@@ -3,6 +3,7 @@
     package="wallstudio.work.cameraprocessing">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.INTERNET" android:required="false"/>
 
     <application
         android:allowBackup="true"

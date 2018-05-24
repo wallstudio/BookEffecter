@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,6 +18,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.ImageReader;
+import android.media.MediaPlayer;
 import android.nfc.Tag;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -28,8 +30,24 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+
+import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,16 +60,57 @@ public class MainActivity extends AppCompatActivity {
     private CameraCaptureSession mCaptureSession;
 
     private ImageView mImageView;
+    private TextView mTextView;
+    private MediaPlayer mMediaPlayer;
+
+    void PlaySound(final String url, final boolean isInternet){
+        if(mMediaPlayer.isPlaying())
+            mMediaPlayer.stop();
+        mMediaPlayer.release();
+        mMediaPlayer = new MediaPlayer();
+        try {
+            AssetFileDescriptor afd = getAssets().openFd(url);
+            mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            mMediaPlayer.prepare();
+            mMediaPlayer.start();
+            Log.d("SOUND", "Play start \""+ url + "\"");
+        }catch (IOException e){
+            Log.e("ERROR", "Cann't load audio file.");
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mTextView = findViewById(R.id.textView);
+        mTextView.setText("Initialize");
+        mMediaPlayer = new MediaPlayer();
+    }
+
+    static {
+        // ネイティブライブラリ読み込み
+        System.loadLibrary("opencv_java3");       
+        
+        // OpenCV Managerつかうならこっち
+        //
+        // OpenCVLoader.initDebug()で切り分けるのがお行儀良い
+        //OpenCVLoader.initAsync(
+        //        OpenCVLoader.OPENCV_VERSION_3_0_0,
+        //        this, new BaseLoaderCallback(this) {
+        // @Override
+        // public void onManagerConnected(int status) {
+        //     if (status == LoaderCallbackInterface.SUCCESS)
+        //         mCameraView.enableView();
+        //     else
+        //         super.onManagerConnected(status);
+        // });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        
 
         mTextureView = findViewById(R.id.view_texture);
         mImageView = findViewById(R.id.image_view);
@@ -82,22 +141,18 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
                         Log.d("",mTextureView.getWidth() +"x"+mTextureView.getHeight() + " "+mTextureView.getBitmap().isMutable());
-                        Bitmap bitmap = mTextureView.getBitmap();
-                        int[] buffer = new int[bitmap.getWidth() * bitmap.getHeight()];
-                        for (int j = 0; j < bitmap.getHeight(); j++){
-                            for(int i = 0; i < bitmap.getWidth(); i++){
-                                int pixel = bitmap.getPixel(i, j);
-                                int gray = (int)(0.299 * Color.red(pixel) + 0.587 *  Color.green(pixel) + 0.114 * Color.blue(pixel));
-                                gray = gray < 63 ? 10 : 244;
-                                buffer[j * bitmap.getWidth() + i] = Color.argb(
-                                        Color.alpha(pixel),
-                                        gray,
-                                        gray,
-                                        gray);
+                        HoleParser holeParser = new HoleParser(mTextureView.getBitmap(), new HoleParser.HoleParserCallBack() {
+                            @Override
+                            public void playSound(String url) {
+                                PlaySound(url, false);
                             }
-                        }
-                        bitmap.setPixels(buffer,0,bitmap.getWidth(),0,0,bitmap.getWidth(),bitmap.getHeight());
-                        mImageView.setImageBitmap(bitmap);
+
+                            @Override
+                            public void refleshText(String message) {
+                                mTextView.setText(message);
+                            }
+                        });
+                        mImageView.setImageBitmap(holeParser.getProcessedBitmap());
                     }
                 });
             }
