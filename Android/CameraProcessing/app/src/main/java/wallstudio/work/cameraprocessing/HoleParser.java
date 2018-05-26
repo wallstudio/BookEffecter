@@ -14,11 +14,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HoleParser {
 
@@ -157,20 +153,32 @@ public class HoleParser {
             if(mPreCount != count){
                 Log.d("HOLE",String.format("CHANGE %d -> %d",mPreCount,count));
                 switch (count){
-                    case 0:break;
-                    case 1:break;
-                    case 2:break;
-                    case 3:mHoleParserCallBack.playSound("yukarisan.mp3");break;
-                    case 4:break;
-                    case 5:break;
-                    case 6:break;
-                    case 7:break;
-                    case 8:break;
-                    case 9:break;
+                    case 0:mHoleParserCallBack.playSound("yukarisan.mp3");break;
+                    case 1:mHoleParserCallBack.playSound("count1.mp3");break;
+                    case 2:mHoleParserCallBack.playSound("count2.mp3");break;
+                    case 3:mHoleParserCallBack.playSound("tts0.mp3");break;
+                    case 4:mHoleParserCallBack.playSound("count4.mp3");break;
+                    case 5:mHoleParserCallBack.playSound("count5.mp3");break;
+                    case 6:mHoleParserCallBack.playSound("tts1.mp3");break;
+                    case 7:mHoleParserCallBack.playSound("count7.mp3");break;
+                    case 8:mHoleParserCallBack.playSound("count8.mp3");break;
+                    case 9:mHoleParserCallBack.playSound("tts2.mp3");break;
                     default:break;
                 }
             }
         }
         mPreCount = count < 0 ? mPreCount : count;
     }
+
+    public final static String text = "民安ともえ(v1)＞けだまきまき、の育てかた？\n" +
+            "/\n" +
+            "琴葉 茜＞けだマキマキ、掛ける結月ゆかり\n" +
+            "結月ゆかり＞けだまきちゃんは自慢の毛並みを保つため、毎日その体毛が入れ替わり、大量の毛が抜け落ちます。\n" +
+            "結月ゆかり＞こまめに掃除をしてあげましょう。\n" +
+            "結月ゆかり＞けだまきちゃんにとって心地よい環境を整えてあげることが絆を深める第一歩となります。\n" +
+            "/\n" +
+            "琴葉 葵＞けだマキマキ、掛ける弦巻マキ\n" +
+            "民安ともえ(v1)＞ギューン\n" +
+            "民安ともえ(v1)＞おや、何かを伝えたいのでしょうか？\n" +
+            "民安ともえ(v1)＞お腹がすいているようですね？大好物であるラザニアを食べさせてあげると、きっと喜ぶでしょう？";
 }
