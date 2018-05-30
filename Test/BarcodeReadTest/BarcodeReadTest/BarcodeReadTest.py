@@ -6,110 +6,137 @@ import pylab as plt
 import random
 import os 
 
-global set
+class LearndImage:
+    
+    _akaze = None
+    
+    def __init__(self, path='??', image=None, akaze=None):
+        self.imagePath = path
+        try:self.imageName = os.path.basename(self.imagePath)
+        except:self.imageName = '?'
+        if akaze is None:
+            LearndImage._akaze = cv2.AKAZE_create()
+        else:
+            LearndImage._akaze = akaze
+        if image is None:
+            self.image = cv2.imread(self.imagePath)
+            self.image = cv2.cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        else:
+            self.image = image    
+        self.keyPoints, self.descriptions = LearndImage._akaze.detectAndCompute(self.image, None)
+                    
+class LearndImageSet:
 
-set = 2
+    def __init__(self, directoryPath:str):
+        self.path = directoryPath
+        self.imageNames = os.listdir(directoryPath)
+        self.imagePaths = map(lambda x:directoryPath+x, self.imageNames)
+        self.akaze = cv2.AKAZE_create()
+        self.bfMatcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        self._calc()
+    
+    def _calc(self):
+        self.learndImages = []
+        for imagePath in self.imagePaths:
+            learndImage = LearndImage(path=imagePath, akaze=self.akaze)
+            self.learndImages.append(learndImage)
+            
+    def search(self, inputImagePath='', inputImage=None, drawResult=False) -> (LearndImage, float, list, np.ndarray):
+        if inputImage is None:
+            learndInputImage = LearndImage(path=inputImagePath,akaze=self.akaze)
+        else:
+            learndInputImage = LearndImage(image=inputImage,akaze=self.akaze)
+        kepoint_i = learndInputImage.keyPoints
+        descrip_i = learndInputImage.descriptions
+        bestScore = 1000000.0
+        bestMatches = None
+        best = None
+        scores = []
+        for learndImage in self.learndImages:
+            kepoint_d = learndImage.keyPoints
+            descrip_d = learndImage.descriptions
+            matches = self.bfMatcher.match(descrip_i,descrip_d)
+            matches = sorted(matches, key = lambda x:x.distance)
+            distancies = [m.distance for m in matches]
+            score = sum(distancies)/len(distancies)
+            scores.append(score)
+            if  score < bestScore:
+                bestScore = score
+                best = learndImage
+                bestMatches = matches
 
-def pmatch(pat):
-    result1 = []
-    result2 = []
-    max = 100000
-    maxIdx = -1
-    dir = 'testdata/'+str(set)+'/origin/'
+        if drawResult:
+            resultImage = self._resultShow(best, learndInputImage, bestMatches, bestScore)
+            return (best, bestScore, scores, resultImage)        
+
+        return (best, bestScore, scores, None)
+
+    def _resultShow(self, dataImage:LearndImage, inputImage:LearndImage, matches, score:float) -> np.ndarray:
+        resultImage = cv2.drawMatches(inputImage.image, inputImage.keyPoints, dataImage.image, dataImage.keyPoints, matches[:10], None,flags=2)
+        h,w,_ = resultImage.shape
+        if score < 120: textColor = (255,255,255)
+        else: textColor = (50,50,255)
+        resultImage = cv2.putText(resultImage, str(int(score)), (0,h-20), cv2.FONT_HERSHEY_DUPLEX, 1,textColor, thickness=2)
+        return resultImage
+
+class CorrectedImage:
+    def __init__(self, image:np.ndarray, vanisingRate:(float,float), pageAreaRatio:float, name="???", drawProcessing=False, size=256):
+        self.name = name
+        self.resultImage =  np.copy(image)
+        self.resultImage = cv2.cvtColor(self.resultImage,cv2.COLOR_BGR2GRAY)
+        h, w = self.resultImage.shape
+        self.vanising = (int(vanisingRate[0]*w), int(vanisingRate[1]*h))
+        self.pageAreaY = int(pageAreaRatio*h)
+        self.cross0 = (int((1-((self.pageAreaY-self.vanising[1])/(h-self.vanising[1])))*self.vanising[0]), self.pageAreaY)
+        self.cross1 = (w-int((1-((self.pageAreaY-self.vanising[1])/(h-self.vanising[1])))*self.vanising[0]), self.pageAreaY)
+
+        self.size = size
+        self.pts1 = np.float32([self.cross0,self.cross1,(0,h),(w,h)])
+        self.pts2 = np.float32([[0,0],[size,0],[0,size],[size,size]])
+        self.PersMatrix = cv2.getPerspectiveTransform(self.pts1,self.pts2)
+        self.resultImage = cv2.warpPerspective(self.resultImage,self.PersMatrix,(size,size))
+        self.resultImage = cv2.flip(self.resultImage,-1)
+        
+        if drawProcessing:
+            color = (255,100,0,100)
+            self.processingImage = np.copy(image)
+            self.processingImage = cv2.line(self.processingImage, self.vanising, (0,h), color, thickness=3)
+            self.processingImage = cv2.line(self.processingImage, self.vanising, (w,h), color, thickness=3)
+            self.processingImage = cv2.line(self.processingImage, self.cross0, self.cross1, color, thickness=3)
+            self.processingImage = cv2.circle(self.processingImage,self.cross0,5,color,3)
+            self.processingImage = cv2.circle(self.processingImage,self.cross1,5,color,3)
+
+def resize(image:np.ndarray, ratio:float) -> np.ndarray:
+    if len(image.shape) == 2:
+        h, w = image.shape
+    else:
+        h, w, _ = image.shape
+    return cv2.resize(image,(int(w*ratio),int(h*ratio)))
+
+def main():
+    set = 0
+    # 正解データセットの学習
+    learndImageSet = LearndImageSet('testdata/'+str(set)+'/origin/')
+    # カメラ画像の読み込み
+    dir = 'testdata/'+str(set)+'/in/'
     fs = os.listdir(dir)
-    for i in range(0,len(fs)):
-        path = dir + fs[i]
-        origin = cv2.imread(path)
-        origin = cv2.cvtColor(origin, cv2.COLOR_BGR2GRAY)
-        #origin = cv2.blur(origin, (30,30))
-        #res = cv2.matchTemplate(origin,pat,cv2.TM_CCOEFF)
-        #min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    pages = range(0,len(fs))
+    for page in pages:
+        src = cv2.imread(dir+fs[page])
+        src = cv2.resize(src,(1280, 720))
+        # 射影補正
+        vanisingPoint = (0.5,0.2)
+        pageAreaRatio = 0.65
+        correctedImage = CorrectedImage(src, vanisingPoint, pageAreaRatio, drawProcessing=True)
+        # 照合
+        best, bestScore, scores, resultImage = learndImageSet.search(inputImage=correctedImage.resultImage, drawResult=True)
+        # データの表示
+        windowID = str(random.random())
+        cv2.imshow("input "+ windowID, resize(correctedImage.processingImage,0.25))
+        cv2.imshow("result "+ windowID, resize(resultImage,0.5))
+        print(','.join([str(int(x)) for x in scores]) + '\n')
+    # 終了
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-        akaze = cv2.AKAZE_create()
-        kp1, des1 = akaze.detectAndCompute(origin, None)
-        kp2, des2 = akaze.detectAndCompute(pat, None)
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        matches = bf.match(des1,des2)
-        matches = sorted(matches, key = lambda x:x.distance)
-        dist = [m.distance for m in matches]
-        img3 = cv2.drawMatches(origin,kp1,pat,kp2,matches[:10], None,flags=2)
-        #good = []
-        #for m, n in matches:
-        #    if m.distance < ratio * n.distance:
-        #        good.append([m])
-        #img3 = cv2.drawMatchesKnn(origin, kp1, pat, kp2, good, None,flags=2)
-        h, w, c = img3.shape
-        img3 = cv2.resize(img3, (w//2, h//2))
-        score = sum(dist)/len(dist)
-        img3 = cv2.putText(img3,str(score),(w//2-100,h//2-100),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,0))
-        if  score < max:
-            max = score
-            maxIdx = i
-
-        #cv2.imshow('Kanaze ' + str(i), img3)
-        result1.append(img3)
-        result2.append(str(int(score)))
-
-    print(','.join(result2) + '\n')
-    return (maxIdx, result1)
-
-
-vanising = 0.2
-dir = 'testdata/'+str(set)+'/in/'
-fs = os.listdir(dir)
-pages = range(0,len(fs))
-for page in pages:
-    src = cv2.imread(dir+fs[page])
-    src = cv2.resize(src,(1280, 720))
-    h,w,ch = src.shape
-    vanP = (w//2, int(h*vanising))
-
-    pro0 = np.copy(src)
-    pro0 = cv2.line(pro0, vanP, (0,h), (255,100,0,100), thickness=3)
-    pro0 = cv2.line(pro0, vanP, (w,h), (255,100,0,100), thickness=3)
-
-    gray = cv2.cvtColor(src,cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray,50,150,apertureSize = 3)
-    #lines = cv2.HoughLines(edges,1,np.pi/180,200)
-    #edgeY = h
-    #for l in lines:
-    #    for rho,theta in l:
-    #        a = np.cos(theta)
-    #        b = np.sin(theta)
-    #        if a > 0.1 or -0.1 > a:
-    #            continue 
-    #        x0 = a*rho
-    #        y0 = b*rho
-    #        x1 = int(x0 + 1000*(-b))
-    #        y1 = int(y0 + 1000*(a))
-    #        x2 = int(x0 - 1000*(-b))
-    #        y2 = int(y0 - 1000*(a))
-    #        yy = max(y1,y2)
-    #        if edgeY > yy:
-    #            edgeY = yy
-    #        cv2.line(pro0,(x1,y1),(x2,y2),(0,0,255),2)
-    edgeY = int(h * 0.65)
-    cross0 = (int((1-((edgeY-vanP[1])/(h-vanP[1])))*vanP[0]), edgeY)
-    cross1 = (w-int((1-((edgeY-vanP[1])/(h-vanP[1])))*vanP[0]), edgeY)
-    pro0 = cv2.circle(pro0,cross0,2,(0,255,0))
-    pro0 = cv2.circle(pro0,cross1,2,(0,255,0))
-    pro0 = cv2.resize(pro0,(w//2,h//2))
-    #cv2.imshow('input '+ str(random.random()), pro0)
-
-    size = 256
-    pts1 = np.float32([cross0,cross1,(0,h),(w,h)])
-    pts2 = np.float32([[0,0],[size,0],[0,size],[size,size]])
-    M = cv2.getPerspectiveTransform(pts1,pts2)
-    pattern = cv2.warpPerspective(src,M,(size,size))
-    pattern = cv2.flip(pattern,-1)
-    pattern = cv2.cvtColor(pattern,cv2.COLOR_BGR2GRAY)
-    g = 0.4
-    imax = pattern.max()
-    #pattern = np.array(imax * (pattern / imax)**(1/g), 'uint8')
-    #pattern = cv2.blur(pattern,(30,30))
-    j, res1 = pmatch(pattern)
-
-    cv2.imshow("result "+ str(random.random()), res1[j])
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+main()
