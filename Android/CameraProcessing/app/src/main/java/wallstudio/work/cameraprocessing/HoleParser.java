@@ -66,7 +66,7 @@ public class HoleParser {
         }else {
             // 大津の二値化
             Imgproc.threshold(mFrame, mFrame, 0.0, 255.0,
-                    Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+                    Imgproc.THRESH_OTSU);
             mMessage += "algo=OTSU, ";
         }
         // ノイズ処理
