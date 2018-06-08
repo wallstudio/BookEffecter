@@ -50,6 +50,7 @@ public class StandCameraActivity extends Activity {
     public static final int CAMERA_SIDE = CameraCharacteristics.LENS_FACING_BACK;
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
     public static final int BACKGROUND_BITMAP_REDUCTION = 16;
+    public static final int BACKGROUND_BITMAP_BLUR_KERNAL = 15;
 
     private Point mInputImageSize;
 
@@ -155,10 +156,7 @@ public class StandCameraActivity extends Activity {
             Utils.bitmapToMat(mOriginalBitmap, original, false);
             // Convert for Background
             Mat background = new Mat();
-            Imgproc.resize(original, background, new Size(original.width() / BACKGROUND_BITMAP_REDUCTION, original.height() / BACKGROUND_BITMAP_REDUCTION));
-            Imgproc.cvtColor(background, background, COLOR_BGR2GRAY);
-            Imgproc.GaussianBlur(background, background, new Size(21, 21), 0);
-            Utils.matToBitmap(background, mBackgroundBitmap, false);
+            createBackground(original, background);
             mBackground.setImageBitmap(mBackgroundBitmap);
             background.release();
             // Convert for Preview
@@ -178,11 +176,18 @@ public class StandCameraActivity extends Activity {
             image.close();
         }
 
-        public void createPreview(Mat in, Mat out){
+        private void createBackground(Mat in, Mat out) {
+            Imgproc.resize(in, out, new Size(in.width() / BACKGROUND_BITMAP_REDUCTION, in.height() / BACKGROUND_BITMAP_REDUCTION));
+            Imgproc.cvtColor(out, out, COLOR_BGR2GRAY);
+            Imgproc.GaussianBlur(out, out, new Size(BACKGROUND_BITMAP_BLUR_KERNAL, BACKGROUND_BITMAP_BLUR_KERNAL), 0);
+            Utils.matToBitmap(out, mBackgroundBitmap, false);
+        }
+
+        private void createPreview(Mat in, Mat out){
             Imgproc.resize(in, out, in.size());
         }
 
-        public void createMatch(Mat in, Mat out){
+        private void createMatch(Mat in, Mat out){
             Imgproc.cvtColor(in,out, COLOR_BGR2GRAY);
             Imgproc.resize(in, out, new Size(mMatchBitmap.getWidth(), mMatchBitmap.getHeight()));
         }
