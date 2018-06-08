@@ -47,9 +47,9 @@ public class CorrectedImage {
         if (isDrawProcessing) {
             Scalar color = new Scalar(255, 100, 0, 100);
             processingImage = image.clone();
-            Imgproc.line(resultImage, vanising, new Point(0, h), color,3);
-            Imgproc.line(resultImage, vanising, new Point(w, h), color,3);
-            Imgproc.line(resultImage, cross0, cross1, color,3);
+            Imgproc.line(processingImage, vanising, new Point(0, h), color,3);
+            Imgproc.line(processingImage, vanising, new Point(w, h), color,3);
+            Imgproc.line(processingImage, cross0, cross1, color,3);
         }
     }
 }

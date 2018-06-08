@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.AKAZE;
@@ -36,6 +37,7 @@ public class LearndImage{
         this.image = image;
         keyPoints = new MatOfKeyPoint();
         descriptors = new Mat();
-        akaze.detectAndCompute(image, null, keyPoints, descriptors);
+        Mat mask = Mat.zeros(image.size(), CvType.CV_8U);
+        akaze.detectAndCompute(image, mask, keyPoints, descriptors);
     }
 }

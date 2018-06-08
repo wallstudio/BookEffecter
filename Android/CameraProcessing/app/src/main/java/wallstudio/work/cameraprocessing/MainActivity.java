@@ -2,13 +2,18 @@ package wallstudio.work.cameraprocessing;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -81,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTextView = findViewById(R.id.textView);
@@ -130,7 +136,25 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
-
+                        int previewWidth = 1280;
+                        int previewHeight = 720;
+                        int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
+                        Matrix matrix = new Matrix();
+                        RectF viewRect = new RectF(0, 0, mTextureView.getWidth(), mTextureView.getHeight());
+                        RectF bufferRect = new RectF(0, 0, previewHeight, previewWidth);
+                        PointF center = new PointF(viewRect.centerX(), viewRect.centerY());
+                        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
+                            bufferRect.offset(center.x - bufferRect.centerX(), center.y - bufferRect.centerY());
+                            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
+                            float scale = Math.max(
+                                    (float) mTextureView.getHeight() / previewHeight,
+                                    (float) mTextureView.getWidth() / previewHeight);
+                            matrix.postScale(scale, scale, center.x, center.y);
+                            matrix.postRotate(90 * (rotation - 2), center.x, center.y);
+                        } else if (Surface.ROTATION_180 == rotation) {
+                            matrix.postRotate(180, center.x, center.y);
+                        }
+                        mTextureView.setTransform(matrix);
                     }
 
                     @Override
@@ -140,19 +164,21 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-                        Log.d("",mTextureView.getWidth() +"x"+mTextureView.getHeight() + " "+mTextureView.getBitmap().isMutable());
-                        HoleParser holeParser = new HoleParser(mTextureView.getBitmap(), new HoleParser.HoleParserCallBack() {
-                            @Override
-                            public void playSound(String url) {
-                                PlaySound(url, false);
-                            }
+                        Bitmap bitmap = mTextureView.getBitmap();
+                        int w = bitmap.getWidth();
+                        int h = bitmap.getHeight();
+                        Mat frame = new Mat();
+                        Utils.bitmapToMat(bitmap, frame, false);
 
-                            @Override
-                            public void refleshText(String message) {
-                                mTextView.setText(message);
-                            }
-                        });
-                        mImageView.setImageBitmap(holeParser.getProcessedBitmap());
+                        Point vanising = new Point(0.5, 0.2);
+                        double pageAearRatio = 0.65;
+                        CorrectedImage correctedImage = new CorrectedImage(frame, vanising, pageAearRatio, true, 256);
+                        LearndImage learndImage = new LearndImage(correctedImage.resultImage);
+                        frame = learndImage.image;
+
+                        bitmap = Bitmap.createBitmap(frame.width(), frame.height(), Bitmap.Config.ARGB_8888);
+                        Utils.matToBitmap(frame, bitmap,false);
+                        mImageView.setImageBitmap(bitmap);
                     }
                 });
             }
@@ -165,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
     private void openCamera() throws CameraAccessException {
         // カメラIDを取得
         mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        String cameraId = mCameraManager.getCameraIdList()[0];
+        String cameraId = mCameraManager.getCameraIdList()[1];
         // カメラ起動
         mCameraManager.openCamera(cameraId, new CameraDevice.StateCallback() {
 
@@ -218,5 +244,9 @@ public class MainActivity extends AppCompatActivity {
         }, null);
 
 
+    }
+
+    Activity getActivity(){
+        return  this;
     }
 }
