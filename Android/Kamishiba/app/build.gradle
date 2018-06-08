@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        WallStudio {
+            keyPassword 'xxxxxx'
+            storeFile file('C:/Users/huser/Documents/key/wallstudio_android.keystore')
+            storePassword 'xxxxxx'
+            keyAlias 'test'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "wallstudio.work.kamishiba"
@@ -19,6 +27,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.WallStudio
+            debuggable false
+        }
+        debug {
+            debuggable true
+            jniDebuggable true
         }
     }
     externalNativeBuild {
@@ -26,6 +40,13 @@ android {
             path "CMakeLists.txt"
         }
     }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
+    buildToolsVersion '27.0.3'
 }
 
 dependencies {
