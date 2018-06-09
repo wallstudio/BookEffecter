@@ -1,43 +1,37 @@
 package wallstudio.work.kamishiba;
 
-import android.graphics.BitmapFactory;
-import android.util.Log;
-
-import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.AKAZE;
+import org.opencv.imgproc.Imgproc;
 
 public class LearndImage{
 
-    private static AKAZE akaze;
+    private static AKAZE sAkaze;
 
-    public  String imagePath = "";
-    public  Mat image;
-
+    public Mat image;
     public MatOfKeyPoint keyPoints;
     public Mat descriptors;
 
-    public  LearndImage(String path){
-        imagePath = path;
-        try{
-            Utils.bitmapToMat(BitmapFactory.decodeFile(path), image, false);
-        }catch (Exception e){
-            Log.e("ERROR", "FILE read error");
-        }
-        if(akaze == null) akaze = AKAZE.create();
+    public  LearndImage(Mat image){
+        if(sAkaze == null) sAkaze = AKAZE.create();
+        this.image = image;
+        Mat gray = new Mat();
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2GRAY);
+        // ref. https://jp.mathworks.com/help/vision/ug/local-feature-detection-and-extract// ref. 
         keyPoints = new MatOfKeyPoint();
         descriptors = new Mat();
-        akaze.detectAndCompute(image, null, keyPoints, descriptors);
+        Mat mask = Mat.ones(image.size(), CvType.CV_8U);
+        sAkaze.detectAndCompute(image, mask, keyPoints, descriptors);
+        gray.release();
     }
 
-    public  LearndImage(Mat image){
-        if(akaze == null) akaze = AKAZE.create();
-        this.image = image;
-        keyPoints = new MatOfKeyPoint();
-        descriptors = new Mat();
-        Mat mask = Mat.zeros(image.size(), CvType.CV_8U);
-        akaze.detectAndCompute(image, mask, keyPoints, descriptors);
+    public void release(){
+        image.release();
+        keyPoints.release();
+        descriptors.release();
     }
+
+    // TODO: Serializer and Desirializer
 }

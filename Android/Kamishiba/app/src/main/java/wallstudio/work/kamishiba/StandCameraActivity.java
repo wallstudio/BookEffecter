@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -39,14 +40,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.findContours;
-
 
 public class StandCameraActivity extends Activity {
 
-
     public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
+//    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
     public static final int CAMERA_SIDE = CameraCharacteristics.LENS_FACING_BACK;
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
     public static final int BACKGROUND_BITMAP_REDUCTION = 16;
@@ -81,13 +79,15 @@ public class StandCameraActivity extends Activity {
     private CameraCaptureSession mCaptureSession;
     private android.util.Size[] mSupportPreviewSize;
 
-    public Surface mDebugPreviewSurface;
-    public ImageReader mPreviewBuffer;
+    private Surface mDebugPreviewSurface;
+    private ImageReader mPreviewBuffer;
 
     // 汚いけど，レイアウトが完全に計算され切ったときのイベントが無いので
-    public boolean mIsInitedCursors = false;
-    public org.opencv.core.Point mVanisingRatio = new org.opencv.core.Point(0.5, 0.2);
-    public double mPageAearRatio = 0.65;
+    private boolean mIsInitedCursors = false;
+    private org.opencv.core.Point mVanisingRatio = new org.opencv.core.Point(0.5, 0.2);
+    private double mPageAearRatio = 0.65;
+    private LearndImageSet mLearndImageSet;
+
 
     // Device setting (Contains Capture and Processing callback)
     CameraDevice.StateCallback mDeviceSettingCallback = new CameraDevice.StateCallback() {
@@ -167,6 +167,7 @@ public class StandCameraActivity extends Activity {
             // Convert for Background
             Mat background = new Mat();
             createBackground(original, background);
+            Utils.matToBitmap(background, mBackgroundBitmap, false);
             mBackground.setImageBitmap(mBackgroundBitmap);
             background.release();
             // Convert for Preview
@@ -177,7 +178,11 @@ public class StandCameraActivity extends Activity {
             preview.release();
             // Convert for Parsing
             Mat match = new Mat();
-            createMatch(original, match, mMatchBitmap.getWidth());
+            createMatch(original, match, 256);
+            if(mMatchBitmap.getWidth() != match.width() || mMatchBitmap.getHeight() != match.height()){
+                mMatchBitmap.recycle();
+                mMatchBitmap = Bitmap.createBitmap(match.width(), match.height(), BUFFER_BITMAP_FORMAT);
+            }
             Utils.matToBitmap(match, mMatchBitmap, false);
             mMatchPreviewView.setImageBitmap(mMatchBitmap);
             match.release();
@@ -188,9 +193,8 @@ public class StandCameraActivity extends Activity {
 
         private void createBackground(Mat in, Mat out) {
             Imgproc.resize(in, out, new Size(in.width() / BACKGROUND_BITMAP_REDUCTION, in.height() / BACKGROUND_BITMAP_REDUCTION));
-            Imgproc.cvtColor(out, out, COLOR_BGR2GRAY);
+            Imgproc.cvtColor(out, out, Imgproc.COLOR_BGR2GRAY);
             Imgproc.GaussianBlur(out, out, new Size(BACKGROUND_BITMAP_BLUR_KERNAL, BACKGROUND_BITMAP_BLUR_KERNAL), 0);
-            Utils.matToBitmap(out, mBackgroundBitmap, false);
         }
 
         private void createPreview(Mat in, Mat out){
@@ -200,6 +204,10 @@ public class StandCameraActivity extends Activity {
 
         private void createMatch(Mat in, Mat out, int size){
             CorrectedImage.PerspectiveTransform(in, out, mVanisingRatio, mPageAearRatio, size);
+            mLearndImageSet.search(out);
+            mLearndImageSet.drawResult();
+            out.release();
+            mLearndImageSet.resultImage.copyTo(out);
         }
     };
 
@@ -255,17 +263,18 @@ public class StandCameraActivity extends Activity {
                     int bottom = top + mVanisingCursor.getHeight();
 
                     mVanisingCursor.layout(left, top, right, bottom);
-                    setDisplayDebugMessage("Area", mVanisingCursorArea.getWidth() + "x" + mVanisingCursorArea.getHeight());
-                    setDisplayDebugMessage("RowTouch", globalX + "x" + globalY);
 
                     int xOnImage = mVanisingCursorArea.getLeft() + mVanisingCursor.getLeft() + mVanisingCursor.getWidth() / 2;
                     int yOnImage = mVanisingCursorArea.getTop() + mVanisingCursor.getTop() + mVanisingCursor.getHeight() / 2;
 
                     mVanisingRatio.x = xOnImage / (double)mInputPreviewWrapper.getWidth();
                     mVanisingRatio.y = yOnImage / (double)mInputPreviewWrapper.getHeight();
-                    setDisplayDebugMessage("Y OnImage", mVanisingCursorArea.getTop() + "+" + mVanisingCursor.getTop() + "+" + mVanisingCursor.getHeight() + "/2");
-                    setDisplayDebugMessage("Y Ratio", yOnImage + "/" + mInputPreviewWrapper.getHeight());
-                    setDisplayDebugMessage("Vanising", String.format("%.2fx%.2f", mVanisingRatio.x, mVanisingRatio.y));
+
+                    if(mVanisingRatio.y > mPageAearRatio - 0.05){
+                        mPageAearRatio = mVanisingRatio.y + 0.05;
+                        top = (int) (mInputPreviewWrapper.getHeight() * mPageAearRatio - mPageYCursorArea.getTop()) - mPageYCursor.getHeight() / 2;
+                        mPageYCursor.layout(mPageYCursor.getLeft(), top, mPageYCursor.getRight(), top + mPageYCursor.getHeight());
+                    }
             }
             mPreX = globalX;
             mPreY = globalY;
@@ -302,6 +311,13 @@ public class StandCameraActivity extends Activity {
                 int yOnImage = mPageYCursorArea.getTop() + mPageYCursor.getTop() + mPageYCursor.getHeight() / 2;
 
                 mPageAearRatio =  yOnImage / (double)mInputPreviewWrapper.getHeight();
+
+                if(mVanisingRatio.y > mPageAearRatio - 0.05){
+                    mVanisingRatio.y = mPageAearRatio - 0.05;
+                    left = (int) (mInputPreviewWrapper.getWidth() * mVanisingRatio.x - mVanisingCursorArea.getLeft()) - mVanisingCursor.getWidth() / 2;
+                    top = (int) (mInputPreviewWrapper.getHeight() * mVanisingRatio.y - mVanisingCursorArea.getTop()) - mVanisingCursor.getHeight() / 2;
+                    mVanisingCursor.layout(left, top, left + mVanisingCursor.getWidth(), top + mVanisingCursor.getHeight());
+                }
             }
             mPreY = globalY;
             return true;
@@ -323,12 +339,13 @@ public class StandCameraActivity extends Activity {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
             if(!mIsInitedCursors) {
-
                 top = (int) (mInputPreviewWrapper.getHeight() * mPageAearRatio - mPageYCursorArea.getTop()) - mPageYCursor.getHeight() / 2;
                 mPageYCursor.layout(mPageYCursor.getLeft(), top, mPageYCursor.getRight(), top + mPageYCursor.getHeight());
             }
         }
     };
+
+    static {System.loadLibrary("opencv_java3");}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -338,12 +355,12 @@ public class StandCameraActivity extends Activity {
         beginFullScreen();
         bindViews();
 
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, new BaseLoaderCallback(this) {
-            @Override
-            public void onManagerConnected(int status) {
-                super.onManagerConnected(status);
-            }
-        });
+//        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, new BaseLoaderCallback(this) {
+//            @Override
+//            public void onManagerConnected(int status) {
+//                super.onManagerConnected(status);
+//            }
+//        });
     }
 
     @Override
@@ -363,14 +380,15 @@ public class StandCameraActivity extends Activity {
         mVanisingCursor.setOnTouchListener(mVanisingCursorDragListener);
         mPageYCursor.addOnLayoutChangeListener(mInitSetPageYCursorListener);
         mPageYCursor.setOnTouchListener(mPageYCursorDragListener);
+        mLearndImageSet = new LearndImageSet(getResources());
     }
 
     @Override
     protected void onPause(){
         releaseCamera();
+        mLearndImageSet.release();
         super.onPause();
     }
-
 
     @SuppressLint("MissingPermission")
     private void openCamera() throws CameraAccessException {

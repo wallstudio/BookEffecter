@@ -23,24 +23,22 @@ public class CorrectedImage {
         pts1m.put(0,0, pts1);
         pts2m.put(0,0, pts2);
         Mat persMatrix = Imgproc.getPerspectiveTransform(pts1m, pts2m);
-//        Imgproc.cvtColor(src, dest, COLOR_BGR2GRAY);
         Imgproc.warpPerspective(src, dest, persMatrix, new Size(size,size));
         Core.flip(dest, dest, -1);
         persMatrix.release();
-
-        Point[] ptsP = floats2Points(pts2);
-        // Vertical grid
-        for (int i = 0; i < GRID_DIVISIONS; i++) {
-            Point start = new Point(ptsP[0].x + (ptsP[1].x - ptsP[0].x) / GRID_DIVISIONS * i, ptsP[0].y + (ptsP[1].y - ptsP[0].y) / GRID_DIVISIONS * i);
-            Point end = new Point(ptsP[2].x + (ptsP[3].x - ptsP[2].x) / GRID_DIVISIONS * i, ptsP[2].y + (ptsP[3].y - ptsP[2].y) / GRID_DIVISIONS * i);
-            Imgproc.line(dest, start, end, GRID_COLOR, 2);
-        }
-        // Horizontal grid
-        for (int i = 0; i < GRID_DIVISIONS; i++) {
-            Point start = new Point(ptsP[0].x + (ptsP[2].x - ptsP[0].x) / GRID_DIVISIONS * i, ptsP[0].y + (ptsP[2].y - ptsP[0].y) / GRID_DIVISIONS * i);
-            Point end = new Point(ptsP[1].x + (ptsP[3].x - ptsP[1].x) / GRID_DIVISIONS * i, ptsP[1].y + (ptsP[3].y - ptsP[1].y) / GRID_DIVISIONS * i);
-            Imgproc.line(dest, start, end, GRID_COLOR, 2);
-        }
+//        Point[] ptsP = floats2Points(pts2);
+//        // Vertical grid
+//        for (int i = 0; i < GRID_DIVISIONS; i++) {
+//            Point start = new Point(ptsP[0].x + (ptsP[1].x - ptsP[0].x) / GRID_DIVISIONS * i, ptsP[0].y + (ptsP[1].y - ptsP[0].y) / GRID_DIVISIONS * i);
+//            Point end = new Point(ptsP[2].x + (ptsP[3].x - ptsP[2].x) / GRID_DIVISIONS * i, ptsP[2].y + (ptsP[3].y - ptsP[2].y) / GRID_DIVISIONS * i);
+//            Imgproc.line(dest, start, end, GRID_COLOR, 2);
+//        }
+//        // Horizontal grid
+//        for (int i = 0; i < GRID_DIVISIONS; i++) {
+//            Point start = new Point(ptsP[0].x + (ptsP[2].x - ptsP[0].x) / GRID_DIVISIONS * i, ptsP[0].y + (ptsP[2].y - ptsP[0].y) / GRID_DIVISIONS * i);
+//            Point end = new Point(ptsP[1].x + (ptsP[3].x - ptsP[1].x) / GRID_DIVISIONS * i, ptsP[1].y + (ptsP[3].y - ptsP[1].y) / GRID_DIVISIONS * i);
+//            Imgproc.line(dest, start, end, GRID_COLOR, 2);
+//        }
     }
 
     public static void DrawPerspectiveGuidLine(Mat srcAndDest, Point vanisingRate, double pageAreaRatio) {

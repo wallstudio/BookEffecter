@@ -1,26 +1,18 @@
 package wallstudio.work.kamishiba;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import org.opencv.core.Core;
 import org.opencv.core.DMatch;
 import org.opencv.core.MatOfDMatch;
-import org.opencv.features2d.AKAZE;
 import org.opencv.features2d.BFMatcher;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
-import org.opencv.features2d.AKAZE;
-import org.opencv.android.Utils;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.features2d.Feature2D;
 import org.opencv.features2d.Features2d;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -28,50 +20,66 @@ import java.util.List;
 
 public class LearndImageSet {
 
-    public  class SearchResult{
-        public LearndImage learndImage;
-        public double bestScore;
-        public List<Float> scores;
-        public Mat resultImage;
-    }
+    // TODO: ネット or ストレージから拾うように
+    public static final int[] TEST_DATA = new int[]{
+            R.drawable.td0,
+            R.drawable.td1,
+            R.drawable.td2,
+            R.drawable.td3,
+            R.drawable.td4,
+            R.drawable.td5,
+            R.drawable.td6,
+            R.drawable.td7
+    };
 
-    public String path;
-    public List<String> imageNames;
-    public List<String> imagePaths;
-    public BFMatcher bfMatcher;
+    public static BFMatcher sBFMatcher;
+
     public List<LearndImage> learndImages;
 
-    public  LearndImageSet(String directoryPath){
-        path = directoryPath;
-        imageNames = new ArrayList<String>(); //TODO: file list for android
-        imagePaths = imageNames;
-        bfMatcher = BFMatcher.create(Core.NORM_HAMMING, true);
-        calc();
-    }
+    public LearndImage learndInputImage;
+    public LearndImage bestLearndImage;
+    public double bestScore;
+    public List<Float> scores;
+    public DMatch[] bestMatch;
+    public Mat resultImage = new Mat();
 
-    private  void calc(){
-        learndImages = new ArrayList<LearndImage>();
-        for(String imagePath : imagePaths){
-            LearndImage learndImage = new LearndImage(imagePath);
+
+    public  LearndImageSet(Resources res){
+
+        if(null == sBFMatcher)
+            sBFMatcher = BFMatcher.create(Core.NORM_HAMMING, true);
+
+        learndImages = new ArrayList<>();
+        // ref. http://android-java.hatenablog.jp/entry/2016/06/27/054415
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+        for(int srcId : TEST_DATA){
+            Bitmap bitmap = BitmapFactory.decodeResource(res, srcId, options);
+            Mat imageMat = new Mat();
+            Utils.bitmapToMat(bitmap, imageMat, false);
+            LearndImage learndImage = new LearndImage(imageMat);
             learndImages.add(learndImage);
+            bitmap.recycle();
         }
     }
 
-    public SearchResult search(Mat inputImage, boolean isDrawResult){
+    public void search(Mat inputImage){
 
-        LearndImage learndInputImage = new LearndImage(inputImage);
-        MatOfKeyPoint keypoint_i = learndInputImage.keyPoints;
+        if(learndInputImage != null)
+            learndInputImage.release();
+        learndInputImage = new LearndImage(inputImage);
+
         Mat descriptor_i = learndInputImage.descriptors;
-        float bestScore = 10000000.0f;
-        DMatch[] bestMatch = new DMatch[0];
-        LearndImage best = null;
+        bestScore = Float.MAX_VALUE;
+        bestMatch = new DMatch[0];
+        bestLearndImage = null;
         List<Float> scores = new ArrayList<Float>();
         for(LearndImage learndImage: learndImages) {
-            MatOfKeyPoint keypoint_d = learndImage.keyPoints;
             Mat descriptor_d = learndImage.descriptors;
             MatOfDMatch matchesMat = new MatOfDMatch();
-            bfMatcher.match(descriptor_i, descriptor_d, matchesMat);
+            sBFMatcher.match(descriptor_i, descriptor_d, matchesMat);
             DMatch[] matchies = matchesMat.toArray();
+            matchesMat.release();
             Arrays.sort(matchies, new Comparator<DMatch>() {
                 @Override
                 public int compare(DMatch dMatch, DMatch t1) {
@@ -89,31 +97,30 @@ public class LearndImageSet {
             scores.add(score);
             if (score < bestScore) {
                 bestScore = score;
-                best = learndImage;
+                bestLearndImage = learndImage;
                 bestMatch = matchies;
             }
         }
-
-        SearchResult result = new SearchResult();
-        result.learndImage = best;
-        result.bestScore = bestScore;
-        result.scores = scores;
-        result.resultImage = null;
-
-        if(isDrawResult){
-            result.resultImage = drawResult(best, learndInputImage, bestMatch, bestScore);
-        }
-
-        return  result;
     }
 
-    private Mat drawResult(LearndImage dataImage, LearndImage inputImage, DMatch[] matches, float score){
-        Mat resultImage = new Mat();
-        MatOfDMatch matchMat= new MatOfDMatch();
-        DMatch[] subMatchs = Arrays.copyOf(matches, matches.length < 10 ? matches.length : 10);
-        matchMat.fromArray(matches);
-        Features2d.drawMatches(inputImage.image, inputImage.keyPoints, dataImage.image, dataImage.keyPoints, matchMat, resultImage);
-        //TODO: put score;
-        return resultImage;
+    public void drawResult(){
+        if(null != bestLearndImage) {
+            MatOfDMatch matchMat = new MatOfDMatch();
+            DMatch[] subMatchs = Arrays.copyOf(bestMatch, bestMatch.length < 10 ? bestMatch.length : 10);
+            matchMat.fromArray(subMatchs);
+            Features2d.drawMatches(learndInputImage.image, learndInputImage.keyPoints, bestLearndImage.image, bestLearndImage.keyPoints, matchMat, resultImage);
+            matchMat.release();
+            //TODO: put score;
+        }else {
+            learndInputImage.image.copyTo(resultImage);
+        }
+    }
+
+    public void release(){
+        for(LearndImage l :learndImages)
+            l.release();
+        learndInputImage.release();
+        bestLearndImage.release();
+        resultImage.release();
     }
 }
