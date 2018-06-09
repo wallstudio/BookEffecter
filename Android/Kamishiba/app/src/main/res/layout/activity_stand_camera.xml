@@ -58,10 +58,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="80dp"
-                android:layout_marginLeft="68dp"
-                android:layout_marginRight="68dp"
+                android:layout_marginLeft="60dp"
+                android:layout_marginRight="60dp"
                 android:layout_marginTop="16dp"
-                android:background="@color/black_overlay">
+                android:visibility="visible">
 
                 <ImageButton
                     android:id="@+id/vanising_cursor"
@@ -76,12 +76,62 @@
                     app:layout_constraintHorizontal_bias="0.016"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/page_y_cursor_area"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="44dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:layout_marginTop="60dp">
+
+                <FrameLayout
+                    android:id="@+id/page_y_cursor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom">
+
+                    <ImageButton
+                        android:id="@+id/vanising_cursor4"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_gravity="center_vertical|fill_horizontal|center"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginTop="0dp"
+                        android:background="@android:color/transparent"
+                        android:scaleType="fitXY"
+                        android:src="@color/pageYLine"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.016"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginTop="0dp"
+                        android:background="@android:color/transparent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_unfold_more_black_24dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.016"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </FrameLayout>
             </FrameLayout>
 
         </FrameLayout>
 
         <ImageButton
-            android:id="@+id/imageButton3"
+            android:id="@+id/back_button"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginStart="12dp"
@@ -110,7 +160,7 @@
             android:layout_height="37dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:text="タイトル"
             android:textAlignment="viewStart"
             android:textColor="@android:color/white"
@@ -118,7 +168,7 @@
             app:layout_constraintBottom_toTopOf="@+id/authorLabelView"
             app:layout_constraintEnd_toStartOf="@+id/pageLabelView"
             app:layout_constraintStart_toEndOf="@+id/coverView"
-            app:layout_constraintTop_toBottomOf="@+id/inputPreviewView"
+            app:layout_constraintTop_toBottomOf="@+id/input_preview_wrapper"
             app:layout_constraintVertical_bias="1.0" />
 
         <TextView
@@ -141,6 +191,7 @@
             android:layout_height="67dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:text="8/21p"
             android:textAlignment="center"
@@ -148,7 +199,7 @@
             android:textSize="36sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
-            app:layout_constraintTop_toBottomOf="@+id/inputPreviewView" />
+            app:layout_constraintTop_toBottomOf="@+id/input_preview_wrapper" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraintLayout"

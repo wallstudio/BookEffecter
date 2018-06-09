@@ -25,8 +25,6 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -66,6 +64,8 @@ public class StandCameraActivity extends Activity {
     private TextView mPageLabelView;
     private ImageView mVanisingCursor;
     private View mVanisingCursorArea;
+    private View mPageYCursor;
+    private View mPageYCursorArea;
     private View mInputPreviewWrapper;
 
     private HashMap<String, String> mDisplayDebugMessageList = new HashMap<>();
@@ -87,7 +87,7 @@ public class StandCameraActivity extends Activity {
     // 汚いけど，レイアウトが完全に計算され切ったときのイベントが無いので
     public boolean mIsInitedCursors = false;
     public org.opencv.core.Point mVanisingRatio = new org.opencv.core.Point(0.5, 0.2);
-    public double pageAearRatio = 0.65;
+    public double mPageAearRatio = 0.65;
 
     // Device setting (Contains Capture and Processing callback)
     CameraDevice.StateCallback mDeviceSettingCallback = new CameraDevice.StateCallback() {
@@ -195,11 +195,11 @@ public class StandCameraActivity extends Activity {
 
         private void createPreview(Mat in, Mat out){
             in.copyTo(out);
-            CorrectedImage.DrawPerspectiveGuidLine(out, mVanisingRatio, pageAearRatio);
+            CorrectedImage.DrawPerspectiveGuidLine(out, mVanisingRatio, mPageAearRatio);
         }
 
         private void createMatch(Mat in, Mat out, int size){
-            CorrectedImage.PerspectiveTransform(in, out, mVanisingRatio, pageAearRatio, size);
+            CorrectedImage.PerspectiveTransform(in, out, mVanisingRatio, mPageAearRatio, size);
         }
     };
 
@@ -226,7 +226,7 @@ public class StandCameraActivity extends Activity {
         public void onSurfaceTextureUpdated(SurfaceTexture surface) { }
     };
 
-    private View.OnTouchListener mDragListener = new View.OnTouchListener() {
+    private View.OnTouchListener mVanisingCursorDragListener = new View.OnTouchListener() {
         // ref. https://akira-watson.com/android/imageview-drag.html
         private int mPreX;
         private int mPreY;
@@ -273,6 +273,41 @@ public class StandCameraActivity extends Activity {
         }
     };
 
+    private View.OnTouchListener mPageYCursorDragListener = new View.OnTouchListener() {
+        private int mPreY;
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+
+            mIsInitedCursors = true;
+
+            int globalY = (int) event.getRawY();
+
+            if(event.getAction() == MotionEvent.ACTION_MOVE){
+                int deltaY = globalY - mPreY;
+                int left = mPageYCursor.getLeft();
+                int top = mPageYCursor.getTop() + deltaY;
+                int minLeft = 0;
+                int minTop = 0;
+                int maxRight = mPageYCursorArea.getWidth() - mPageYCursor.getWidth();
+                int maxBottom = mPageYCursorArea.getHeight() - mPageYCursor.getHeight();
+                left = left < minLeft ? minLeft : left;
+                left = left > maxRight ? maxRight : left;
+                top = top < minTop ? minTop : top;
+                top = top > maxBottom ? maxBottom : top;
+                int right = left + mPageYCursor.getWidth();
+                int bottom = top + mPageYCursor.getHeight();
+
+                mPageYCursor.layout(left, top, right, bottom);
+
+                int yOnImage = mPageYCursorArea.getTop() + mPageYCursor.getTop() + mPageYCursor.getHeight() / 2;
+
+                mPageAearRatio =  yOnImage / (double)mInputPreviewWrapper.getHeight();
+            }
+            mPreY = globalY;
+            return true;
+        }
+    };
+
     private View.OnLayoutChangeListener mInitSetVanisingCursorListener = new View.OnLayoutChangeListener() {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -280,6 +315,17 @@ public class StandCameraActivity extends Activity {
                 left = (int) (mInputPreviewWrapper.getWidth() * mVanisingRatio.x - mVanisingCursorArea.getLeft()) - mVanisingCursor.getWidth() / 2;
                 top = (int) (mInputPreviewWrapper.getHeight() * mVanisingRatio.y - mVanisingCursorArea.getTop()) - mVanisingCursor.getHeight() / 2;
                 mVanisingCursor.layout(left, top, left + mVanisingCursor.getWidth(), top + mVanisingCursor.getHeight());
+            }
+        }
+    };
+
+    private View.OnLayoutChangeListener mInitSetPageYCursorListener = new View.OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            if(!mIsInitedCursors) {
+
+                top = (int) (mInputPreviewWrapper.getHeight() * mPageAearRatio - mPageYCursorArea.getTop()) - mPageYCursor.getHeight() / 2;
+                mPageYCursor.layout(mPageYCursor.getLeft(), top, mPageYCursor.getRight(), top + mPageYCursor.getHeight());
             }
         }
     };
@@ -314,7 +360,9 @@ public class StandCameraActivity extends Activity {
         }
         mIsInitedCursors = false;
         mVanisingCursor.addOnLayoutChangeListener(mInitSetVanisingCursorListener);
-        mVanisingCursor.setOnTouchListener(mDragListener);
+        mVanisingCursor.setOnTouchListener(mVanisingCursorDragListener);
+        mPageYCursor.addOnLayoutChangeListener(mInitSetPageYCursorListener);
+        mPageYCursor.setOnTouchListener(mPageYCursorDragListener);
     }
 
     @Override
@@ -377,6 +425,8 @@ public class StandCameraActivity extends Activity {
         mPageLabelView = findViewById(R.id.pageLabelView);
         mVanisingCursor = findViewById(R.id.vanising_cursor);
         mVanisingCursorArea = findViewById(R.id.vanising_cursor_area);
+        mPageYCursor = findViewById(R.id.page_y_cursor);
+        mPageYCursorArea = findViewById(R.id.page_y_cursor_area);
         mInputPreviewWrapper = findViewById(R.id.input_preview_wrapper);
     }
 
