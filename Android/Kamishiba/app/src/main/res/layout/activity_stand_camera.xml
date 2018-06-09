@@ -32,19 +32,53 @@
         android:visibility="visible"
         tools:context=".StandCameraActivity_">
 
-        <ImageView
-            android:id="@+id/inputPreviewView"
+        <FrameLayout
+            android:id="@+id/input_preview_wrapper"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:src="@color/blankImage"
-            android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/coverView"
             app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+            <ImageView
+                android:id="@+id/inputPreviewView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@color/blankImage"
+                android:visibility="visible" />
+
+            <FrameLayout
+                android:id="@+id/vanising_cursor_area"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="80dp"
+                android:layout_marginLeft="68dp"
+                android:layout_marginRight="68dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/black_overlay">
+
+                <ImageButton
+                    android:id="@+id/vanising_cursor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="0dp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_arrow_drop_down_circle_black_36dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.016"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </FrameLayout>
+
+        </FrameLayout>
 
         <ImageButton
             android:id="@+id/imageButton3"
@@ -217,29 +251,37 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
         <TextureView
             android:id="@+id/debugPreview"
             android:layout_width="82dp"
             android:layout_height="57dp"
-            android:layout_marginStart="28dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:src="@android:color/transparent"
             android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.983"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.31" />
 
         <TextView
             android:id="@+id/debugPrint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="56dp"
             android:text="TextView"
             android:textColor="@android:color/holo_green_dark"
-            app:layout_constraintStart_toEndOf="@+id/debugPreview"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/debugPreview" />
 
     </android.support.constraint.ConstraintLayout>
 

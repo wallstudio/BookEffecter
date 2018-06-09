@@ -3,14 +3,15 @@
 #include <android/bitmap.h>
 
 extern "C" JNIEXPORT jstring
-
 JNICALL
 Java_wallstudio_work_kamishiba_Jni_stringFromJNI(
         JNIEnv *env,
         jobject /* this */) {
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
                                                      jobject yBuffer,

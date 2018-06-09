@@ -1,12 +1,11 @@
 package wallstudio.work.kamishiba;
 
-import android.graphics.Color;
+import android.support.annotation.Nullable;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -15,41 +14,43 @@ import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
 
 public class CorrectedImage {
 
-    public Mat resultImage;
-    public Point vanising;
-    public int pageAreaY;
-    public Point cross0;
-    public Point cross1;
-    public int size;
-    public Mat processingImage;
+    public static void PerspectiveTransform(Mat src, Mat dest, Point vanisingRate, double pageAreaRatio, int size){
 
-    public CorrectedImage(Mat image, Point vanisingRate, double pageAreaRatio, boolean isDrawProcessing, int size){
-        resultImage = image.clone();
-        Imgproc.cvtColor(resultImage, resultImage, COLOR_BGR2GRAY);
-        int h = resultImage.height();
-        int w = resultImage.width();
-        vanising = new Point((int)(vanisingRate.x*w), (int)(vanisingRate.y*h));
-        pageAreaY = (int)(pageAreaRatio*h);
-        cross0 = new Point ((int)((1-((pageAreaY-vanising.y)/(h-vanising.y)))*vanising.x), pageAreaY);
-        cross1 = new Point (w-(int)((1-((pageAreaY-vanising.y)/(h-vanising.y)))*vanising.x), pageAreaY);
-
-        this.size = size;
-        float[] pts1 = new float[]{(int)cross0.x, (int)cross0.y, (int)cross1.x, (int)cross1.y, 0, h, w, h};
+        float[] pts1 = calc4Points(src, vanisingRate, pageAreaRatio);
         float[] pts2 = new float[]{0, 0, size, 0, 0, size, size, size};
         Mat pts1m = new Mat(4,2, CvType.CV_32F);
         Mat pts2m = new Mat(4,2, CvType.CV_32F);
-        pts1m.put(0,0,pts1);
-        pts2m.put(0,0,pts2);
+        pts1m.put(0,0, pts1);
+        pts2m.put(0,0, pts2);
         Mat persMatrix = Imgproc.getPerspectiveTransform(pts1m, pts2m);
-        Imgproc.warpPerspective(resultImage,resultImage,persMatrix,new Size(size,size));
-        Core.flip(resultImage,resultImage, -1);
+//        Imgproc.cvtColor(src, dest, COLOR_BGR2GRAY);
+        Imgproc.warpPerspective(src, dest, persMatrix, new Size(size,size));
+        Core.flip(dest, dest, -1);
+    }
 
-        if (isDrawProcessing) {
-            Scalar color = new Scalar(255, 100, 0, 100);
-            processingImage = image.clone();
-            Imgproc.line(processingImage, vanising, new Point(0, h), color,3);
-            Imgproc.line(processingImage, vanising, new Point(w, h), color,3);
-            Imgproc.line(processingImage, cross0, cross1, color,3);
-        }
+    public static void DrawPerspectiveGuidLine(Mat srcAndDest, Point vanisingRate, double pageAreaRatio){
+
+        Point vanising = new Point((int)(vanisingRate.x*srcAndDest.width()), (int)(vanisingRate.y*srcAndDest.height()));
+        float[] pts1 = calc4Points(srcAndDest, vanisingRate, pageAreaRatio);
+
+        Scalar color = new Scalar(255, 100, 0, 100);
+        Imgproc.line(srcAndDest, vanising, new Point(0, srcAndDest.height()), color,3);
+        Imgproc.line(srcAndDest, vanising, new Point(srcAndDest.width(), srcAndDest.height()), color,3);
+        Imgproc.line(srcAndDest, new Point(pts1[0], pts1[1]), new Point(pts1[2], pts1[3]), color,3);
+    }
+
+    public static float[] calc4Points(Mat src, Point vanisingRate, double pageAreaRatio){
+        int h = src.height();
+        int w = src.width();
+        Point vanising = new Point((int)(vanisingRate.x*w), (int)(vanisingRate.y*h));
+        int pageAreaY = (int)(pageAreaRatio*h);
+        // ref. https://imgur.com/a/mNAz9Mm
+        double a = pageAreaY - vanising.y;
+        double b = h - pageAreaY;
+        double ab = a + b;
+        Point cross0 = new Point ((b / ab) * vanising.x, pageAreaY);
+        Point cross1 = new Point ((a / ab) * (w - vanising.x) + vanising.x, pageAreaY);
+
+        return new float[]{(int)cross0.x, (int)cross0.y, (int)cross1.x, (int)cross1.y, 0, h, w, h};
     }
 }

@@ -21,9 +21,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -39,14 +42,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.COLOR_RGB2RGBA;
 import static org.opencv.imgproc.Imgproc.findContours;
 
 
 public class StandCameraActivity extends Activity {
 
 
-    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
+    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
     public static final int CAMERA_SIDE = CameraCharacteristics.LENS_FACING_BACK;
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
     public static final int BACKGROUND_BITMAP_REDUCTION = 16;
@@ -62,6 +64,9 @@ public class StandCameraActivity extends Activity {
     private ImageView mMatchPreviewView;
     private ImageView mCoverView;
     private TextView mPageLabelView;
+    private ImageView mVanisingCursor;
+    private View mVanisingCursorArea;
+    private View mInputPreviewWrapper;
 
     private HashMap<String, String> mDisplayDebugMessageList = new HashMap<>();
 
@@ -78,6 +83,11 @@ public class StandCameraActivity extends Activity {
 
     public Surface mDebugPreviewSurface;
     public ImageReader mPreviewBuffer;
+
+    // 汚いけど，レイアウトが完全に計算され切ったときのイベントが無いので
+    public boolean mIsInitedCursors = false;
+    public org.opencv.core.Point mVanisingRatio = new org.opencv.core.Point(0.5, 0.2);
+    public double pageAearRatio = 0.65;
 
     // Device setting (Contains Capture and Processing callback)
     CameraDevice.StateCallback mDeviceSettingCallback = new CameraDevice.StateCallback() {
@@ -167,7 +177,7 @@ public class StandCameraActivity extends Activity {
             preview.release();
             // Convert for Parsing
             Mat match = new Mat();
-            createMatch(original, match);
+            createMatch(original, match, mMatchBitmap.getWidth());
             Utils.matToBitmap(match, mMatchBitmap, false);
             mMatchPreviewView.setImageBitmap(mMatchBitmap);
             match.release();
@@ -184,16 +194,16 @@ public class StandCameraActivity extends Activity {
         }
 
         private void createPreview(Mat in, Mat out){
-            Imgproc.resize(in, out, in.size());
+            in.copyTo(out);
+            CorrectedImage.DrawPerspectiveGuidLine(out, mVanisingRatio, pageAearRatio);
         }
 
-        private void createMatch(Mat in, Mat out){
-            Imgproc.cvtColor(in,out, COLOR_BGR2GRAY);
-            Imgproc.resize(in, out, new Size(mMatchBitmap.getWidth(), mMatchBitmap.getHeight()));
+        private void createMatch(Mat in, Mat out, int size){
+            CorrectedImage.PerspectiveTransform(in, out, mVanisingRatio, pageAearRatio, size);
         }
     };
 
-    TextureView.SurfaceTextureListener mDebugPreviewListener = new TextureView.SurfaceTextureListener() {
+    private TextureView.SurfaceTextureListener mDebugPreviewListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             try {
@@ -216,10 +226,69 @@ public class StandCameraActivity extends Activity {
         public void onSurfaceTextureUpdated(SurfaceTexture surface) { }
     };
 
+    private View.OnTouchListener mDragListener = new View.OnTouchListener() {
+        // ref. https://akira-watson.com/android/imageview-drag.html
+        private int mPreX;
+        private int mPreY;
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+
+            mIsInitedCursors = true;
+
+            int globalX = (int) event.getRawX();
+            int globalY = (int) event.getRawY();
+
+            if(event.getAction() == MotionEvent.ACTION_MOVE){
+                    int deltaX = globalX - mPreX;
+                    int deltaY = globalY - mPreY;
+                    int left = mVanisingCursor.getLeft() + deltaX;
+                    int top = mVanisingCursor.getTop() + deltaY;
+                    int minLeft = 0;
+                    int minTop = 0;
+                    int maxRight = mVanisingCursorArea.getWidth() - mVanisingCursor.getWidth();
+                    int maxBottom = mVanisingCursorArea.getHeight() - mVanisingCursor.getHeight();
+                    left = left < minLeft ? minLeft : left;
+                    left = left > maxRight ? maxRight : left;
+                    top = top < minTop ? minTop : top;
+                    top = top > maxBottom ? maxBottom : top;
+                    int right = left + mVanisingCursor.getWidth();
+                    int bottom = top + mVanisingCursor.getHeight();
+
+                    mVanisingCursor.layout(left, top, right, bottom);
+                    setDisplayDebugMessage("Area", mVanisingCursorArea.getWidth() + "x" + mVanisingCursorArea.getHeight());
+                    setDisplayDebugMessage("RowTouch", globalX + "x" + globalY);
+
+                    int xOnImage = mVanisingCursorArea.getLeft() + mVanisingCursor.getLeft() + mVanisingCursor.getWidth() / 2;
+                    int yOnImage = mVanisingCursorArea.getTop() + mVanisingCursor.getTop() + mVanisingCursor.getHeight() / 2;
+
+                    mVanisingRatio.x = xOnImage / (double)mInputPreviewWrapper.getWidth();
+                    mVanisingRatio.y = yOnImage / (double)mInputPreviewWrapper.getHeight();
+                    setDisplayDebugMessage("Y OnImage", mVanisingCursorArea.getTop() + "+" + mVanisingCursor.getTop() + "+" + mVanisingCursor.getHeight() + "/2");
+                    setDisplayDebugMessage("Y Ratio", yOnImage + "/" + mInputPreviewWrapper.getHeight());
+                    setDisplayDebugMessage("Vanising", String.format("%.2fx%.2f", mVanisingRatio.x, mVanisingRatio.y));
+            }
+            mPreX = globalX;
+            mPreY = globalY;
+            return true;
+        }
+    };
+
+    private View.OnLayoutChangeListener mInitSetVanisingCursorListener = new View.OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            if(!mIsInitedCursors) {
+                left = (int) (mInputPreviewWrapper.getWidth() * mVanisingRatio.x - mVanisingCursorArea.getLeft()) - mVanisingCursor.getWidth() / 2;
+                top = (int) (mInputPreviewWrapper.getHeight() * mVanisingRatio.y - mVanisingCursorArea.getTop()) - mVanisingCursor.getHeight() / 2;
+                mVanisingCursor.layout(left, top, left + mVanisingCursor.getWidth(), top + mVanisingCursor.getHeight());
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_stand_camera);
         beginFullScreen();
         bindViews();
 
@@ -243,6 +312,9 @@ public class StandCameraActivity extends Activity {
         }else {
             mDebugPreview.setSurfaceTextureListener(mDebugPreviewListener);
         }
+        mIsInitedCursors = false;
+        mVanisingCursor.addOnLayoutChangeListener(mInitSetVanisingCursorListener);
+        mVanisingCursor.setOnTouchListener(mDragListener);
     }
 
     @Override
@@ -290,7 +362,6 @@ public class StandCameraActivity extends Activity {
     }
 
     private void beginFullScreen(){
-        setContentView(R.layout.activity_stand_camera);
         this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
@@ -304,6 +375,9 @@ public class StandCameraActivity extends Activity {
         mMatchPreviewView = findViewById(R.id.matchPreviewView);
         mCoverView = findViewById(R.id.coverView);
         mPageLabelView = findViewById(R.id.pageLabelView);
+        mVanisingCursor = findViewById(R.id.vanising_cursor);
+        mVanisingCursorArea = findViewById(R.id.vanising_cursor_area);
+        mInputPreviewWrapper = findViewById(R.id.input_preview_wrapper);
     }
 
     private Point selectSupportedPreviewSize(Point ideal, android.util.Size[] supports){
