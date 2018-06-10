@@ -5,8 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
+import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfDMatch;
+import org.opencv.core.Scalar;
 import org.opencv.features2d.BFMatcher;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -20,6 +23,7 @@ import java.util.List;
 
 public class LearndImageSet {
 
+    public static final int DRAW_MATCH_COUT  = 10;
     // TODO: ネット or ストレージから拾うように
     public static final int[] TEST_DATA = new int[]{
             R.drawable.td0,
@@ -31,6 +35,7 @@ public class LearndImageSet {
             R.drawable.td6,
             R.drawable.td7
     };
+    public final Scalar RANDOM_COLOR = Scalar.all(-1);
 
     public static BFMatcher sBFMatcher;
 
@@ -62,6 +67,8 @@ public class LearndImageSet {
             bitmap.recycle();
         }
     }
+
+
 
     public void search(Mat inputImage){
 
@@ -106,9 +113,16 @@ public class LearndImageSet {
     public void drawResult(){
         if(null != bestLearndImage) {
             MatOfDMatch matchMat = new MatOfDMatch();
-            DMatch[] subMatchs = Arrays.copyOf(bestMatch, bestMatch.length < 10 ? bestMatch.length : 10);
+            MatOfByte matchMask = new MatOfByte();
+            DMatch[] subMatchs = Arrays.copyOf(bestMatch, bestMatch.length < DRAW_MATCH_COUT ? bestMatch.length : DRAW_MATCH_COUT);
             matchMat.fromArray(subMatchs);
-            Features2d.drawMatches(learndInputImage.image, learndInputImage.keyPoints, bestLearndImage.image, bestLearndImage.keyPoints, matchMat, resultImage);
+            byte[] matchMaskArr = new byte[DRAW_MATCH_COUT];
+            Arrays.fill(matchMaskArr, (byte)1);
+            matchMask.fromArray(matchMaskArr);
+            Features2d.drawMatches(
+                    learndInputImage.image, learndInputImage.keyPoints,
+                    bestLearndImage.image, bestLearndImage.keyPoints,
+                    matchMat, resultImage, RANDOM_COLOR, RANDOM_COLOR, matchMask, Features2d.NOT_DRAW_SINGLE_POINTS);
             matchMat.release();
             //TODO: put score;
         }else {
