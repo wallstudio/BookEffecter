@@ -148,15 +148,4 @@ public class LearndImageSet {
         bestLearndImage.release();
         resultImage.release();
     }
-
-    private static String InputStreamToString(InputStream is) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line + '\n');
-        }
-        br.close();
-        return sb.toString();
-    }
 }

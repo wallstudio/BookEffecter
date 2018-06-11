@@ -9,4 +9,13 @@
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="CVImageView">
+        <attr name="buffer_width" format="dimension"/>
+        <attr name="buffer_height" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="MatchPreviewView">
+        <attr name="corrected_image_width" format="dimension"/>
+        <attr name="corrected_image_height" format="dimension"/>
+    </declare-styleable>
 </resources>

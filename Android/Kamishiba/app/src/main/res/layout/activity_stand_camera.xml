@@ -16,13 +16,15 @@
          android:fitsSystemWindows. -->
 
 
-    <ImageView
+    <wallstudio.work.kamishiba.BackgroundView
         android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0.5"
         android:scaleType="fitXY"
-        android:src="@android:color/black" />
+        android:src="@android:color/black"
+        app:buffer_width="800px"
+        app:buffer_height="480px"/>
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -33,7 +35,6 @@
         tools:context=".StandCameraActivity_">
 
         <FrameLayout
-            android:id="@+id/input_preview_wrapper"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginEnd="8dp"
@@ -46,88 +47,19 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0">
 
-            <ImageView
+            <wallstudio.work.kamishiba.InputPreviewView
                 android:id="@+id/inputPreviewView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@color/blankImage"
-                android:visibility="visible" />
+                android:visibility="visible"
+                app:buffer_height="480px"
+                app:buffer_width="800px" />
 
-            <FrameLayout
-                android:id="@+id/vanising_cursor_area"
+            <wallstudio.work.kamishiba.PerspectiveController
+                android:id="@+id/controller_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="80dp"
-                android:layout_marginLeft="60dp"
-                android:layout_marginRight="60dp"
-                android:layout_marginTop="16dp"
-                android:visibility="visible">
-
-                <ImageButton
-                    android:id="@+id/vanising_cursor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="0dp"
-                    android:layout_marginTop="0dp"
-                    android:background="@android:color/transparent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_arrow_drop_down_circle_black_36dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.016"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/page_y_cursor_area"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="44dp"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
-                android:layout_marginTop="60dp">
-
-                <FrameLayout
-                    android:id="@+id/page_y_cursor"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom">
-
-                    <ImageButton
-                        android:id="@+id/vanising_cursor4"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_gravity="center_vertical|fill_horizontal|center"
-                        android:layout_marginEnd="44dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="0dp"
-                        android:background="@android:color/transparent"
-                        android:scaleType="fitXY"
-                        android:src="@color/pageYLine"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.016"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right|center_vertical"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginStart="0dp"
-                        android:layout_marginTop="0dp"
-                        android:background="@android:color/transparent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_unfold_more_black_24dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.016"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </FrameLayout>
-            </FrameLayout>
+                android:layout_height="match_parent"/>
 
         </FrameLayout>
 
@@ -138,6 +70,7 @@
             android:layout_marginStart="12dp"
             android:layout_marginTop="16dp"
             android:background="@android:color/transparent"
+            android:onClick="onClickBack"
             android:src="@drawable/ic_arrow_back_black_40dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.016"
@@ -173,7 +106,7 @@
             app:layout_constraintBottom_toTopOf="@+id/authorLabelView"
             app:layout_constraintEnd_toStartOf="@+id/pageLabelView"
             app:layout_constraintStart_toEndOf="@+id/coverView"
-            app:layout_constraintTop_toBottomOf="@+id/input_preview_wrapper"
+            app:layout_constraintTop_toBottomOf="@+id/controller_view"
             app:layout_constraintVertical_bias="1.0" />
 
         <TextView
@@ -212,7 +145,7 @@
             android:textSize="36sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
-            app:layout_constraintTop_toBottomOf="@+id/input_preview_wrapper" />
+            app:layout_constraintTop_toBottomOf="@+id/controller_view" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraintLayout"
@@ -305,15 +238,19 @@
                 </android.support.constraint.ConstraintLayout>
             </LinearLayout>
 
-            <ImageView
+            <wallstudio.work.kamishiba.MatchPreviewView
                 android:id="@+id/matchPreviewView"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_weight="1"
-                android:src="@color/blankImage"
+                android:scaleType="centerInside"
+                android:src="@drawable/td7"
+                app:buffer_height="360px"
+                app:buffer_width="360px"
+                app:corrected_image_height="480px"
+                app:corrected_image_width="320px"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout"
                 app:layout_constraintVertical_bias="1.0" />
 
@@ -338,17 +275,16 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.983"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.31" />
+            app:layout_constraintVertical_bias="0.392" />
 
         <TextView
             android:id="@+id/debugPrint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:layout_marginTop="56dp"
             android:text="TextView"
             android:textColor="@android:color/holo_green_dark"
             android:visibility="visible"
