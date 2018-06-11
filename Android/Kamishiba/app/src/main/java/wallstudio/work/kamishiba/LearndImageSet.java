@@ -3,6 +3,7 @@ package wallstudio.work.kamishiba;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -10,16 +11,19 @@ import org.opencv.core.DMatch;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfDMatch;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.features2d.BFMatcher;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.Features2d;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class LearndImageSet {
 
@@ -67,8 +71,6 @@ public class LearndImageSet {
             bitmap.recycle();
         }
     }
-
-
 
     public void search(Mat inputImage){
 
@@ -130,11 +132,31 @@ public class LearndImageSet {
         }
     }
 
+    public void setImageReduction(int reductions){
+        for(LearndImage li : learndImages)
+            li.reductionSize(reductions);
+    }
+
+    public void inputImageReduction(int reductions){
+        learndInputImage.reductionSize(reductions);
+    }
+
     public void release(){
         for(LearndImage l :learndImages)
             l.release();
         learndInputImage.release();
         bestLearndImage.release();
         resultImage.release();
+    }
+
+    private static String InputStreamToString(InputStream is) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + '\n');
+        }
+        br.close();
+        return sb.toString();
     }
 }

@@ -205,6 +205,7 @@ public class StandCameraActivity extends Activity {
         private void createMatch(Mat in, Mat out, int size){
             CorrectedImage.PerspectiveTransform(in, out, mVanisingRatio, mPageAearRatio, size);
             mLearndImageSet.search(out);
+            mLearndImageSet.inputImageReduction(2);
             mLearndImageSet.drawResult();
             out.release();
             mLearndImageSet.resultImage.copyTo(out);
@@ -381,6 +382,7 @@ public class StandCameraActivity extends Activity {
         mPageYCursor.addOnLayoutChangeListener(mInitSetPageYCursorListener);
         mPageYCursor.setOnTouchListener(mPageYCursorDragListener);
         mLearndImageSet = new LearndImageSet(getResources());
+        mLearndImageSet.setImageReduction(4);
     }
 
     @Override
