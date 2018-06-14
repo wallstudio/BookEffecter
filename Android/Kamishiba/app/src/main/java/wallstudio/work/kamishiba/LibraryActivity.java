@@ -1,11 +1,10 @@
 package wallstudio.work.kamishiba;
 
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-
-import java.util.Map;
 
 public class LibraryActivity extends AppCompatActivity {
 
@@ -16,7 +15,9 @@ public class LibraryActivity extends AppCompatActivity {
     }
 
     public void onClick_DL(View v){
-        SetDownloadTask setDownloadTask = new SetDownloadTask();
+
+
+        LoadTask setDownloadTask = new LoadTask(this);
         setDownloadTask.execute("http://192.168.0.10/smb/kamishiba/uphashi/kadamaki/index.yml");
     }
 

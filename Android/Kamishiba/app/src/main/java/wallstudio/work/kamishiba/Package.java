@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class Unit {
+public class Package {
 
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -49,31 +49,31 @@ public class Unit {
         List<Double> track_timing = new ArrayList<>();
     }
 
-    public static Unit fromYaml(String yamlString) throws IOException, ParseException {
+    public static Package fromYaml(String yamlString) throws IOException, ParseException {
         Yaml yaml = new Yaml();
         Map map = yaml.load(yamlString);
         if(null == map) throw new IOException("Invalid YAML");
-        Unit unit = new Unit();
-        unit.uuid = UUID.fromString((String) map.get("UUID"));
+        Package pack = new Package();
+        pack.uuid = UUID.fromString((String) map.get("UUID"));
         Map book = (Map) map.get("book_info");
-        unit.book.uuid = UUID.fromString((String) book.get("UUID"));
-        unit.book.id = (String) book.get("id");
-        unit.book.title = (String) book.get("title");
+        pack.book.uuid = UUID.fromString((String) book.get("UUID"));
+        pack.book.id = (String) book.get("id");
+        pack.book.title = (String) book.get("title");
         Map author = (Map) book.get("author");
-        unit.book.author.uuid = UUID.fromString((String) author.get("UUID"));
-        unit.book.author.id = (String) author.get("id");
-        unit.book.author.name = (String) author.get("name");
-        unit.book.author.contact = (String) author.get("contact");
-        unit.book.page_count = (int) book.get("page_count");
-        unit.book.publish_date = (Date) book.get("publish_date");
-        unit.book.genre = (List<String>) book.get("genre");
-        unit.book.sexy = (boolean) book.get("sexy");
-        unit.book.vaiolence = (boolean) book.get("vaiolence");
-        unit.book.grotesque = (boolean) book.get("grotesque");
+        pack.book.author.uuid = UUID.fromString((String) author.get("UUID"));
+        pack.book.author.id = (String) author.get("id");
+        pack.book.author.name = (String) author.get("name");
+        pack.book.author.contact = (String) author.get("contact");
+        pack.book.page_count = (int) book.get("page_count");
+        pack.book.publish_date = (Date) book.get("publish_date");
+        pack.book.genre = (List<String>) book.get("genre");
+        pack.book.sexy = (boolean) book.get("sexy");
+        pack.book.vaiolence = (boolean) book.get("vaiolence");
+        pack.book.grotesque = (boolean) book.get("grotesque");
         List audio = (List) map.get("audio");
         for (Object ao: audio){
             Map am = (Map)ao;
-            Unit.Audio ua = new Unit.Audio();
+            Package.Audio ua = new Package.Audio();
             ua.uuid = UUID.fromString((String) am.get("UUID"));
             ua.id = (String) am.get("id");
             ua.title = (String) am.get("title");
@@ -85,8 +85,8 @@ public class Unit {
             ua.publish_date = (Date) am.get("publish_date");
             ua.official = (boolean) am.get("official");
             ua.track_timing = (List<Double>) am.get("track_timing");
-            unit.audio.add(ua);
+            pack.audio.add(ua);
         }
-        return  unit;
+        return  pack;
     }
 }

@@ -32,13 +32,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
 
-    <wallstudio.work.kamishiba.InputPreviewView
-        android:layout_width="179dp"
-        android:layout_height="257dp"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="56dp"
-        app:buffer_height="780px"
+    <ImageView
+        android:id="@+id/iv"
+        android:layout_width="169dp"
+        android:layout_height="200dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button2" />
+        app:layout_constraintTop_toBottomOf="@+id/button2"
+        app:layout_constraintVertical_bias="0.107"
+        app:srcCompat="@android:color/darker_gray" />
 
 </android.support.constraint.ConstraintLayout>
