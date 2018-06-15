@@ -17,7 +17,6 @@ public class LibraryTapAdapter extends FragmentPagerAdapter {
         super(fm);
         tabTitles = Arrays.asList(/*"Favorite",*/ "Local", "Cloud", "QR");
         tabFragments = Arrays.asList(
-                //new LibraryTabFragment(),
                 new LibraryTabFragment(),
                 new LibraryTabFragment(),
                 new QRScanerFragment()

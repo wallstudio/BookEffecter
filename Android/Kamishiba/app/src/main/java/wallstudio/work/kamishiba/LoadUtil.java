@@ -1,10 +1,8 @@
 package wallstudio.work.kamishiba;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
@@ -12,6 +10,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -31,9 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Pattern;
 
 public class LoadUtil{
 
@@ -118,6 +116,19 @@ public class LoadUtil{
             return context.getFilesDir().getPath();
     }
 
+    public static String getSha1Hash(String plain){
+        String cypher = "";
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5"); // <--> book's UUID
+            byte[] result = digest.digest(plain.getBytes());
+            for(byte b : result)
+                cypher += String.format("%02X", b);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return  cypher;
+    }
+
     public static class stringDownloadTask extends AsyncTask<String, Double, String> {
         @Override
         protected String doInBackground(String... strings) {
@@ -135,39 +146,36 @@ public class LoadUtil{
         }
     }
 
-    public static class bitmapDownloadWithCacheTask extends AsyncTask<Object, Double, Bitmap>{
-        private ImageView mView;
+    public static class PackageSummaryDownloadTask extends AsyncTask<String, Double, Bitmap>{
+
         private Context mContext;
+        private ImageView mImage;
+
+        public PackageSummaryDownloadTask(Context context, ImageView image){
+            mContext = context;
+            mImage = image;
+        }
 
         @Override
-        protected Bitmap doInBackground(Object... objects) {
-            mContext = (Context) objects[0];
-            mView = (ImageView) objects[1];
-            String url = (String) objects[2];
+        protected Bitmap doInBackground(String... param) {
+            String url = param[0];
             InputStream stream;
+            String sha1 = getSha1Hash(url);
+            File file = new File(mContext.getCacheDir() + "/" + sha1);
             try {
-                String cachepath = "";
-                MessageDigest digest = MessageDigest.getInstance("SHA-1");
-                byte[] result = digest.digest(url.getBytes());
-                for(byte b : result)
-                    cachepath += String.valueOf(b);
-
-                File file = new File(mContext.getCacheDir() + "/" + cachepath);
                 if(!file.exists()){
                     stream = LoadUtil.getStreamFromUrl(url);
-                    saveStream(stream, mContext.getCacheDir() + "/" + cachepath);
+                    saveStream(stream, mContext.getCacheDir() + "/" + sha1);
                     stream.close();
                 }
-
-                stream = getStreamFromPath(mContext.getCacheDir() + "/" + cachepath);
+                stream = getStreamFromPath(mContext.getCacheDir() + "/" + sha1);
                 Bitmap bitmap = LoadUtil.streamToBitmap(stream);
                 stream.close();
                 return bitmap;
-
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
+                if(file.exists()){
+                    file.delete();
+                }
             }
 
             return null;
@@ -176,85 +184,48 @@ public class LoadUtil{
         @Override
         protected void onPostExecute(Bitmap bitmap){
             if(null != bitmap){
-                mView.setImageBitmap(bitmap);
+                mImage.setImageBitmap(bitmap);
             }else {
-                Toast.makeText(mContext, "Tumbnail download error", Toast.LENGTH_SHORT);
+                Toast.makeText(mContext, "Thumbnail download error", Toast.LENGTH_SHORT);
             }
         }
     }
 
-    public static class SummaryDownloadTask extends AsyncTask<Object, Double, String>{
-        private Context mContext;
-        private TextView mTitle;
-        private TextView mAutor;
-        private TextView mDetail;
-
-        @Override
-        protected String doInBackground(Object... objects) {
-            mContext = (Context) objects[0];
-            mTitle = (TextView) objects[1];
-            mAutor = (TextView) objects[2];
-            mDetail = (TextView) objects[3];
-            String url = (String) objects[4];
-
-            try {
-                InputStream stream = getStreamFromUrl(url);
-                String string = streamToString(stream);
-                stream.close();
-                return  string;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return "";
-        }
-
-        @Override
-        protected void onPostExecute(String string) {
-            try {
-                if(string != null) {
-                    Package pac = new Package(mContext, "", null);
-                    pac.fromYaml(string);
-                    mTitle.setText(pac.book.title);
-                    mAutor.setText(pac.book.author.name);
-                    mDetail.setText(pac.book.page_count + " " + pac.audio.size());
-                }
-            } catch (ParseException | IOException e) {
-                    e.printStackTrace();
-                }
-        }
-    }
-
-    public static class CloudPackageListDownloadTask extends AsyncTask<Object, Double, List<String>>{
+    public static class CloudPackageListDownloadTask extends AsyncTask<String, Double, List<Map>>{
 
         private Context mContext;
         private GridView mGridView;
 
+        public CloudPackageListDownloadTask(Context context, GridView grid){
+            super();
+            mContext = context;
+            mGridView = grid;
+        }
+
         @Override
-        protected List<String> doInBackground(Object... param) {
-            List<String> pacs = new ArrayList<>();
+        protected List<Map> doInBackground(String... param) {
+            List<Map> pacs = new ArrayList<>();
             try {
-                mContext = (Context) param[0];
-                mGridView = (GridView) param[1];
-                String url = (String) param[2];
+                String url = param[0];
                 LoadUtil.stringDownloadTask task = new LoadUtil.stringDownloadTask();
                 task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
                 String result = task.get();
                 result = result.trim();
-                pacs = Arrays.asList(result.split("\n"));
-            } catch (InterruptedException | ExecutionException e) {
-                Toast.makeText(mContext, "failed download list.", Toast.LENGTH_SHORT);
+                Yaml yaml = new Yaml();
+                pacs = yaml.load(result);
+            } catch (InterruptedException e){
+            } catch (ExecutionException e) {
+                Log.e("", e.toString());
             }
             return pacs;
         }
 
         @Override
-        protected void onPostExecute(List<String> pacs){
+        protected void onPostExecute(List<Map> pacs){
             LibraryTabFragment.PackageGridAdapter pga
                     = new LibraryTabFragment.PackageGridAdapter(
                             mContext, R.layout.fragment_package, pacs);
             mGridView.setAdapter(pga);
         }
     }
-
 }
