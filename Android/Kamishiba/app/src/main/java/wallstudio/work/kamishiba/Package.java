@@ -1,8 +1,11 @@
 package wallstudio.work.kamishiba;
 
+import android.content.Context;
+
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,10 +13,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class Package {
 
+    public static final String DOWNLOADED_LIST_PATH = "downloaded.list";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static List<UUID> sDownlowed;
+
+    public Context context;
+    public String url;
 
     public UUID uuid;
     public Book book = new Book();
@@ -49,27 +59,43 @@ public class Package {
         List<Double> track_timing = new ArrayList<>();
     }
 
-    public static Package fromYaml(String yamlString) throws IOException, ParseException {
+    public Package(Context context, String url, UUID uuid){
+        this.context = context;
+    }
+
+    public void create(){
+        // PackageGridAdapter.getView で読み込まれる
+        String yamlString;
+        if(sDownlowed.indexOf(uuid) < 0){
+
+        }
+    }
+
+
+    private String loadStringFromRemote(String url){
+        return "";
+    }
+
+    public void fromYaml(String yamlString) throws IOException, ParseException {
         Yaml yaml = new Yaml();
         Map map = yaml.load(yamlString);
         if(null == map) throw new IOException("Invalid YAML");
-        Package pack = new Package();
-        pack.uuid = UUID.fromString((String) map.get("UUID"));
+        uuid = UUID.fromString((String) map.get("UUID"));
         Map book = (Map) map.get("book_info");
-        pack.book.uuid = UUID.fromString((String) book.get("UUID"));
-        pack.book.id = (String) book.get("id");
-        pack.book.title = (String) book.get("title");
+        this.book.uuid = UUID.fromString((String) book.get("UUID"));
+        this.book.id = (String) book.get("id");
+        this.book.title = (String) book.get("title");
         Map author = (Map) book.get("author");
-        pack.book.author.uuid = UUID.fromString((String) author.get("UUID"));
-        pack.book.author.id = (String) author.get("id");
-        pack.book.author.name = (String) author.get("name");
-        pack.book.author.contact = (String) author.get("contact");
-        pack.book.page_count = (int) book.get("page_count");
-        pack.book.publish_date = (Date) book.get("publish_date");
-        pack.book.genre = (List<String>) book.get("genre");
-        pack.book.sexy = (boolean) book.get("sexy");
-        pack.book.vaiolence = (boolean) book.get("vaiolence");
-        pack.book.grotesque = (boolean) book.get("grotesque");
+        this.book.author.uuid = UUID.fromString((String) author.get("UUID"));
+        this.book.author.id = (String) author.get("id");
+        this.book.author.name = (String) author.get("name");
+        this.book.author.contact = (String) author.get("contact");
+        this.book.page_count = (int) book.get("page_count");
+        this.book.publish_date = (Date) book.get("publish_date");
+        this.book.genre = (List<String>) book.get("genre");
+        this.book.sexy = (boolean) book.get("sexy");
+        this.book.vaiolence = (boolean) book.get("vaiolence");
+        this.book.grotesque = (boolean) book.get("grotesque");
         List audio = (List) map.get("audio");
         for (Object ao: audio){
             Map am = (Map)ao;
@@ -85,8 +111,7 @@ public class Package {
             ua.publish_date = (Date) am.get("publish_date");
             ua.official = (boolean) am.get("official");
             ua.track_timing = (List<Double>) am.get("track_timing");
-            pack.audio.add(ua);
+            this.audio.add(ua);
         }
-        return  pack;
     }
 }
