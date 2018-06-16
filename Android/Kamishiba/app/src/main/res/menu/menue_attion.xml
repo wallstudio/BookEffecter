@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/help"
+        android:title="ヘルプ" />
+    <item
+        android:id="@+id/config"
+        android:title="設定" />
+    <item
+        android:id="@+id/upload"
+        android:title="アップロード" />
+    <item
+        android:id="@+id/about"
+        android:title="アプリについて" />
+    <item
+        android:id="@+id/donate"
+        android:title="寄付" />
+</menu>

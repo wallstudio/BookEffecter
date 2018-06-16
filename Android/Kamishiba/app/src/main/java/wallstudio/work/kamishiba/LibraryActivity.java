@@ -7,6 +7,10 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 public class LibraryActivity extends AppCompatActivity {
@@ -35,10 +39,39 @@ public class LibraryActivity extends AppCompatActivity {
         }
     }
 
-    public void onClick_CAM(View v){
-        Intent intent = new Intent(getApplicationContext(), StandCameraActivity.class);
-        intent.putExtra("audio", 0);
-        intent.putExtra("yaml", "");
-        startActivity(intent);
+    private Menu mMenue;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        final MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menue_attion, menu);
+
+        mMenue = menu;
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.help:
+                Log.d("MENU", "Help");
+                break;
+            case R.id.config:
+                Log.d("MENU", "Config");
+                break;
+            case R.id.upload:
+                Log.d("MENU", "Upload");
+                break;
+            case R.id.about:
+                Log.d("MENU", "About");
+                break;
+            case R.id.donate:
+                Log.d("MENU", "Donate");
+                break;
+            default:
+                Log.d("MENU", "Invalid");
+        }
+        return true;
     }
 }
