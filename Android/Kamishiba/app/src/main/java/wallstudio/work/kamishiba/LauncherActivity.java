@@ -15,6 +15,10 @@ public class LauncherActivity extends AppCompatActivity {
 
         packageId = getIntent().getStringExtra("package_id");
         setTitle(packageId);
+        setPackageInfo();
+    }
 
+    private void setPackageInfo(){
+        
     }
 }

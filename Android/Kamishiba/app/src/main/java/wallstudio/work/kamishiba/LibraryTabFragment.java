@@ -1,8 +1,6 @@
 package wallstudio.work.kamishiba;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -23,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class LibraryTabFragment extends TitleContainerFragment {
+public abstract class LibraryTabFragment extends TabFragment {
 
     public static final String PACKAGE_ROOT_URL = "http://192.168.0.10/smb/kamishiba/package/";
     public static final String CLOUD_PACKAGE_SUMMARY_LIST_URL = "http://192.168.0.10/smb/kamishiba/packages.yml";
@@ -106,9 +104,8 @@ public abstract class LibraryTabFragment extends TitleContainerFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PackageGridAdapter adapter = (PackageGridAdapter) parent.getAdapter();
-                        Intent intent = new Intent(((Activity) (view.getContext())).getApplication(), LauncherActivity.class);
-                        intent.putExtra("package_id", (String) (adapter.yaml.get(position).get("id")));
-                        view.getContext().startActivity(intent);
+                String pacId = (String) adapter.yaml.get(position).get("id");
+                startLauncher(pacId);
             }
         });
 

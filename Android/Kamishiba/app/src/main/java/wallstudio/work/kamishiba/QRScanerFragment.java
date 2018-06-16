@@ -2,31 +2,32 @@ package wallstudio.work.kamishiba;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
-import com.journeyapps.barcodescanner.CompoundBarcodeView;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
 import java.util.List;
 
 
-public class QRScanerFragment extends TitleContainerFragment{
+public class QRScanerFragment extends TabFragment {
 
     public static final String TITLE = "ライブラリ ＞ QR読み取り";
 
     private DecoratedBarcodeView mBarcodeView;
+    private boolean mIsUserVisible = false;
+    private boolean decoded = false;
 
     // ref. https://qiita.com/sakuna63/items/653452eb48029d53d44f
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+
+        mIsUserVisible = isVisibleToUser;
 
         if(isVisibleToUser && getActivity() != null)
             getActivity().setTitle(TITLE);
@@ -44,9 +45,15 @@ public class QRScanerFragment extends TitleContainerFragment{
 
     @Override
     public void onResume() {
+        decoded = false;
         super.onResume();
-        mBarcodeView.resume();
-        Log.d("QR_CAMERA" , "onResume " );
+        if(mIsUserVisible) {
+            mBarcodeView.resume();
+            Log.d("QR_CAMERA", "onResume ");
+        }else {
+            mBarcodeView.pause();
+            Log.d("QR_CAMERA" , "onPause " );
+        }
     }
 
     @Override
@@ -60,14 +67,15 @@ public class QRScanerFragment extends TitleContainerFragment{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_qrscaner, container, false);
         mBarcodeView = v.findViewById(R.id.decoratedBarcodeView);
-        mBarcodeView.decodeSingle(new BarcodeCallback() {
+        mBarcodeView.decodeContinuous(new BarcodeCallback() {
             @Override
             public void barcodeResult(BarcodeResult barcodeResult) {
-
-                TextView textView = getView().findViewById(R.id.rq_result);
-                textView.setText(barcodeResult.getText());
+                if(!decoded) {
+                    decoded = true;
+                    String input = barcodeResult.getText().trim();
+                    startLauncher(input);
+                }
             }
-
             @Override
             public void possibleResultPoints(List<ResultPoint> list) {}
         });
