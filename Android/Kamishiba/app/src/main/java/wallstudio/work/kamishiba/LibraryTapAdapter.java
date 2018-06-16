@@ -30,11 +30,6 @@ public class LibraryTapAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if(position == 2)
-            ((QRScanerFragment)(tabFragments.get(2))).setActive(true);
-        else
-            ((QRScanerFragment)(tabFragments.get(2))).setActive(false);
-
         return tabFragments.get(position);
     }
 

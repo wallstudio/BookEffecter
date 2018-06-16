@@ -3,6 +3,7 @@ package wallstudio.work.kamishiba;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,26 +22,33 @@ public class QRScanerFragment extends Fragment {
 
     private DecoratedBarcodeView mBarcodeView;
 
-    public void setActive(boolean isActive){
-        if(mBarcodeView != null)
-            if(isActive)
+    // ref. https://qiita.com/sakuna63/items/653452eb48029d53d44f
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if(mBarcodeView != null) {
+            if (isVisibleToUser) {
                 mBarcodeView.resume();
-            else
+                Log.d("QR_CAMERA", "onResume ");
+            } else {
                 mBarcodeView.pause();
+                Log.d("QR_CAMERA", "onPause ");
+            }
+        }
     }
-
-
 
     @Override
     public void onResume() {
         super.onResume();
         mBarcodeView.resume();
+        Log.d("QR_CAMERA" , "onResume " );
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mBarcodeView.pause();
+        Log.d("QR_CAMERA" , "onPause " );
     }
 
     @Override
