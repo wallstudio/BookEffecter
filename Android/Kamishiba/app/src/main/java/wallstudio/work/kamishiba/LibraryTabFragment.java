@@ -1,17 +1,18 @@
 package wallstudio.work.kamishiba;
 
+import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -33,7 +34,7 @@ public abstract class LibraryTabFragment extends TitleContainerFragment {
         private Context mContext;
         private int mResource;
         private LayoutInflater mInflater;
-        private List<Map> mYaml;
+        public List<Map> yaml;
         private HashMap<Integer, AsyncTask> mImageLoadHolder = new HashMap<>();
 
         public PackageGridAdapter(@NonNull Context context, int resource, @NonNull List<Map> yaml) {
@@ -42,11 +43,11 @@ public abstract class LibraryTabFragment extends TitleContainerFragment {
             mContext = context;
             mResource = resource;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mYaml = yaml;
+            this.yaml = yaml;
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             View view;
             if (convertView != null) {
                 view = convertView;
@@ -79,15 +80,17 @@ public abstract class LibraryTabFragment extends TitleContainerFragment {
             LoadUtil.PackageSummaryDownloadTask imageTask
                     = new LoadUtil.PackageSummaryDownloadTask(getContext(), thumnail);
             imageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    PACKAGE_ROOT_URL + mYaml.get(position).get("id") + "/thumbnail.jpg");
-            title.setText((String)mYaml.get(position).get("title"));
-            autor.setText((String)mYaml.get(position).get("author"));
-            //mDetail.setText((String)mYaml.get(position).get("page_count"));
-            pageCount.setText(String.valueOf((int)(mYaml.get(position).get("page_count"))));
-            audioCount.setText(String.valueOf((int)(mYaml.get(position).get("audio_count"))));
+                    PACKAGE_ROOT_URL + yaml.get(position).get("id") + "/thumbnail.jpg");
+            title.setText((String) yaml.get(position).get("title"));
+            autor.setText((String) yaml.get(position).get("author"));
+//            mDetail.setText((String)mYaml.get(position).get("page_count"));
+            pageCount.setText(String.valueOf((int)(yaml.get(position).get("page_count"))));
+            audioCount.setText(String.valueOf((int)(yaml.get(position).get("audio_count"))));
             downloadStatus.setVisibility(
-                    ((boolean)(mYaml.get(position).get("download_status"))) ? View.VISIBLE: View.INVISIBLE);
+                    ((boolean)(yaml.get(position).get("download_status"))) ? View.VISIBLE: View.INVISIBLE);
+            // for canceling override task
             mImageLoadHolder.put(view.hashCode(), imageTask);
+
 
             return view;
         }
@@ -96,7 +99,18 @@ public abstract class LibraryTabFragment extends TitleContainerFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_library_tab, container, false);
-        setAdapter((GridView) v.findViewById(R.id.grid));
+        GridView gridView = v.findViewById(R.id.grid);
+        setAdapter(gridView);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                PackageGridAdapter adapter = (PackageGridAdapter) parent.getAdapter();
+                        Intent intent = new Intent(((Activity) (view.getContext())).getApplication(), LauncherActivity.class);
+                        intent.putExtra("package_id", (String) (adapter.yaml.get(position).get("id")));
+                        view.getContext().startActivity(intent);
+            }
+        });
 
         return v;
     }

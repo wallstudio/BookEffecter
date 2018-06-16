@@ -15,19 +15,26 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light">
+
         <activity android:name=".LibraryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".StandCameraActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_stand_camera"
-            android:screenOrientation="landscape"
+            android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme">
+        </activity>
+
+        <activity android:name=".LauncherActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:label="@string/title_activity_launcher"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

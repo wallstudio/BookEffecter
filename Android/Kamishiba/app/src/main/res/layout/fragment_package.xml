@@ -14,7 +14,7 @@
         android:layout_marginEnd="2dp"
         android:layout_marginStart="2dp"
         android:layout_marginTop="2dp"
-        android:background="?attr/colorPrimary"
+        android:background="?android:attr/colorBackground"
         android:elevation="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

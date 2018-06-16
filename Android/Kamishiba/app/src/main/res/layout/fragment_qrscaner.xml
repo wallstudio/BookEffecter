@@ -28,7 +28,7 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_marginTop="8dp"
-            android:text="@string/hello_blank_fragment"
+            android:text="makimaki"
             android:textAlignment="center"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
