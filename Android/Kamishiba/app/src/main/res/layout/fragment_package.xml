@@ -31,9 +31,12 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:text="TextView"
+            android:ellipsize="end"
+            android:lines="1"
+            android:text="TITLE"
             android:textAlignment="center"
-            android:textSize="18sp"
+            android:textSize="14sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/pack_autor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -45,7 +48,9 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:text="TextView"
+            android:text="AUTHOR"
+            android:ellipsize="end"
+            android:lines="1"
             android:textAlignment="center"
             android:textSize="12sp"
             app:layout_constraintBottom_toTopOf="@+id/pack_audio_count"
@@ -63,10 +68,94 @@
             android:text="TextView"
             android:textAlignment="center"
             android:textSize="14sp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/constraintLayout3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/pack_title"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <wallstudio.work.kamishiba.OutlineTextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="PAGE"
+                android:textAllCaps="true"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <wallstudio.work.kamishiba.OutlineTextView
+                android:id="@+id/pac_pcount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="20"
+                android:textAlignment="center"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/pack_title"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <wallstudio.work.kamishiba.OutlineTextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="AUDIO"
+                android:textAlignment="center"
+                android:textAllCaps="true"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <wallstudio.work.kamishiba.OutlineTextView
+                android:id="@+id/pac_acount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:textAlignment="center"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        </android.support.constraint.ConstraintLayout>
 
     </android.support.constraint.ConstraintLayout>
 
@@ -79,6 +168,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_marginTop="4dp"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -101,6 +191,7 @@
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/download_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"

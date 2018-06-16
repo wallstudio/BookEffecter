@@ -11,16 +11,20 @@ import java.util.List;
 public class LibraryTapAdapter extends FragmentPagerAdapter {
 
     private List<String> tabTitles;
-    private List<Fragment> tabFragments;
+    private List<TitleContainerFragment> tabFragments;
 
     public LibraryTapAdapter(FragmentManager fm) {
         super(fm);
-        tabTitles = Arrays.asList(/*"Favorite",*/ "Local", "Cloud", "QR");
+        tabTitles = Arrays.asList("Local", "Cloud", "QR");
         tabFragments = Arrays.asList(
-                new LibraryTabFragment(),
-                new LibraryTabFragment(),
+                new LoacalLibraryTabFragment(),
+                new CloudLibraryTabFragment(),
                 new QRScanerFragment()
         );
+    }
+
+    public String getTitle(int position){
+        return tabFragments.get(position).getTitle();
     }
 
     @Override

@@ -18,13 +18,18 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import java.util.List;
 
 
-public class QRScanerFragment extends Fragment {
+public class QRScanerFragment extends TitleContainerFragment{
+
+    public static final String TITLE = "ライブラリ ＞ QR読み取り";
 
     private DecoratedBarcodeView mBarcodeView;
 
     // ref. https://qiita.com/sakuna63/items/653452eb48029d53d44f
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+
+        if(isVisibleToUser && getActivity() != null)
+            getActivity().setTitle(TITLE);
 
         if(mBarcodeView != null) {
             if (isVisibleToUser) {
@@ -67,6 +72,11 @@ public class QRScanerFragment extends Fragment {
             public void possibleResultPoints(List<ResultPoint> list) {}
         });
         return v;
+    }
+
+    @Override
+    public String getTitle() {
+        return TITLE;
     }
 
 }

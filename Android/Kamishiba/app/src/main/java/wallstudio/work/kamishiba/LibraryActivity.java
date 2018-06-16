@@ -27,10 +27,14 @@ public class LibraryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_liblary);
 
-        FragmentPagerAdapter fpa = new LibraryTapAdapter(getSupportFragmentManager());
+        LibraryTapAdapter fpa = new LibraryTapAdapter(getSupportFragmentManager());
         ViewPager pager = findViewById(R.id.viewPager);
         pager.setOffscreenPageLimit(fpa.getCount());
         pager.setAdapter(fpa);
+
+        // Welcam Tab
+        pager.setCurrentItem(1, true);
+        setTitle(fpa.getTitle(1));
 
         TabLayout tab = findViewById(R.id.tabLayout);
         tab.setupWithViewPager(pager);
