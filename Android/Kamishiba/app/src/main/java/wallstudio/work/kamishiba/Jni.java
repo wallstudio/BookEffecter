@@ -19,8 +19,8 @@ public class Jni {
         // YUV -> ARGB
         Image.Plane Y_plane = src.getPlanes()[0];
         int Y_rowStride = Y_plane.getRowStride();
-        Image.Plane U_plane = src.getPlanes()[1];
-        Image.Plane V_plane = src.getPlanes()[2];
+        Image.Plane U_plane = src.getPlanes()[2];
+        Image.Plane V_plane = src.getPlanes()[1];
         int imageHeight = src.getHeight();
 
         // Create original bitmap
