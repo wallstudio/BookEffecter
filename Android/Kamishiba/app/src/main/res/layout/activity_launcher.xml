@@ -9,21 +9,65 @@
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout5"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/lnc_book_cover"
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/constraintLayout7"
             android:layout_width="100dp"
             android:layout_height="140dp"
-            android:layout_marginBottom="4dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:background="?android:attr/colorBackground"
-            android:src="@drawable/ic_local_library_black_100dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.25" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/lnc_book_cover"
+                android:layout_width="100dp"
+                android:layout_height="140dp"
+                android:background="?android:attr/colorBackground"
+                android:src="@drawable/ic_local_library_black_100dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/lnc_book_cover"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <wallstudio.work.kamishiba.OutlineTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
+                    android:text="PAGE"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toTopOf="@+id/lnc_page_count"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <wallstudio.work.kamishiba.OutlineTextView
+                    android:id="@+id/lnc_page_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
+                    android:text="-"
+                    android:textAlignment="center"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.constraint.ConstraintLayout>
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraintLayout4"
@@ -34,10 +78,9 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:background="?android:attr/colorBackground"
-            android:elevation="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/lnc_book_cover"
+            app:layout_constraintStart_toEndOf="@+id/constraintLayout7"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -109,20 +152,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView6" />
         </android.support.constraint.ConstraintLayout>
+
     </android.support.constraint.ConstraintLayout>
 
     <ListView
         android:id="@+id/lnc_audio_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:background="?android:attr/colorBackground"
         android:elevation="2dp"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout6"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout5">
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout5"
+        app:layout_constraintVertical_bias="0.0">
 
     </ListView>
 
@@ -131,36 +179,48 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <Button
-            android:id="@+id/lnc_download_btn"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:elevation="2dp"
-            android:text="ダウンロード"
-            android:textAlignment="center"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/lnc_download_btn"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/lnc_remove_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:elevation="2dp"
-            android:text="削除"
-            android:textAlignment="center"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/lnc_download_btn"
-            app:layout_constraintTop_toTopOf="parent" />
+            <Button
+                android:id="@+id/lnc_download_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:elevation="2dp"
+                android:onClick="onClickDownloadOrUpdateButton"
+                android:text="ダウンロード"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/lnc_remove_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:elevation="2dp"
+                android:onClick="onClickRemoveButton"
+                android:text="削除"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/lnc_download_btn"
+                app:layout_constraintTop_toTopOf="parent" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -206,6 +266,64 @@
                 app:srcCompat="@drawable/ic_camera_front_black_24dp" />
         </LinearLayout>
 
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/lnc_dl_popup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_marginStart="24dp"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ProgressBar
+            android:id="@+id/lnc_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="100dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:max="100"
+            android:progress="30"
+            app:layout_constraintEnd_toStartOf="@+id/lnc__progress_cancel"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lnc_progress_text"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:lines="1"
+            android:text="Download (0/20)"
+            android:textAlignment="center"
+            android:textSize="10sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/lnc__progress_cancel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lnc_progress_bar"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <ImageView
+            android:id="@+id/lnc__progress_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_cancel_black_24dp" />
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

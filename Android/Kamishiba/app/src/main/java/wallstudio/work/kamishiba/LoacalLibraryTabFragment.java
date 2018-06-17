@@ -12,7 +12,7 @@ public class LoacalLibraryTabFragment extends LibraryTabFragment{
         // アクセスできないと固まってしまうので…
         LoadUtil.CloudPackageListDownloadTask task
                 = new LoadUtil.CloudPackageListDownloadTask(getContext(), gridView);
-        task.execute(CLOUD_PACKAGE_SUMMARY_LIST_URL);
+        task.execute(getContext().getCacheDir() + LOCAL_PACKAGE_SUMMATY_LIST_DIR);
     }
 
     @Override

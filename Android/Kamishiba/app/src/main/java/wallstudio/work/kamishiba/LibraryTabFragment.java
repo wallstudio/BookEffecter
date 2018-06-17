@@ -23,9 +23,8 @@ import java.util.Map;
 
 public abstract class LibraryTabFragment extends TabFragment {
 
-    public static final String PACKAGE_ROOT_URL = "http://192.168.0.10/smb/kamishiba/package/";
-    public static final String CLOUD_PACKAGE_SUMMARY_LIST_URL = "http://192.168.0.10/smb/kamishiba/packages.yml";
-    public static final String LOCAL_PACKAGE_SUMMATY_LIST_PATH = "local_packages.yml";
+    public static final String CLOUD_PACKAGE_SUMMARY_LIST_PATH = "packages.yml";
+    public static final String LOCAL_PACKAGE_SUMMATY_LIST_DIR = "local_packages.yml";
 
     public static class PackageGridAdapter extends ArrayAdapter<Map> {
 
@@ -78,7 +77,8 @@ public abstract class LibraryTabFragment extends TabFragment {
             LoadUtil.PackageSummaryDownloadTask imageTask
                     = new LoadUtil.PackageSummaryDownloadTask(getContext(), thumnail);
             imageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    PACKAGE_ROOT_URL + yaml.get(position).get("id") + "/thumbnail.jpg");
+                     getContext().getResources().getString(R.string.root_url)
+                             + yaml.get(position).get("id") + "/thumbnail.jpg");
             title.setText((String) yaml.get(position).get("title"));
             autor.setText((String) yaml.get(position).get("author"));
 //            mDetail.setText((String)mYaml.get(position).get("page_count"));

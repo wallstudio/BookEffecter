@@ -11,7 +11,7 @@ public class CloudLibraryTabFragment extends LibraryTabFragment {
         // アクセスできないと固まってしまうので…
         LoadUtil.CloudPackageListDownloadTask task
                 = new LoadUtil.CloudPackageListDownloadTask(getContext(), gridView);
-        task.execute(CLOUD_PACKAGE_SUMMARY_LIST_URL);
+        task.execute(getContext().getResources().getString(R.string.root_url) + CLOUD_PACKAGE_SUMMARY_LIST_PATH);
     }
 
     @Override
