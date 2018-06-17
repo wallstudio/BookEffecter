@@ -30,13 +30,34 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class LoadUtil{
 
-    // InputStream の close() はしない
+    public static final String[] PACKAGE_SUMMARY_ENTRIES = new String[]{
+            "id",
+            "title",
+            "author",
+            "contact",
+            "page_count",
+            "audio_count",
+            "publish_date",
+            "genre",
+            "sexy",
+            "vaiolence",
+            "grotesque",
+            "download_status"
+    };
+
+    // InputStream; close() はしない
+    public static InputStream getStreamFromPath(String path) throws IOException{
+        InputStream stream = new FileInputStream(path);
+        return stream;
+    }
+
     public static InputStream getStreamFromUrl(String url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.setRequestMethod("GET");
@@ -45,62 +66,24 @@ public class LoadUtil{
         return  stream;
     }
 
-    public static InputStream getStreamFromPath(String path) throws IOException{
-        InputStream stream = new FileInputStream(path);
-        return stream;
+    public static void saveStream(InputStream inputStream, String path) throws IOException {
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
+        byte[] bytes = new byte[512];
+        int count = 0;
+        while (0 < (count = bufferedInputStream.read(bytes))){
+            stream.write(bytes, 0, count);
+        }
+        stream.close();
     }
 
+    // Bitmap
     public static Bitmap streamToBitmap(InputStream stream) throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
         Bitmap bitmap = BitmapFactory.decodeStream(stream, null, options);
         if (bitmap == null) throw new IOException("Stream から Bitmap が生成できません");
         return bitmap;
-    }
-
-    public static String streamToString(InputStream is) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line + '\n');
-        }
-        br.close();
-
-        String string = sb.toString();
-        //string = string.substring(0, string.length() - 2);
-
-        return string;
-    }
-
-    public static String getStringFromUrl(String url) throws IOException{
-        InputStream stream = getStreamFromUrl(url);
-        String result = streamToString(stream);
-        stream.close();
-        return  result;
-    }
-
-    public static String getStringFromUrlWithCashe(Context context, String url){
-        InputStream stream;
-        String sha1 = getSha1Hash(url);
-        File file = new File(context.getCacheDir() + "/" + sha1);
-        try {
-            if(!file.exists()){
-                stream = LoadUtil.getStreamFromUrl(url);
-                saveStream(stream, context.getCacheDir() + "/" + sha1);
-                stream.close();
-            }
-            stream = getStreamFromPath(context.getCacheDir() + "/" + sha1);
-            String string = LoadUtil.streamToString(stream);
-            stream.close();
-            return string;
-        } catch (IOException e) {
-            if(file.exists()){
-                file.delete();
-            }
-        }
-        return "";
     }
 
     public static Bitmap getBitmapFromUrl(String url) throws  IOException{
@@ -132,49 +115,149 @@ public class LoadUtil{
         return null;
     }
 
-    public static void saveStream(InputStream inputStream, String path) throws IOException {
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
-        byte[] bytes = new byte[512];
-        int count = 0;
-        while (0 < (count = bufferedInputStream.read(bytes))){
-            stream.write(bytes, 0, count);
-        }
-        stream.close();
-    }
-
-    public static void saveStream(InputStream inputStream, String path, boolean isExternal) throws IOException {
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
-        byte[] bytes = new byte[512];
-        int count = 0;
-        while (0 < (count = bufferedInputStream.read(bytes))){
-            stream.write(bytes, 0, count);
-        }
-        stream.close();
-    }
-
     public static void saveBitmap(Bitmap bitmap, String path, boolean isExternal) throws IOException {
         BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
         stream.close();
     }
 
-    public static void saveString(String string, String path, boolean isExternal) throws IOException {
+    // String
+    public static String streamToString(InputStream is) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + '\n');
+        }
+        br.close();
+
+        String string = sb.toString();
+        //string = string.substring(0, string.length() - 2);
+
+        return string;
+    }
+
+    public static String getStringFromPath(String path) throws IOException{
+        InputStream stream = getStreamFromPath(path);
+        String result = streamToString(stream);
+        stream.close();
+        return  result;
+    }
+
+    public static String getStringFromUrl(String url) throws IOException{
+        InputStream stream = getStreamFromUrl(url);
+        String result = streamToString(stream);
+        stream.close();
+        return  result;
+    }
+
+    public static String getStringFromUrlWithCashe(Context context, String url){
+        InputStream stream;
+        String sha1 = getSha1Hash(url);
+        File file = new File(context.getCacheDir() + "/" + sha1);
+        try {
+            if(!file.exists()){
+                stream = LoadUtil.getStreamFromUrl(url);
+                saveStream(stream, context.getCacheDir() + "/" + sha1);
+                stream.close();
+            }
+            stream = getStreamFromPath(context.getCacheDir() + "/" + sha1);
+            String string = LoadUtil.streamToString(stream);
+            stream.close();
+            return string;
+        } catch (IOException e) {
+            if(file.exists()){
+                file.delete();
+            }
+        }
+        return "";
+    }
+
+    public static void saveString(String string, String path) throws IOException {
         BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
         stream.write(string.getBytes());
         stream.close();
     }
 
-    public static String getDataDirPath(Context context, boolean isExternal){
-        // ref. https://qiita.com/flat-8-kiki/items/dd3dfdd49e4ee967d8f7#android
-        String strageState = Environment.getExternalStorageState();
-        if(isExternal && strageState.equals(Environment.MEDIA_MOUNTED))
-            return context.getExternalFilesDir(null).getPath();
-        else
-            return context.getFilesDir().getPath();
+    // YAML
+    public static Object getYamlFromPath(String path) throws IOException {
+        String yamlString = getStringFromPath(path);
+        Yaml yaml = new Yaml();
+        Object map = yaml.load(yamlString);
+        return map;
     }
 
+    public static Object getYamlFromUrl(String url) throws IOException {
+        String yamlString = getStringFromUrl(url);
+        Yaml yaml = new Yaml();
+        Object map = yaml.load(yamlString);
+        return map;
+    }
+
+    public static void saveSummariesYaml(List<Map> summaries, String path, boolean isAppend) throws IOException {
+        if(summaries == null) return;
+
+        StringBuilder builder = new StringBuilder();
+        if(new File(path).exists()) {
+            if (isAppend) {
+                InputStream stream = getStreamFromPath(path);
+                String preFile = streamToString(stream);
+                stream.close();
+                builder.append(preFile);
+            }
+            new File(path).delete();
+        }
+
+        for(Map s : summaries){
+            builder.append(summaryYamlToString(s));
+        }
+
+        saveString(builder.toString(), path);
+    }
+
+    // YAML Util
+    public static String summaryYamlToString(Map summary) throws IOException {
+        if(summary == null) return "";
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("\n-\n");
+        for (String key : PACKAGE_SUMMARY_ENTRIES){
+            builder.append(String.format("    %s: %s\n", key, summary.get(key)));
+        }
+        return builder.toString();
+    }
+
+    public static Map getSummaryYamlInList(List<Map> list, String id){
+        if (list == null)
+            return  null;
+
+        for (Map m : list){
+            String id2 = (String)m.get("id");
+            if(id.equals(id2)){
+                return m;
+            }
+        }
+        return  null;
+    }
+
+    public static void summaryDownloadCheck(List<Map> clouds, List<Map> locals){
+        if(clouds == null || locals == null)
+            return;
+
+        for (Map cloud : clouds){
+            String cId = (String) cloud.get("id");
+            for(Map local : locals){
+                String lId = (String) local.get("id");
+
+                if(cId.equals(lId)){
+                    cloud.put("download_status", true);
+                }
+            }
+        }
+    }
+
+    // Util
     public static String getSha1Hash(String plain){
         String cypher = "";
         try {
@@ -196,6 +279,20 @@ public class LoadUtil{
         return  builder.substring(0, builder.length() - separator.length());
     }
 
+    public static String getLocalPackageSummaryListPath(Context context){
+        return context.getFilesDir() + "/" + TabFragment.LOCAL_PACKAGE_SUMMATY_LIST_PATH;
+    }
+
+    public static String getCloudPackageSummaryListUrl(Context context){
+        return context.getResources().getString(R.string.root_url)
+                + TabFragment.CLOUD_PACKAGE_SUMMARY_LIST_PATH;
+    }
+
+    public static String getPackagePath(Context context, String id){
+        return context.getFilesDir().getPath() + "/" + id + "/";
+    }
+
+    // Task
     public static class PackageSummaryDownloadTask extends AsyncTask<String, Double, Bitmap>{
 
         private Context mContext;
@@ -235,16 +332,18 @@ public class LoadUtil{
 
         @Override
         protected List<Map> doInBackground(String... param) {
-            List<Map> pacs = new ArrayList<>();
+            List<Map> cloucSummaries = null;
             try {
-                String url = param[0];
-                String result = getStringFromUrl(url);
-                result = result.trim();
-                Yaml yaml = new Yaml();
-                pacs = yaml.load(result);
+                String cloudUrl = param[0];
+                String localPath = getLocalPackageSummaryListPath(mContext);
+                cloucSummaries = (List<Map>) getYamlFromUrl(cloudUrl);
+                List<Map> localSummaries = (List<Map>) getYamlFromPath(localPath);
+                summaryDownloadCheck(cloucSummaries, localSummaries);
             } catch (IOException e){
             }
-            return pacs;
+
+            if(cloucSummaries == null) cloucSummaries = new ArrayList<>();
+            return cloucSummaries;
         }
 
         @Override
@@ -253,6 +352,26 @@ public class LoadUtil{
                     = new LibraryTabFragment.PackageGridAdapter(
                             mContext, R.layout.fragment_package, pacs);
             mGridView.setAdapter(pga);
+        }
+    }
+
+    public static class LocalPackageListLoadTask extends CloudPackageListDownloadTask{
+
+        public LocalPackageListLoadTask(Context context, GridView grid) {
+            super(context, grid);
+        }
+
+        @Override
+        protected List<Map> doInBackground(String... param) {
+            List<Map> pacs = new ArrayList<>();
+            try {
+                String path = param[0];
+                pacs = (List<Map>) getYamlFromPath(path);
+            } catch (IOException e){
+            }
+
+            if(pacs == null) pacs = new ArrayList<>();
+            return pacs;
         }
     }
 
@@ -271,6 +390,7 @@ public class LoadUtil{
         private TextView mTags;
         private TextView mDescription;
         private TextView mPageCount;
+        private List<Map> mAudios;
 
         public PackageDetailDownloadTask(LauncherActivity context, ListView list, ImageView cover,
                  TextView title, TextView author, TextView tags, TextView description, TextView pageCount){
@@ -291,43 +411,37 @@ public class LoadUtil{
             String url = strings[0];
             String coverUrl = strings[1];
             String yamlString = null;
-            try {
-                yamlString = getStringFromUrl(url);
-                Yaml yaml = new Yaml();
-                result.map = yaml.load(yamlString);
-            } catch (IOException e) { }
+            yamlString = getStringFromUrlWithCashe(mContext, url);
+            Yaml yaml = new Yaml();
+            result.map = yaml.load(yamlString);
             result.bitmap = getBitmapFromUrlWithCache(mContext, coverUrl);
             return  result;
         }
 
         @Override
         protected void onPostExecute(MapBitmapPair pac){
-            mContext.yaml = pac.map;
-
-            List<Map> audios = new ArrayList<>();
             if(pac.map != null){
                 try {
+                    mContext.yaml = pac.map;
+
                     mTitle.setText((String) pac.map.get("title"));
                     mAuthor.setText((String) pac.map.get("author"));
                     mTags.setText(join((List<String>) pac.map.get("genre"), ", "));
                     mDescription.setText((String) pac.map.get("description"));
                     mPageCount.setText(String.valueOf((int) pac.map.get("page_count")));
-                    audios = (List<Map>) pac.map.get("audio");
+                    mAudios = (List<Map>) pac.map.get("audio");
                 }catch (NullPointerException e){ }
             }
-            if(pac.bitmap != null){
-                mCover.setImageBitmap(pac.bitmap);
-            }
-
-            LauncherActivity.AudioAdapter aa
+            if(pac.bitmap != null) mCover.setImageBitmap(pac.bitmap);
+            if(mAudios == null) mAudios = new ArrayList<>();
+            LauncherActivity.AudioAdapter adapter
                     = new LauncherActivity.AudioAdapter(
-                    mContext, R.layout.fragment_audio, audios);
-            mList.setAdapter(aa);
+                    mContext, R.layout.fragment_audio, mAudios);
+            mList.setAdapter(adapter);
         }
     }
 
     public static class PackageDataDownloadTask extends AsyncTask<PackageDataDownloadTask.UrlAndCounts, Double, Void>{
-
 
         public static class UrlAndCounts{
             public String url;
@@ -341,16 +455,26 @@ public class LoadUtil{
             }
         }
 
+        public  static List<String> singleTaskEachPackage = new ArrayList<>();
         private LauncherActivity mContext;
         private ProgressBar mProgressBar;
         private ViewGroup mPopup;
         private TextView mProgressText;
+        private String mPackageId;
 
-        public PackageDataDownloadTask(LauncherActivity context, ViewGroup popup, ProgressBar progressBar, TextView progressText){
+        public PackageDataDownloadTask(LauncherActivity context, ViewGroup popup,
+                                       ProgressBar progressBar, TextView progressText,
+                                       String id) throws Exception {
+            mPackageId = id;
+            if(singleTaskEachPackage.contains(mPackageId))
+                throw new Exception("Already running task " + mPackageId);
+            else
+                singleTaskEachPackage.add(mPackageId);
             mContext = context;
             mPopup = popup;
             mProgressBar = progressBar;
             mProgressText = progressText;
+
         }
 
         @Override
@@ -364,15 +488,84 @@ public class LoadUtil{
             String url = urlAndCounts[0].url;
             int imageCount = urlAndCounts[0].imageCount;
             int audioCount = urlAndCounts[0].audioCount;
-            for (int i=0;i< 10;i++){
-                try {
-                    Thread.sleep(1000);
-                    publishProgress(i/10.0, (double)i, (double)imageCount + audioCount);
-                } catch (InterruptedException e) { }
+
+            int totalCount = imageCount + audioCount + 2;
+            int progressCount = 1;
+
+            // Storage prepare
+            String saveDirPath = getPackagePath(mContext, mPackageId);
+            String saveImageDirPath = saveDirPath + "set/";
+            String saveAudioDirPath = saveDirPath + "audio/";
+            File saveDir = new File(saveDirPath);
+            File saveImageDir = new File(saveImageDirPath);
+            File saveAudioDir = new File(saveAudioDirPath);
+            if(!saveDir.exists()) saveDir.mkdirs();
+            if(!saveImageDir.exists()) saveImageDir.mkdirs();
+            if(!saveAudioDir.exists()) saveAudioDir.mkdirs();
+
+            if(isCancelled()) return null;
+            publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
+
+            try {
+                // Download YAML
+                InputStream stream = getStreamFromUrl(url + "detail.yml");
+                saveStream(stream, saveDirPath + "detail.yml");
+                stream.close();
+                progressCount++;
+
+                if(isCancelled()) return null;
+                publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
+
+                // Download image set
+                for (int i = 0; i < imageCount; i++){
+                    String fileNeme =  i + ".jpg";
+                    InputStream imageStream = getStreamFromUrl(url + "set/" + fileNeme);
+                    saveStream(imageStream, saveImageDirPath + fileNeme);
+                    imageStream.close();
+                    progressCount++;
+
+
+                    if(isCancelled()) return null;
+                    publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
+                }
+
+                // Download audios
+                for (int i = 0; i < audioCount; i++){
+                    String fileName = i + ".mp3";
+                    InputStream audioStream = getStreamFromUrl(url + "audio/" + fileName);
+                    saveStream(audioStream, saveAudioDirPath + fileName);
+                    audioStream.close();
+                    progressCount++;
+
+                    if(isCancelled()) return null;
+                    publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
+                }
+
+                // Download summary
+                String cloudUrl = getCloudPackageSummaryListUrl(mContext);
+                String localPath = getLocalPackageSummaryListPath(mContext);
+                List<Map> cloudSummaries = (List<Map>) getYamlFromUrl(cloudUrl);
+                Map cloudSummary = getSummaryYamlInList(cloudSummaries, mPackageId);
+                cloudSummary.put("download_status", true);
+                Map localSummary = null;
+                if(new File(localPath).exists()) {
+                    List<Map> localSummaries = (List<Map>) getYamlFromPath(localPath);
+                    localSummary = getSummaryYamlInList(localSummaries, mPackageId);
+                }
+                if(localSummary == null)
+                    saveSummariesYaml(Arrays.asList(cloudSummary), localPath, true);
+
+            } catch (IOException e) {
+                cancel(true);
+                return null;
             }
 
-            publishProgress((double)1, (double)imageCount + audioCount, (double)imageCount + audioCount);
+            // 0.5s 待たせて終わった感を出す
+            if(isCancelled()) return null;
+            publishProgress((double)1, (double)totalCount, (double)totalCount);
+
             try{ Thread.sleep(500); }catch (InterruptedException e){ }
+
             return null;
         }
 
@@ -388,12 +581,18 @@ public class LoadUtil{
         @Override
         protected void onPostExecute(Void dummy){
             mPopup.setVisibility(View.INVISIBLE);
+            mContext.setIsDownloaded(true);
+            singleTaskEachPackage.remove(mPackageId);
             Toast.makeText(mContext, "Download completed!", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         protected void onCancelled(){
             mPopup.setVisibility(View.INVISIBLE);
+            mContext.setIsDownloaded(false);
+            singleTaskEachPackage.remove(mPackageId);
+            mContext.removeSummary(mPackageId);
+            mContext.removeDirectory(getPackagePath(mContext, mPackageId));
             Toast.makeText(mContext, "Cancelled", Toast.LENGTH_LONG).show();
         }
     }

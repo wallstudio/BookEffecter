@@ -12,7 +12,9 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 
 public class QRScanerFragment extends TabFragment {
@@ -73,7 +75,16 @@ public class QRScanerFragment extends TabFragment {
                 if(!decoded) {
                     decoded = true;
                     String input = barcodeResult.getText().trim();
-                    startLauncher(input);
+                    boolean downloadStatus = false;
+                    String localPath = LoadUtil.getLocalPackageSummaryListPath(getContext());
+                    try {
+                        List<Map> localSummaries = (List<Map>) LoadUtil.getYamlFromPath(localPath);
+                        Map localSummary = LoadUtil.getSummaryYamlInList(localSummaries, input);
+                        if(localSummary != null) downloadStatus = true;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    startLauncher(input, downloadStatus);
                 }
             }
             @Override

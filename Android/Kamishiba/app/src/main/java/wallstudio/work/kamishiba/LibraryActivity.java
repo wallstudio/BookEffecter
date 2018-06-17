@@ -13,6 +13,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.io.IOException;
+
 public class LibraryActivity extends AppCompatActivity {
 
     public static final int[] TAB_ICONS = {
@@ -72,6 +74,13 @@ public class LibraryActivity extends AppCompatActivity {
                 break;
             case R.id.donate:
                 Log.d("MENU", "Donate");
+                String path = getFilesDir() + "/" + TabFragment.LOCAL_PACKAGE_SUMMATY_LIST_PATH;
+                Log.d("DEB", path);
+                try {
+                    Log.d("DEB", LoadUtil.getStringFromPath(path));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 break;
             default:
                 Log.d("MENU", "Invalid");

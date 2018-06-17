@@ -1,7 +1,6 @@
 package wallstudio.work.kamishiba;
 
 import android.widget.GridView;
-import android.support.v4.app.Fragment;
 
 public class LoacalLibraryTabFragment extends LibraryTabFragment{
 
@@ -10,9 +9,9 @@ public class LoacalLibraryTabFragment extends LibraryTabFragment{
     @Override
     protected void setAdapter(GridView gridView) {
         // アクセスできないと固まってしまうので…
-        LoadUtil.CloudPackageListDownloadTask task
-                = new LoadUtil.CloudPackageListDownloadTask(getContext(), gridView);
-        task.execute(getContext().getCacheDir() + LOCAL_PACKAGE_SUMMATY_LIST_DIR);
+        LoadUtil.LocalPackageListLoadTask task
+                = new LoadUtil.LocalPackageListLoadTask(getContext(), gridView);
+        task.execute(getContext().getFilesDir() + "/" + LOCAL_PACKAGE_SUMMATY_LIST_PATH);
     }
 
     @Override

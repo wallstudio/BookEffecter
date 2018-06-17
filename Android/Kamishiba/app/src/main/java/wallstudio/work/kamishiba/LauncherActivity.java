@@ -18,7 +18,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -28,25 +31,27 @@ public class LauncherActivity extends AppCompatActivity {
     public static final String PACKAGE_DETAIL_PATH = "detail.yml";
     public static final String COVER_PATH = "cover.jpg";
 
+    public Map yaml;
+    
     private String packageId;
     private Switch mCameraSwitch;
     private Button mDownloadOrUpdate;
     private Button mRemove;
     private ListView mListView;
-    public Map yaml;
-    public boolean isDownloaded = false;
-    public boolean isUpdateable = false;
+    private boolean mIsDownloaded = false;
+    private boolean mIsUpdateable = false;
 
     private AdapterView.OnItemClickListener mOnItemClickListener =  new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             boolean isFront = mCameraSwitch.isChecked();
-            Intent intent = new Intent();
-            intent.putExtra("is_front",isFront);
+            Intent intent = new Intent(getApplication(), isFront ? StandCameraActivity.class : HandedActivity.class);
             intent.putExtra("audio_index", position);
             intent.putExtra("package", packageId);
-            Log.d("StartCamera", "is_front=" + isFront + ", audio_index=" + position + ", package=" + packageId);
-            //startActivity(intent);
+            Log.d("StartCamera", String.format(
+                    "is_front=%s, audio_index=%s, package=%s",
+                    isFront, position, packageId));
+            startActivity(intent);
         }
     };
 
@@ -56,12 +61,22 @@ public class LauncherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launcher);
 
         packageId = getIntent().getStringExtra("package_id");
+        mIsDownloaded = getIntent().getBooleanExtra("download_status", false);
         setTitle(packageId);
         setPackageInfo();
 
         mDownloadOrUpdate = findViewById(R.id.lnc_download_btn);
         mRemove = findViewById(R.id.lnc_remove_btn);
-        setUIStatus();
+        refleshUIStatus();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mTask != null && !mTask.isCancelled()){
+            mTask.cancel(true);
+            mTask = null;
+        }
     }
 
     private void setPackageInfo(){
@@ -82,18 +97,31 @@ public class LauncherActivity extends AppCompatActivity {
         mCameraSwitch = findViewById(R.id.lnc_camera_dirction_switch);
     }
 
-    public void setUIStatus(){
-        if(!isDownloaded){
+    public void setIsDownloaded(boolean isDownloaded){
+        this.mIsDownloaded = isDownloaded;
+        refleshUIStatus();
+    }
+
+    public void setIsUpdateable(boolean isUpdateable){
+        this.mIsUpdateable = isUpdateable;
+        refleshUIStatus();
+    }
+
+    public void refleshUIStatus(){
+        if(!mIsDownloaded){
             mDownloadOrUpdate.setVisibility(View.VISIBLE);
             mDownloadOrUpdate.setText("ダウンロード");
+            mListView.setAlpha(0.3f);
             mRemove.setVisibility(View.GONE);
             mListView.setOnItemClickListener(null);
-        }else if(isDownloaded && !isUpdateable){
+        }else if(mIsDownloaded && !mIsUpdateable){
             mDownloadOrUpdate.setVisibility(View.GONE);
+            mListView.setAlpha(1.0f);
             mRemove.setVisibility(View.VISIBLE);
             mListView.setOnItemClickListener(mOnItemClickListener);
         }else {
             mDownloadOrUpdate.setVisibility(View.VISIBLE);
+            mListView.setAlpha(1.0f);
             mDownloadOrUpdate.setText("更新");
             mRemove.setVisibility(View.VISIBLE);
             mListView.setOnItemClickListener(mOnItemClickListener);
@@ -105,29 +133,67 @@ public class LauncherActivity extends AppCompatActivity {
     public void onClickDownloadOrUpdateButton(View view){
         Log.d("Launcher", "DOWNLOAD " + packageId);
         if(yaml != null) {
-            String url = "";
-            int imageCount = (int) yaml.get("page_count");
-            int audioCount = (int) yaml.get("audio_count");
-            mTask = new LoadUtil.PackageDataDownloadTask(this,
-                    (ViewGroup) findViewById(R.id.lnc_dl_popup),
-                    (ProgressBar) findViewById(R.id.lnc_progress_bar),
-                    (TextView) findViewById(R.id.lnc_progress_text));
-            mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                    new LoadUtil.PackageDataDownloadTask.UrlAndCounts(url, imageCount, audioCount));
+            try {
+                String url = getResources().getString(R.string.root_url) + packageId + "/";
+                int imageCount = (int) yaml.get("page_count");
+                int audioCount = (int) yaml.get("audio_count");
+                mTask = new LoadUtil.PackageDataDownloadTask(this,
+                        (ViewGroup) findViewById(R.id.lnc_dl_popup),
+                        (ProgressBar) findViewById(R.id.lnc_progress_bar),
+                        (TextView) findViewById(R.id.lnc_progress_text), packageId);
+                mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        new LoadUtil.PackageDataDownloadTask.UrlAndCounts(url, imageCount, audioCount));
+            } catch (Exception e) {
+                Log.e("ERROR", e.getMessage());
+            }
         }
     }
 
     public void onClickCancelButton(View view){
         Log.d("Launcher", "CANCEL " + packageId);
-        if(mTask != null && mTask.isCancelled()){
+        if(mTask != null && !mTask.isCancelled()){
             mTask.cancel(true);
+            mTask = null;
         }
     }
 
     public void onClickRemoveButton(View view){
+        removeSummary(packageId);
+        removeDirectory(this.getFilesDir().getPath() + "/" + packageId);
+        setIsDownloaded(false);
+        Toast.makeText(this, "Deleted " + packageId, Toast.LENGTH_SHORT).show();
         Log.d("Launcher", "DELETE " + packageId);
     }
 
+    public void removeSummary(String id){
+        try {
+            String localPath = getFilesDir() + "/" + TabFragment.LOCAL_PACKAGE_SUMMATY_LIST_PATH;
+            List<Map> list = (List<Map>) LoadUtil.getYamlFromPath(localPath);
+            if(list != null) {
+                Map removee = LoadUtil.getSummaryYamlInList(list, id);
+                list.remove(removee);
+                LoadUtil.saveSummariesYaml(list, localPath, false);
+            }
+            Log.d("REMOVE", id + " in " + localPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeDirectory(String path){
+        File file = new File(path);
+        if(file.exists()){
+            if(file.isDirectory()){
+                String[] subfiles = file.list();
+                for(String f : subfiles)
+                    removeDirectory(file.getPath() + "/" + f);
+            }else if(file.isFile()){
+                file.delete();
+                Log.d("DELETE", file.getPath());
+            }else
+                throw new RuntimeException("Invalid file type");
+        }
+    }
 
     public static class AudioAdapter extends ArrayAdapter<Map> {
 

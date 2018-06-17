@@ -35,6 +35,7 @@
         tools:context=".StandCameraActivity_">
 
         <FrameLayout
+            android:id="@+id/frameLayout2"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginEnd="8dp"
@@ -59,7 +60,7 @@
             <wallstudio.work.kamishiba.PerspectiveController
                 android:id="@+id/controller_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
 
         </FrameLayout>
 
@@ -99,14 +100,14 @@
             android:shadowDx="2"
             android:shadowDy="2"
             android:shadowRadius="8"
-            android:text="タイトル"
+            android:text="-"
             android:textAlignment="viewStart"
             android:textColor="@android:color/white"
             android:textSize="30sp"
             app:layout_constraintBottom_toTopOf="@+id/authorLabelView"
             app:layout_constraintEnd_toStartOf="@+id/pageLabelView"
             app:layout_constraintStart_toEndOf="@+id/coverView"
-            app:layout_constraintTop_toBottomOf="@+id/controller_view"
+            app:layout_constraintTop_toBottomOf="@+id/frameLayout2"
             app:layout_constraintVertical_bias="1.0" />
 
         <TextView
@@ -120,7 +121,7 @@
             android:shadowDx="2"
             android:shadowDy="2"
             android:shadowRadius="8"
-            android:text="作成者"
+            android:text="-"
             android:textAlignment="textStart"
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -135,17 +136,18 @@
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
             android:layout_weight="1"
+            android:gravity="center"
             android:shadowColor="@android:color/black"
             android:shadowDx="2"
             android:shadowDy="2"
             android:shadowRadius="8"
-            android:text="8/21p"
+            android:text="-/-p"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="36sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
-            app:layout_constraintTop_toBottomOf="@+id/controller_view" />
+            app:layout_constraintTop_toBottomOf="@+id/frameLayout2" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraintLayout"
@@ -243,7 +245,7 @@
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_weight="1"
-                android:scaleType="centerInside"
+                android:scaleType="fitCenter"
                 android:src="@drawable/td7"
                 app:buffer_height="360px"
                 app:buffer_width="360px"

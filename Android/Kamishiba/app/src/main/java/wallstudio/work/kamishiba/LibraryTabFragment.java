@@ -23,9 +23,6 @@ import java.util.Map;
 
 public abstract class LibraryTabFragment extends TabFragment {
 
-    public static final String CLOUD_PACKAGE_SUMMARY_LIST_PATH = "packages.yml";
-    public static final String LOCAL_PACKAGE_SUMMATY_LIST_DIR = "local_packages.yml";
-
     public static class PackageGridAdapter extends ArrayAdapter<Map> {
 
         private Context mContext;
@@ -67,9 +64,9 @@ public abstract class LibraryTabFragment extends TabFragment {
             if(preImage != null && preImage instanceof BitmapDrawable)
                 ((BitmapDrawable) preImage).getBitmap().recycle();
             thumnail.setImageResource(R.drawable.ic_local_library_black_100dp);
-            title.setText("TITLE");
-            autor.setText("AUTHOR");
-            detail.setText("DETAIL");
+            title.setText("-");
+            autor.setText("-");
+            detail.setText("-");
             pageCount.setText("-");
             audioCount.setText("-");
             downloadStatus.setVisibility(View.INVISIBLE);
@@ -94,22 +91,30 @@ public abstract class LibraryTabFragment extends TabFragment {
         }
     }
 
+    GridView mGrid;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_library_tab, container, false);
-        GridView gridView = v.findViewById(R.id.grid);
-        setAdapter(gridView);
+        mGrid = v.findViewById(R.id.grid);
+        setAdapter(mGrid);
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PackageGridAdapter adapter = (PackageGridAdapter) parent.getAdapter();
                 String pacId = (String) adapter.yaml.get(position).get("id");
-                startLauncher(pacId);
+                startLauncher(pacId, (boolean)adapter.yaml.get(position).get("download_status"));
             }
         });
 
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setAdapter(mGrid);
     }
 
     protected abstract void setAdapter(GridView gridView);

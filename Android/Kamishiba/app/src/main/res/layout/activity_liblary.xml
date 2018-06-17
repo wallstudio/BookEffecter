@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:icon="@drawable/ic_sd_card_black_24dp"
-            android:text="ライブラリ" />
+            android:text="ローカル" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tab2"
