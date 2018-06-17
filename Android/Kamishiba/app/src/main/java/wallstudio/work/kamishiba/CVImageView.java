@@ -3,11 +3,14 @@ package wallstudio.work.kamishiba;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -25,10 +28,9 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
     public int bufferWidth = 0;
     public int bufferHeight = 0;
 
-    private Bitmap mBitmapBuffer;
+    protected Bitmap mBitmapBuffer;
     protected Mat mMatBuffer;
 
-    private ConvertTask mTask;
 
     public CVImageView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -40,40 +42,16 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
     }
 
 
-    public final void convertAsync(final Mat frame, final Point vanishingRatio, final double pageEdgeY){
-        mTask = new ConvertTask();
-        mTask.execute(frame, vanishingRatio, pageEdgeY);
+    public void convert(final Mat frame, final Point vanishingRatio, final double pageEdgeY) {
+        mMatBuffer = frame.clone();
+        process(mMatBuffer, vanishingRatio, pageEdgeY);
+        if(mBitmapBuffer.getWidth() != mMatBuffer.width() || mBitmapBuffer.getHeight() != mMatBuffer.height())
+            Imgproc.resize(mMatBuffer, mMatBuffer, new Size(mBitmapBuffer.getWidth(), mBitmapBuffer.getHeight()));
+        Utils.matToBitmap(mMatBuffer, mBitmapBuffer, false);
+        setImageBitmap(mBitmapBuffer);
     }
-
-    public final Return waitAndSetBufferBitmap(){
-        try {
-            Return r = mTask.get();
-            if(mBitmapBuffer.getWidth() != mMatBuffer.width() || mBitmapBuffer.getHeight() != mMatBuffer.height())
-                Imgproc.resize(mMatBuffer, mMatBuffer, new Size(mBitmapBuffer.getWidth(), mBitmapBuffer.getHeight()));
-            Utils.matToBitmap(mMatBuffer, mBitmapBuffer, false);
-            setImageBitmap(mBitmapBuffer);
-            return r;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        //mMatBuffer.release();
-        return null;
-    }
-
 
     protected abstract Return process(final Mat frame, final Point vanishingRatio, final double pageEdgeY);
-
-    private final class ConvertTask extends  AsyncTask<Object, Void, Return>{
-        @Override
-        protected Return doInBackground(final Object... params) {
-            mMatBuffer = ((Mat) params[0]).clone();
-            Return r = process(mMatBuffer, (Point) params[1], (double)params[2]);
-            return r;
-        }
-    }
-
 
     private void initBitmap(Context context, AttributeSet attrs){
         // ref. https://qiita.com/Hoshi_7/items/57c3a79c43efe05b5368

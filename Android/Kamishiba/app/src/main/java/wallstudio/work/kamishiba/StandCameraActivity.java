@@ -22,6 +22,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -49,8 +50,8 @@ import java.util.Map;
 
 public class StandCameraActivity extends Activity {
 
-    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
-//    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
+    //    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
+    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
     public static final int CAMERA_SIDE = CameraCharacteristics.LENS_FACING_BACK;
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
 
@@ -193,17 +194,15 @@ public class StandCameraActivity extends Activity {
             }
 
             // Multi thread
-            mBackground.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
-            mInputPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
-            //mMatchPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
-
-            mBackground.waitAndSetBufferBitmap();
-            mInputPreviewView.waitAndSetBufferBitmap();
-            //mMatchPreviewView.waitAndSetBufferBitmap();
+            mBackground.convert(original, mController.vanishingRatio, mController.pageEdgeY);
+            mInputPreviewView.convert(original, mController.vanishingRatio, mController.pageEdgeY);
+            if(mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED)
+                mMatchPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
 
             original.release();
-        }
 
+//            System.gc();
+        }
     };
 
 
