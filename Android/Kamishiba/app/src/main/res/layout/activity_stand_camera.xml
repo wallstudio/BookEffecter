@@ -23,8 +23,8 @@
         android:alpha="0.5"
         android:scaleType="fitXY"
         android:src="@android:color/black"
-        app:buffer_width="800px"
-        app:buffer_height="480px"/>
+        app:buffer_height="30px"
+        app:buffer_width="50px" />
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"

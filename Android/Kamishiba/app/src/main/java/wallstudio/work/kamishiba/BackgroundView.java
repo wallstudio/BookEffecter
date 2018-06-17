@@ -12,7 +12,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class BackgroundView extends CVImageView<Void> {
 
-    public static final int BACKGROUND_BITMAP_BLUR_KERNAL = 15;
+    public static final int BACKGROUND_BITMAP_BLUR_KERNAL = 5;
 
     public BackgroundView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
