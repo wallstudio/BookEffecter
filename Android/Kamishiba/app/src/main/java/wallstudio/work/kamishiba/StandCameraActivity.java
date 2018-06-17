@@ -90,7 +90,7 @@ public class StandCameraActivity extends Activity {
                 openCamera();
                 configureTransform(mDebugPreview, width, height);
             } catch (CameraAccessException ca) {
-                alert("エラー", "カメラアクセスエラー\n\n" + ca.toString(), true);
+                Toast.makeText(StandCameraActivity.this, "Camera access error", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -134,10 +134,14 @@ public class StandCameraActivity extends Activity {
         }
 
         @Override
-        public void onDisconnected(@NonNull CameraDevice cameraDevice) { alert("エラー","カメラの接続が切れました (onDisconnected)", true); }
+        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+            Toast.makeText(StandCameraActivity.this,"Camera disconnected (onDisconnected)", Toast.LENGTH_SHORT).show();
+        }
 
         @Override
-        public void onError(@NonNull CameraDevice cameraDevice, int i) { alert("エラー","カメラの接続が切れました (onError)", true); }
+        public void onError(@NonNull CameraDevice cameraDevice, int i) {
+            Toast.makeText(StandCameraActivity.this,"Camera disconnected (onError)", Toast.LENGTH_SHORT).show();
+        }
     };
     // Capture setting
     private CameraCaptureSession.StateCallback mCaptureSettingCallback = new CameraCaptureSession.StateCallback() {
@@ -157,12 +161,12 @@ public class StandCameraActivity extends Activity {
         }
 
         @Override
-        public void onReady(CameraCaptureSession session){
-
-        }
+        public void onReady(CameraCaptureSession session){ }
 
         @Override
-        public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) { alert("エラー","カメラの接続が切れました (onConfigureFailed)", true); }
+        public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+            Toast.makeText(StandCameraActivity.this,"Camera disconnected (onConfigureFailed)", Toast.LENGTH_SHORT).show();
+        }
     };
     // Processing setting
     private ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
@@ -191,11 +195,11 @@ public class StandCameraActivity extends Activity {
             // Multi thread
             mBackground.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
             mInputPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
-            mMatchPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
+            //mMatchPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
 
             mBackground.waitAndSetBufferBitmap();
             mInputPreviewView.waitAndSetBufferBitmap();
-            mMatchPreviewView.waitAndSetBufferBitmap();
+            //mMatchPreviewView.waitAndSetBufferBitmap();
 
             original.release();
         }
@@ -292,7 +296,7 @@ public class StandCameraActivity extends Activity {
             // Detaile config (buffers and displays)
             mCameraManager.openCamera(mCameraID, mDeviceSettingCallback, null);
         }else{
-            alert("エラー", "カメラが認識できません", true);
+            Toast.makeText(this, "Cannot recognaize camera", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -338,29 +342,9 @@ public class StandCameraActivity extends Activity {
             }
             return new Point(Math.round(betterSupport.getWidth()), Math.round(betterSupport.getHeight()));
         }else {
-            alert("ERROR", "This isn't supported camera.", true);
+           Toast.makeText(this, "This isn't supported camera.", Toast.LENGTH_SHORT).show();
             return new Point();
         }
-    }
-
-    private void alert(String title, String message, boolean isExit){
-
-        DialogInterface.OnClickListener listener = null;
-        if(isExit){
-            listener = new DialogInterface.OnClickListener(){
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            };
-        }
-
-        Log.d("Alert", "[" + title + "] " + message);
-        new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", listener)
-                .show();
     }
 
     private void setDisplayDebugMessage(String key, String message){

@@ -83,14 +83,6 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
         mBitmapBuffer =  Bitmap.createBitmap(bufferWidth, bufferHeight, BUFFER_BITMAP_FORMAT);
     }
 
-    protected void alert(final String title, final String message){
-        new AlertDialog.Builder(getContext())
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
-    }
-
     protected static float[] calc4Points(Mat src, Point vanisingRate, double pageAreaRatio){
         int h = src.height();
         int w = src.width();
