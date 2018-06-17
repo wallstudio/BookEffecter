@@ -5,20 +5,24 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -26,13 +30,17 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -97,9 +105,8 @@ public class StandCameraActivity extends Activity {
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) { }
     };
-
     // Device setting (Contains Capture and Processing callback)
-    CameraDevice.StateCallback mDeviceSettingCallback = new CameraDevice.StateCallback() {
+    private CameraDevice.StateCallback mDeviceSettingCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
             mCameraDevice = cameraDevice;
@@ -159,6 +166,7 @@ public class StandCameraActivity extends Activity {
     };
     // Processing setting
     private ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
+        int i;
         @Override
         public void onImageAvailable(ImageReader reader) {
             if(isFinishing()) return;
@@ -170,6 +178,15 @@ public class StandCameraActivity extends Activity {
             Jni.image2Bitmap(image, mOriginalBitmap, true);
             Mat original = new Mat();
             Utils.bitmapToMat(mOriginalBitmap, original, false);
+
+            // 内面カメラなので D = -C なら向きが一致する
+            int displayOrientation = getDisplayOrientation();
+            int cameraOrientation = getCameraOrientation();
+            if(Math.abs(360-cameraOrientation) != displayOrientation){
+                Core.flip(original, original, 0);
+            }else {
+                Core.flip(original, original, 1);
+            }
 
             // Multi thread
             mBackground.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
@@ -187,6 +204,7 @@ public class StandCameraActivity extends Activity {
 
 
     static {System.loadLibrary("opencv_java3");}
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,6 +260,16 @@ public class StandCameraActivity extends Activity {
         finish();
     }
 
+    public void onClickSensitiveButton(View v){
+        Log.d("ORIENTATION", String.format("Activity=%s, Display=%s, Camera=%s",
+                getActivityOrientation(),
+                getDisplayOrientation(),
+                getCameraOrientation()));
+    }
+
+    public void oClickVolumeButton(View v){
+
+    }
 
     private void openCameraWhenReadySurface(){
         if(mDebugPreview.isAvailable()){
@@ -351,5 +379,50 @@ public class StandCameraActivity extends Activity {
                 super.onManagerConnected(status);
             }
         });
+    }
+
+    private String getActivityOrientation() {
+        switch (getResources().getConfiguration().orientation) {
+            case Configuration.ORIENTATION_LANDSCAPE:
+                return "ORIENTATION_LANDSCAPE";
+            case Configuration.ORIENTATION_PORTRAIT:
+                return "ORIENTATION_PORTRAIT";
+            case Configuration.ORIENTATION_SQUARE:
+                return "ORIENTATION_SQUARE";
+            case Configuration.ORIENTATION_UNDEFINED:
+            default: {
+                return "ORIENTATION_UNDEFINED";
+            }
+        }
+    }
+
+    private int getDisplayOrientation() {
+        WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        int rotation = windowManager.getDefaultDisplay().getRotation();
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                return 0;
+            case Surface.ROTATION_90:
+                return 90;
+            case Surface.ROTATION_180:
+                return 180;
+            case Surface.ROTATION_270:
+                return 270;
+            default:
+                Toast.makeText(this, "ROTATION_UNDEFINED", Toast.LENGTH_SHORT).show();
+                return 90;
+        }
+    }
+
+    private int getCameraOrientation() {
+        try {
+            CameraManager cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
+            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(mCameraID);
+            Integer sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+            return sensorOrientation;
+        } catch (CameraAccessException e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        return 90;
     }
 }
