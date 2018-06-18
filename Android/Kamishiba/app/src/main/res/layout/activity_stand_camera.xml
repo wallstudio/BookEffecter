@@ -85,12 +85,12 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:scaleType="fitEnd"
-            android:src="@drawable/td0"
+            android:src="@drawable/ic_local_library_black_100dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
-            android:id="@+id/titleLabelView"
+            android:id="@+id/titile_label"
             android:layout_width="0dp"
             android:layout_height="37dp"
             android:layout_marginEnd="8dp"
@@ -101,17 +101,19 @@
             android:shadowDy="2"
             android:shadowRadius="8"
             android:text="-"
+            android:ellipsize="end"
+            android:lines="1"
             android:textAlignment="viewStart"
             android:textColor="@android:color/white"
             android:textSize="30sp"
-            app:layout_constraintBottom_toTopOf="@+id/authorLabelView"
-            app:layout_constraintEnd_toStartOf="@+id/pageLabelView"
+            app:layout_constraintBottom_toTopOf="@+id/author_label"
+            app:layout_constraintEnd_toStartOf="@+id/page_labal"
             app:layout_constraintStart_toEndOf="@+id/coverView"
             app:layout_constraintTop_toBottomOf="@+id/frameLayout2"
             app:layout_constraintVertical_bias="1.0" />
 
         <TextView
-            android:id="@+id/authorLabelView"
+            android:id="@+id/author_label"
             android:layout_width="0dp"
             android:layout_height="21dp"
             android:layout_marginBottom="16dp"
@@ -122,14 +124,16 @@
             android:shadowDy="2"
             android:shadowRadius="8"
             android:text="-"
+            android:ellipsize="end"
+            android:lines="1"
             android:textAlignment="textStart"
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/pageLabelView"
+            app:layout_constraintEnd_toStartOf="@+id/page_labal"
             app:layout_constraintStart_toEndOf="@+id/coverView" />
 
         <TextView
-            android:id="@+id/pageLabelView"
+            android:id="@+id/page_labal"
             android:layout_width="100dp"
             android:layout_height="67dp"
             android:layout_marginBottom="8dp"
@@ -248,7 +252,7 @@
                 android:layout_height="150dp"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/td7"
+                android:src="@drawable/ic_image_black_24dp"
                 app:buffer_height="360px"
                 app:buffer_width="360px"
                 app:corrected_image_height="480px"

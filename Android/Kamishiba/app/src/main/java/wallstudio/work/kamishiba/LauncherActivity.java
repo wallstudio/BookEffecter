@@ -33,7 +33,7 @@ public class LauncherActivity extends AppCompatActivity {
 
     public Map yaml;
     
-    private String packageId;
+    private String mPackageId;
     private Switch mCameraSwitch;
     private Button mDownloadOrUpdate;
     private Button mRemove;
@@ -46,11 +46,14 @@ public class LauncherActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             boolean isFront = mCameraSwitch.isChecked();
             Intent intent = new Intent(getApplication(), isFront ? StandCameraActivity.class : HandedActivity.class);
+            intent.putExtra("image_count", (int)yaml.get("page_count"));
             intent.putExtra("audio_index", position);
-            intent.putExtra("package", packageId);
+            intent.putExtra("package", mPackageId);
+            intent.putExtra("title", (String) yaml.get("title"));
+            intent.putExtra("author", (String) yaml.get("author"));
             Log.d("StartCamera", String.format(
                     "is_front=%s, audio_index=%s, package=%s",
-                    isFront, position, packageId));
+                    isFront, position, mPackageId));
             startActivity(intent);
         }
     };
@@ -60,9 +63,9 @@ public class LauncherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
 
-        packageId = getIntent().getStringExtra("package_id");
+        mPackageId = getIntent().getStringExtra("package_id");
         mIsDownloaded = getIntent().getBooleanExtra("download_status", false);
-        setTitle(packageId);
+        setTitle(mPackageId);
         setPackageInfo();
 
         mDownloadOrUpdate = findViewById(R.id.lnc_download_btn);
@@ -91,8 +94,8 @@ public class LauncherActivity extends AppCompatActivity {
                 (TextView) findViewById(R.id.lnc_description),
                 (TextView) findViewById(R.id.lnc_page_count));
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                getResources().getString(R.string.root_url) + packageId + "/" + PACKAGE_DETAIL_PATH,
-                getResources().getString(R.string.root_url) + packageId + "/" + COVER_PATH);
+                getResources().getString(R.string.root_url) + mPackageId + "/" + PACKAGE_DETAIL_PATH,
+                getResources().getString(R.string.root_url) + mPackageId + "/" + COVER_PATH);
 
         mCameraSwitch = findViewById(R.id.lnc_camera_dirction_switch);
     }
@@ -131,16 +134,16 @@ public class LauncherActivity extends AppCompatActivity {
     private LoadUtil.PackageDataDownloadTask mTask;
 
     public void onClickDownloadOrUpdateButton(View view){
-        Log.d("Launcher", "DOWNLOAD " + packageId);
+        Log.d("Launcher", "DOWNLOAD " + mPackageId);
         if(yaml != null) {
             try {
-                String url = getResources().getString(R.string.root_url) + packageId + "/";
+                String url = getResources().getString(R.string.root_url) + mPackageId + "/";
                 int imageCount = (int) yaml.get("page_count");
                 int audioCount = (int) yaml.get("audio_count");
                 mTask = new LoadUtil.PackageDataDownloadTask(this,
                         (ViewGroup) findViewById(R.id.lnc_dl_popup),
                         (ProgressBar) findViewById(R.id.lnc_progress_bar),
-                        (TextView) findViewById(R.id.lnc_progress_text), packageId);
+                        (TextView) findViewById(R.id.lnc_progress_text), mPackageId);
                 mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                         new LoadUtil.PackageDataDownloadTask.UrlAndCounts(url, imageCount, audioCount));
             } catch (Exception e) {
@@ -150,7 +153,7 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     public void onClickCancelButton(View view){
-        Log.d("Launcher", "CANCEL " + packageId);
+        Log.d("Launcher", "CANCEL " + mPackageId);
         if(mTask != null && !mTask.isCancelled()){
             mTask.cancel(true);
             mTask = null;
@@ -158,11 +161,11 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     public void onClickRemoveButton(View view){
-        removeSummary(packageId);
-        removeDirectory(this.getFilesDir().getPath() + "/" + packageId);
+        removeSummary(mPackageId);
+        removeDirectory(this.getFilesDir().getPath() + "/" + mPackageId);
         setIsDownloaded(false);
-        Toast.makeText(this, "Deleted " + packageId, Toast.LENGTH_SHORT).show();
-        Log.d("Launcher", "DELETE " + packageId);
+        Toast.makeText(this, "Deleted " + mPackageId, Toast.LENGTH_SHORT).show();
+        Log.d("Launcher", "DELETE " + mPackageId);
     }
 
     public void removeSummary(String id){

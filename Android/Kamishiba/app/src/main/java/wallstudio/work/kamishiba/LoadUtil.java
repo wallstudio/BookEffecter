@@ -86,6 +86,13 @@ public class LoadUtil{
         return bitmap;
     }
 
+    public static Bitmap getBitmapFromPath(String path)throws IOException{
+        InputStream stream = getStreamFromPath(path);
+        Bitmap bitmap = streamToBitmap(stream);
+        stream.close();
+        return  bitmap;
+    }
+
     public static Bitmap getBitmapFromUrl(String url) throws  IOException{
         InputStream stream = getStreamFromUrl(url);
         Bitmap bitmap = streamToBitmap(stream);

@@ -2,31 +2,24 @@ package wallstudio.work.kamishiba;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
@@ -41,7 +34,6 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,8 +42,8 @@ import java.util.Map;
 
 public class StandCameraActivity extends Activity {
 
-    //    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
-    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
+    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
+//    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
     public static final int CAMERA_SIDE = CameraCharacteristics.LENS_FACING_BACK;
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
 
@@ -60,10 +52,13 @@ public class StandCameraActivity extends Activity {
     private TextureView mDebugPreview;
     private TextView mDebugPrint;
 
+
     private InputPreviewView mInputPreviewView;
     private BackgroundView mBackground;
     private MatchPreviewView mMatchPreviewView;
     private ImageView mCoverView;
+    private TextView mTitleView;
+    private TextView mAuthorView;
     private TextView mPageLabelView;
     private PerspectiveController mController;
 
@@ -81,6 +76,9 @@ public class StandCameraActivity extends Activity {
     private ImageReader mImageBufferForProcessing;
 
     private LearndImageSet mLearndImageSet;
+    private String mPackageId;
+    private int mImageCount;
+    private int mAudioIndex;
 
 
     // Suface is ready -> openCamera ->
@@ -89,7 +87,6 @@ public class StandCameraActivity extends Activity {
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             try {
                 openCamera();
-                configureTransform(mDebugPreview, width, height);
             } catch (CameraAccessException ca) {
                 Toast.makeText(StandCameraActivity.this, "Camera access error", Toast.LENGTH_SHORT).show();
             }
@@ -97,7 +94,6 @@ public class StandCameraActivity extends Activity {
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-            configureTransform(mDebugPreview, width, height);
         }
 
         @Override
@@ -196,8 +192,13 @@ public class StandCameraActivity extends Activity {
             // Multi thread
             mBackground.convert(original, mController.vanishingRatio, mController.pageEdgeY);
             mInputPreviewView.convert(original, mController.vanishingRatio, mController.pageEdgeY);
-            if(mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED)
+            if(mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED) {
                 mMatchPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
+                mPageLabelView.setText(mMatchPreviewView.page + "/" + mImageCount);
+            }
+
+            setDisplayDebugMessage("page", mMatchPreviewView.page + "/" + mImageCount);
+            setDisplayDebugMessage("similar", String.format("%.3f", mMatchPreviewView.similar));
 
             original.release();
 
@@ -224,10 +225,21 @@ public class StandCameraActivity extends Activity {
         mBackground = findViewById(R.id.background);
         mMatchPreviewView = findViewById(R.id.matchPreviewView);
         mCoverView = findViewById(R.id.coverView);
-        mPageLabelView = findViewById(R.id.pageLabelView);
+        mTitleView = findViewById(R.id.titile_label);
+        mAuthorView = findViewById(R.id.author_label);
+        mPageLabelView = findViewById(R.id.page_labal);
         mController = findViewById(R.id.controller_view);
 
-        mLearndImageSet = new LearndImageSet(getResources());
+        mTitleView.setText(getIntent().getStringExtra("title"));
+        mAuthorView.setText(getIntent().getStringExtra("author"));
+        mPackageId = getIntent().getStringExtra("package");
+        mImageCount = getIntent().getIntExtra("image_count", -1);
+        mAudioIndex = getIntent().getIntExtra("audio_index", -1);
+        mCoverView.setImageBitmap(LoadUtil.getBitmapFromUrlWithCache(this,
+                getResources().getString(R.string.root_url) + mPackageId + "/" + LauncherActivity.COVER_PATH));
+
+        String path = LoadUtil.getPackagePath(this, mPackageId) + "set/";
+        mLearndImageSet = new LearndImageSet(this, path, mImageCount);
         mLearndImageSet.setImageReduction(2);
         mMatchPreviewView.setSet(mLearndImageSet);
     }
@@ -242,7 +254,6 @@ public class StandCameraActivity extends Activity {
 
     @Override
     protected void onPause(){
-
         if(null != mImageBufferForProcessing)
             mImageBufferForProcessing.close();
         if(null != mCaptureSession)
@@ -250,11 +261,13 @@ public class StandCameraActivity extends Activity {
         if(null != mCameraDevice)
             mCameraDevice.close();
         super.onPause();
+        finish();
     }
 
     @Override
     protected void onStop() {
-        mLearndImageSet.release();
+        if(mLearndImageSet != null)
+            mLearndImageSet.release();
         super.onStop();
     }
 
@@ -297,28 +310,6 @@ public class StandCameraActivity extends Activity {
         }else{
             Toast.makeText(this, "Cannot recognaize camera", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void configureTransform(TextureView textureView, int previewWidth, int previewHeight) {
-        int rotation = StandCameraActivity.this.getWindowManager().getDefaultDisplay().getRotation();
-        Matrix matrix = new Matrix();
-//        RectF viewRect = new RectF(0, 0, textureView.getWidth(), textureView.getHeight());
-//        RectF bufferRect = new RectF(0, 0, previewHeight, previewWidth);
-//        PointF center = new PointF(viewRect.centerX(), viewRect.centerY());
-//        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
-//            bufferRect.offset(center.x - bufferRect.centerX(), center.y - bufferRect.centerY());
-//            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
-//            float scale = Math.max(
-//                    (float) textureView.getHeight() / previewHeight,
-//                    (float) textureView.getWidth() / previewHeight);
-//            matrix.postScale(scale, scale, center.x, center.y);
-//            matrix.postRotate(90 * (rotation - 2), center.x, center.y);
-//        } else if (Surface.ROTATION_180 == rotation) {
-//            matrix.postRotate(180, center.x, center.y);
-//        }
-//        matrix.postScale(0.5f, 0.5f);
-//        matrix.postRotate(0);
-//        textureView.setTransform(matrix);
     }
 
     private void beginFullScreen(){

@@ -1,44 +1,32 @@
 package wallstudio.work.kamishiba;
 
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfDMatch;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.features2d.BFMatcher;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfKeyPoint;
 import org.opencv.features2d.Features2d;
-import org.opencv.imgproc.Imgproc;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public class LearndImageSet {
 
     public static final int DRAW_MATCH_COUT  = 10;
-    // TODO: ネット or ストレージから拾うように
-    public static final int[] TEST_DATA = new int[]{
-            R.drawable.td0,
-            R.drawable.td1,
-            R.drawable.td2,
-            R.drawable.td3,
-            R.drawable.td4,
-            R.drawable.td5,
-            R.drawable.td6,
-            R.drawable.td7
-    };
+
     public final Scalar RANDOM_COLOR = Scalar.all(-1);
 
     public static BFMatcher sBFMatcher;
@@ -47,28 +35,32 @@ public class LearndImageSet {
 
     public LearndImage learndInputImage;
     public LearndImage bestLearndImage;
+    public int pageIndex;
     public double bestScore;
     public List<Float> scores;
     public DMatch[] bestMatch;
     public Mat resultImage = new Mat();
 
-
-    public  LearndImageSet(Resources res){
-
+    public LearndImageSet(Activity context, String path, int count){
         if(null == sBFMatcher)
             sBFMatcher = BFMatcher.create(Core.NORM_HAMMING, true);
 
         learndImages = new ArrayList<>();
-        // ref. http://android-java.hatenablog.jp/entry/2016/06/27/054415
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
-        for(int srcId : TEST_DATA){
-            Bitmap bitmap = BitmapFactory.decodeResource(res, srcId, options);
-            Mat imageMat = new Mat();
-            Utils.bitmapToMat(bitmap, imageMat, false);
-            LearndImage learndImage = new LearndImage(imageMat);
-            learndImages.add(learndImage);
-            bitmap.recycle();
+
+        try {
+            for (int srcId = 0; srcId < count; srcId++) {
+                Bitmap bitmap = LoadUtil.getBitmapFromPath(path + String.valueOf(srcId) + ".jpg");
+                Mat imageMat = new Mat();
+                Utils.bitmapToMat(bitmap, imageMat, false);
+                LearndImage learndImage = new LearndImage(imageMat);
+                learndImages.add(learndImage);
+                bitmap.recycle();
+            }
+        }catch (IOException e){
+            Toast.makeText(context,"Failed load bitmap", Toast.LENGTH_SHORT);
+            context.finish();
         }
     }
 
@@ -110,6 +102,7 @@ public class LearndImageSet {
                 bestMatch = matchies;
             }
         }
+        pageIndex = learndImages.indexOf(bestLearndImage);
     }
 
     public void drawResult(){
@@ -142,10 +135,17 @@ public class LearndImageSet {
     }
 
     public void release(){
-        for(LearndImage l :learndImages)
-            l.release();
-        learndInputImage.release();
-        bestLearndImage.release();
-        resultImage.release();
+        if(learndImages == null) {
+            for (LearndImage l : learndImages) {
+                if (l != null)
+                    l.release();
+            }
+        }
+        if(learndInputImage != null)
+            learndInputImage.release();
+        if(bestLearndImage != null)
+            bestLearndImage.release();
+        if(resultImage != null)
+            resultImage.release();
     }
 }

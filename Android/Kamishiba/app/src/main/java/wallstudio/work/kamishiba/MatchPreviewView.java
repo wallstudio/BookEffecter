@@ -25,11 +25,11 @@ public class MatchPreviewView extends CVImageView<Void> {
     private int mCorrectedImageHeight;
 
     private int mBitmapSize;
-    private LearndImageSet mSet;
+    public LearndImageSet mSet;
     private ConvertTask mTask;
 
     public int page;
-    public double similer;
+    public double similar;
 
     public MatchPreviewView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -73,7 +73,7 @@ public class MatchPreviewView extends CVImageView<Void> {
         pts2m.put(0,0, pts2);
         Mat persMatrix = Imgproc.getPerspectiveTransform(pts1m, pts2m);
         Imgproc.warpPerspective(frame, frame, persMatrix, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
-        Core.flip(frame, frame, -1);
+        Core.flip(frame, frame, 0);
         persMatrix.release();
 
         mSet.search(frame);
@@ -81,6 +81,9 @@ public class MatchPreviewView extends CVImageView<Void> {
         mSet.drawResult();
         frame.release();
         mSet.resultImage.copyTo(frame);
+        similar = mSet.bestScore;
+        page = mSet.pageIndex;
+//        mSet.release();
         return null;
     }
 
@@ -120,7 +123,7 @@ public class MatchPreviewView extends CVImageView<Void> {
 
         @Override
         protected void onPostExecute(Mat mat){
-            if(mat == null) return;
+            if(mat == null || mat.width() <= 0 && mat.height() <= 0) return;
             if(mBitmapBuffer.getWidth() != mat.width() || mBitmapBuffer.getHeight() != mat.height())
                 Imgproc.resize(mat, mat, new Size(mBitmapBuffer.getWidth(), mBitmapBuffer.getHeight()));
             Utils.matToBitmap(mat, mBitmapBuffer, false);

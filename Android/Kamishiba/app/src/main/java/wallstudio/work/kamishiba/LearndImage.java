@@ -48,9 +48,12 @@ public class LearndImage{
     }
 
     public void release(){
-        image.release();
-        keyPoints.release();
-        descriptors.release();
+        if(image != null)
+            image.release();
+        if(keyPoints != null)
+            keyPoints.release();
+        if(descriptors != null)
+            descriptors.release();
     }
 
     // TODO: Serializer and Desirializer
