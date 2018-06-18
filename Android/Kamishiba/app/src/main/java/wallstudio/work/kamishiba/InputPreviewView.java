@@ -15,16 +15,13 @@ import org.opencv.imgproc.Imgproc;
 
 public class InputPreviewView extends CVImageView<Void> {
 
-    public final static int GRID_DIVISIONS = 5;
-    public final static Scalar BORDER_COLOR = new Scalar(255, 100, 100);
-    public final static  Scalar GRID_COLOR = new Scalar(100, 255, 100);
+    public static final int GRID_DIVISIONS = 5;
+    public static final Scalar BORDER_COLOR = new Scalar(255, 100, 100);
+    public static final  Scalar GRID_COLOR = new Scalar(100, 255, 100);
 
-    public InputPreviewView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
-    public InputPreviewView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
+    public InputPreviewView(Context context, @Nullable AttributeSet attrs) { super(context, attrs); }
+    
+    public InputPreviewView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {  super(context, attrs, defStyleAttr); }
 
     @Override
     protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY) {

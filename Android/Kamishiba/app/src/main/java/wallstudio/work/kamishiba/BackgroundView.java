@@ -14,12 +14,9 @@ public class BackgroundView extends CVImageView<Void> {
 
     public static final int BACKGROUND_BITMAP_BLUR_KERNAL = 5;
 
-    public BackgroundView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
-    public BackgroundView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
+    public BackgroundView(Context context, @Nullable AttributeSet attrs) { super(context, attrs); }
+    
+    public BackgroundView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) { super(context, attrs, defStyleAttr); }
 
     @Override
     protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY) {

@@ -36,6 +36,7 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
         super(context, attrs);
         initBitmap(context, attrs);
     }
+
     public CVImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initBitmap(context, attrs);
@@ -48,10 +49,12 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
         if(mBitmapBuffer.getWidth() != mMatBuffer.width() || mBitmapBuffer.getHeight() != mMatBuffer.height())
             Imgproc.resize(mMatBuffer, mMatBuffer, new Size(mBitmapBuffer.getWidth(), mBitmapBuffer.getHeight()));
         Utils.matToBitmap(mMatBuffer, mBitmapBuffer, false);
+        mMatBuffer.release();
         setImageBitmap(mBitmapBuffer);
     }
 
     protected abstract Return process(final Mat frame, final Point vanishingRatio, final double pageEdgeY);
+
 
     private void initBitmap(Context context, AttributeSet attrs){
         // ref. https://qiita.com/Hoshi_7/items/57c3a79c43efe05b5368

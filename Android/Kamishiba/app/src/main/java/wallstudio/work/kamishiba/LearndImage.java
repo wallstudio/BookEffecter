@@ -10,7 +10,6 @@ import org.opencv.imgproc.Imgproc;
 
 public class LearndImage{
 
-
     private static AKAZE sAkaze;
 
     public Mat image;

@@ -43,15 +43,18 @@ import java.util.Map;
 public class StandCameraActivity extends Activity {
 
     public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
-//    public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
+    // public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
     public static final int CAMERA_SIDE = CameraCharacteristics.LENS_FACING_BACK;
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
 
-    private Point mInputImageSize;
+
+    private String mPackageId;
+    private int mImageCount;
+    private int mAudioIndex;
 
     private TextureView mDebugPreview;
     private TextView mDebugPrint;
-
+    private HashMap<String, String> mDisplayDebugMessageList = new HashMap<>();
 
     private InputPreviewView mInputPreviewView;
     private BackgroundView mBackground;
@@ -62,26 +65,20 @@ public class StandCameraActivity extends Activity {
     private TextView mPageLabelView;
     private PerspectiveController mController;
 
-    private HashMap<String, String> mDisplayDebugMessageList = new HashMap<>();
-
-    private Bitmap mOriginalBitmap;
-
     private String mCameraID;
     private CameraManager mCameraManager;
     private CameraDevice mCameraDevice;
     private CameraCaptureSession mCaptureSession;
+    private Point mInputImageSize;
     private android.util.Size[] mSupportPreviewSize;
-
     private Surface mDebugPreviewSurface;
     private ImageReader mImageBufferForProcessing;
 
+    private Bitmap mOriginalBitmap;
     private LearndImageSet mLearndImageSet;
-    private String mPackageId;
-    private int mImageCount;
-    private int mAudioIndex;
 
 
-    // Suface is ready -> openCamera ->
+    // 準備が整ったタイミングでカメラを起動するだけ
     private TextureView.SurfaceTextureListener mDebugPreviewListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -102,7 +99,8 @@ public class StandCameraActivity extends Activity {
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) { }
     };
-    // Device setting (Contains Capture and Processing callback)
+
+    // カメラの設定 & バッファの初期化と登録
     private CameraDevice.StateCallback mDeviceSettingCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
@@ -140,6 +138,7 @@ public class StandCameraActivity extends Activity {
             Toast.makeText(StandCameraActivity.this,"Camera disconnected (onError)", Toast.LENGTH_SHORT).show();
         }
     };
+
     // Capture setting
     private CameraCaptureSession.StateCallback mCaptureSettingCallback = new CameraCaptureSession.StateCallback() {
         @Override
@@ -165,58 +164,59 @@ public class StandCameraActivity extends Activity {
             Toast.makeText(StandCameraActivity.this,"Camera disconnected (onConfigureFailed)", Toast.LENGTH_SHORT).show();
         }
     };
-    // Processing setting
+
+    // 毎フレームの処理の呼び出し
     private ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
-        int i;
+
+        private Mat mOriginal = new Mat();
+        private int mCameraOrientation = -1;
+
         @Override
         public void onImageAvailable(ImageReader reader) {
             if(isFinishing()) return;
 
             Image image = reader.acquireNextImage();
-            if (image == null) {
-                return;
-            }
+            if (image == null) return;
+
+            // ImageReader から Mat に変換
             Jni.image2Bitmap(image, mOriginalBitmap, true);
-            Mat original = new Mat();
-            Utils.bitmapToMat(mOriginalBitmap, original, false);
+            Utils.bitmapToMat(mOriginalBitmap, mOriginal, false);
 
             // 内面カメラなので D = -C なら向きが一致する
             int displayOrientation = getDisplayOrientation();
-            int cameraOrientation = getCameraOrientation();
-            if(Math.abs(360-cameraOrientation) != displayOrientation){
-                Core.flip(original, original, 0);
+            if(mCameraOrientation == -1)
+                mCameraOrientation = getCameraOrientation();
+            if(Math.abs(360- mCameraOrientation) != displayOrientation){
+                Core.flip(mOriginal, mOriginal, 0);
             }else {
-                Core.flip(original, original, 1);
+                Core.flip(mOriginal, mOriginal, 1);
             }
 
-            // Multi thread
-            mBackground.convert(original, mController.vanishingRatio, mController.pageEdgeY);
-            mInputPreviewView.convert(original, mController.vanishingRatio, mController.pageEdgeY);
+            // 処理の呼び出し
+            mBackground.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
+            mInputPreviewView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
             if(mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED) {
-                mMatchPreviewView.convertAsync(original, mController.vanishingRatio, mController.pageEdgeY);
+                // AKAZE抽出は重いので，非同期
+                mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
                 mPageLabelView.setText(mMatchPreviewView.page + "/" + mImageCount);
             }
 
             setDisplayDebugMessage("page", mMatchPreviewView.page + "/" + mImageCount);
             setDisplayDebugMessage("similar", String.format("%.3f", mMatchPreviewView.similar));
-
-            original.release();
-
-//            System.gc();
         }
     };
 
-
     static {System.loadLibrary("opencv_java3");}
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_stand_camera);
-        beginFullScreen();
-//        loadOpenCVManagerApp();
+        // Fullscreen
+        this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        // loadOpenCVManagerApp();
 
         mDebugPreview = findViewById(R.id.debugPreview);
         mDebugPrint = findViewById(R.id.debugPrint);
@@ -247,13 +247,23 @@ public class StandCameraActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // OpenCamera when ready surface.
-        openCameraWhenReadySurface();
+        if(mDebugPreview.isAvailable()){
+            mDebugPreviewListener.onSurfaceTextureAvailable(
+                    mDebugPreview.getSurfaceTexture(),
+                    mDebugPreview.getWidth(),
+                    mDebugPreview.getHeight());
+        }else {
+            mDebugPreview.setSurfaceTextureListener(mDebugPreviewListener);
+        }
     }
 
     @Override
     protected void onPause(){
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         if(null != mImageBufferForProcessing)
             mImageBufferForProcessing.close();
         if(null != mCaptureSession)
@@ -273,30 +283,16 @@ public class StandCameraActivity extends Activity {
 
 
     public void onClickBack(View v){
-        finish();
+        onPause();
     }
+
+    public void oClickVolumeButton(View v){ }
 
     public void onClickSensitiveButton(View v){
-        Log.d("ORIENTATION", String.format("Activity=%s, Display=%s, Camera=%s",
-                getActivityOrientation(),
-                getDisplayOrientation(),
-                getCameraOrientation()));
+        Log.d("Button", "tapped");
+        System.gc();
     }
 
-    public void oClickVolumeButton(View v){
-
-    }
-
-    private void openCameraWhenReadySurface(){
-        if(mDebugPreview.isAvailable()){
-            mDebugPreviewListener.onSurfaceTextureAvailable(
-                    mDebugPreview.getSurfaceTexture(),
-                    mDebugPreview.getWidth(),
-                    mDebugPreview.getHeight());
-        }else {
-            mDebugPreview.setSurfaceTextureListener(mDebugPreviewListener);
-        }
-    }
 
     @SuppressLint("MissingPermission")
     private void openCamera() throws CameraAccessException {
@@ -312,9 +308,13 @@ public class StandCameraActivity extends Activity {
         }
     }
 
-    private void beginFullScreen(){
-        this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    private void loadOpenCVManagerApp(){
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, new BaseLoaderCallback(this) {
+            @Override
+            public void onManagerConnected(int status) {
+                super.onManagerConnected(status);
+            }
+        });
     }
 
     private Point selectSupportedPreviewSize(Point ideal, android.util.Size[] supports){
@@ -344,15 +344,6 @@ public class StandCameraActivity extends Activity {
             joindMessage += entry.getKey() + ": " + entry.getValue() + "\n";
         }
         mDebugPrint.setText(joindMessage);
-    }
-
-    private void loadOpenCVManagerApp(){
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, new BaseLoaderCallback(this) {
-            @Override
-            public void onManagerConnected(int status) {
-                super.onManagerConnected(status);
-            }
-        });
     }
 
     private String getActivityOrientation() {

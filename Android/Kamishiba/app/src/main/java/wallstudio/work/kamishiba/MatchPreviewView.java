@@ -37,6 +37,7 @@ public class MatchPreviewView extends CVImageView<Void> {
         mCorrectedImageWidth  = typedArray.getDimensionPixelSize(R.styleable.MatchPreviewView_corrected_image_width, DEFAULT_CORRECTED_IMAGE_WIDTH);
         mCorrectedImageHeight  = typedArray.getDimensionPixelSize(R.styleable.MatchPreviewView_corrected_image_height, DEFAULT_CORRECTED_IMAGE_HEIGHT);
     }
+
     public MatchPreviewView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MatchPreviewView);
@@ -57,8 +58,10 @@ public class MatchPreviewView extends CVImageView<Void> {
 
     public final void convertAsync(final Mat frame, final Point vanishingRatio, final double pageEdgeY){
         mTask = new ConvertTask(this, this, mBitmapBuffer);
-        mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                new ConvertTask.MatAndPram(frame.clone(), vanishingRatio, pageEdgeY));
+        // mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+        //         new ConvertTask.MatAndPram(frame.clone(), vanishingRatio, pageEdgeY));
+        mTask.execute(new ConvertTask.MatAndPram(frame.clone(), vanishingRatio, pageEdgeY));
+
     }
 
     @Override
