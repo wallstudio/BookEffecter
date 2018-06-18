@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -46,14 +47,20 @@ public class LauncherActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             boolean isFront = mCameraSwitch.isChecked();
             Intent intent = new Intent(getApplication(), isFront ? StandCameraActivity.class : HandedActivity.class);
-            intent.putExtra("image_count", (int)yaml.get("page_count"));
-            intent.putExtra("audio_index", position);
             intent.putExtra("package", mPackageId);
             intent.putExtra("title", (String) yaml.get("title"));
             intent.putExtra("author", (String) yaml.get("author"));
+            intent.putExtra("image_count", (int)yaml.get("page_count"));
+            intent.putExtra("audio_index", position);
+            List<Double> timingList = ((List<Double>) (((List<Map>) yaml.get("audio")).get(position).get("track_timing")));
+            double[] timingArray = new double[timingList.size()];
+            for (int i = 0; i < timingList.size(); i++) timingArray[i] = timingList.get(i);
+            intent.putExtra("track_timing", timingArray);
+
             Log.d("StartCamera", String.format(
                     "is_front=%s, audio_index=%s, package=%s",
                     isFront, position, mPackageId));
+
             startActivity(intent);
         }
     };
@@ -163,6 +170,9 @@ public class LauncherActivity extends AppCompatActivity {
     public void onClickRemoveButton(View view){
         removeSummary(mPackageId);
         removeDirectory(this.getFilesDir().getPath() + "/" + mPackageId);
+        String detailPath = getResources().getString(R.string.root_url) + mPackageId + "/" + PACKAGE_DETAIL_PATH;
+        String cachePath = getCacheDir() + "/" + LoadUtil.getSha1Hash(detailPath);
+        removeDirectory(cachePath);
         setIsDownloaded(false);
         Toast.makeText(this, "Deleted " + mPackageId, Toast.LENGTH_SHORT).show();
         Log.d("Launcher", "DELETE " + mPackageId);

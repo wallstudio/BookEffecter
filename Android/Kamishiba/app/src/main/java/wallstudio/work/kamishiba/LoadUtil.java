@@ -600,6 +600,9 @@ public class LoadUtil{
             singleTaskEachPackage.remove(mPackageId);
             mContext.removeSummary(mPackageId);
             mContext.removeDirectory(getPackagePath(mContext, mPackageId));
+            String detailPath = mContext.getResources().getString(R.string.root_url) + mPackageId + "/" + LauncherActivity.PACKAGE_DETAIL_PATH;
+            String cachePath = mContext.getCacheDir() + "/" + LoadUtil.getSha1Hash(detailPath);
+            mContext.removeDirectory(cachePath);
             Toast.makeText(mContext, "Cancelled", Toast.LENGTH_LONG).show();
         }
     }
