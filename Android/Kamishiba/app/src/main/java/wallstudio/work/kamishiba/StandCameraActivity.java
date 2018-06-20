@@ -174,7 +174,7 @@ public class StandCameraActivity extends Activity {
         }
     };
 
-    // 毎フレームの処理の呼び出し
+    // メインループ
     private ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
 
         private Mat mOriginal = new Mat();
@@ -182,7 +182,7 @@ public class StandCameraActivity extends Activity {
 
         @Override
         public void onImageAvailable(ImageReader reader) {
-            if(isFinishing()) return;
+            if (isFinishing()) return;
 
             Image image = reader.acquireNextImage();
             if (image == null) return;
@@ -193,25 +193,33 @@ public class StandCameraActivity extends Activity {
 
             // 内面カメラなので D = -C なら向きが一致する
             int displayOrientation = getDisplayOrientation();
-            if(mCameraOrientation == -1)
+            if (mCameraOrientation == -1)
                 mCameraOrientation = getCameraOrientation();
-            if(Math.abs(360- mCameraOrientation) != displayOrientation){
+            if (Math.abs(360 - mCameraOrientation) != displayOrientation) {
                 Core.flip(mOriginal, mOriginal, 0);
-            }else {
+            } else {
                 Core.flip(mOriginal, mOriginal, 1);
             }
 
             // 処理の呼び出し
             mBackgroundView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
             mInputPreviewView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
-            if(mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED) {
+            if (mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED) {
                 // AKAZE抽出は重いので，非同期
                 mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
-                mPageLabelView.setText(mMatchPreviewView.page + "/" + mImageCount);
+                // 音声
                 mCurrentPage = smooth(mMatchPreviewView.page);
-                if(mCurrentPage >= 0)
-                    action(mCurrentPage);
+                action(mCurrentPage);
+                // 音声止める
+                if (mMediaPlayer.isPlaying()){
+                    int end = (int) (mTrackTiming[mCurrentPage * 2 + 1] * 1000);
+                    int now = mMediaPlayer.getCurrentPosition();
+                    if(end < now){
+                        mMediaPlayer.pause();
+                    }
+                }
             }
+            mPageLabelView.setText((mCurrentPage >= 0 ? mCurrentPage + 1 : "-")  + "/" + mImageCount);
 
             setDisplayDebugMessage("page", mMatchPreviewView.page + "/" + mImageCount);
             setDisplayDebugMessage("similar", String.format("%.3f", mMatchPreviewView.similar));
@@ -219,42 +227,45 @@ public class StandCameraActivity extends Activity {
 
         private static final int BUFFER_SIZE = 8;
         private List<Integer> mBufferForSmooth = new ArrayList<>();
-        private int smooth(int value){
+
+        private int smooth(int value) {
             mBufferForSmooth.add(value);
             while (mBufferForSmooth.size() > BUFFER_SIZE)
                 mBufferForSmooth.remove(0);
-            if(mBufferForSmooth.size() == BUFFER_SIZE) {
+            int ret;
+            if (mBufferForSmooth.size() == BUFFER_SIZE) {
 
                 int pre = mBufferForSmooth.get(0);
                 boolean isSame = true;
-                for(Integer i :mBufferForSmooth) {
+                for (Integer i : mBufferForSmooth) {
                     if (pre != i) {
                         isSame = false;
                         break;
                     }
                 }
 
-                int ret = isSame? pre : -1;
-
-                Log.d("SmoothPage", String.format("smooth=%d (%s), ", ret, mBufferForSmooth.toString()));
-                return ret;
-            }else{return  -1;}
+                ret = isSame ? pre : -1;
+            } else {
+                ret = -1;
+            }
+            Log.d("SmoothPage", String.format("smooth=%d (%s), ", ret, mBufferForSmooth.toString()));
+            return ret;
         }
 
         private int mPreCount = -1;
-        private void action(int count){
-            if(mPreCount >= 0){
-                if(mPreCount != count) {
-                    Log.d("Action", String.format("CHANGE %d -> %d", mPreCount, count));
-                    if (mMediaPlayer.isPlaying()) {
-                        mMediaPlayer.pause();
-                    }
-                    if (count * 2 < mTrackTiming.length) {
-                        mMediaPlayer.seekTo((int) (mTrackTiming[count * 2]*1000));
-                        mMediaPlayer.start();
-                    } else {
-                        Log.e("Action", "Out of range " + count * 2 + ">" + mTrackTiming.length);
-                    }
+
+        private void action(int count) {
+            if (mPreCount != count) {
+                Log.d("Action", String.format("CHANGE %d -> %d", mPreCount, count));
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                }
+                if (count < 0) return;
+                if (count * 2 < mTrackTiming.length) {
+                    mMediaPlayer.seekTo((int) (mTrackTiming[count * 2] * 1000));
+                    mMediaPlayer.start();
+                } else {
+                    Log.e("Action", "Out of range " + count * 2 + ">" + mTrackTiming.length);
                 }
             }
             mPreCount = count < 0 ? mPreCount : count;

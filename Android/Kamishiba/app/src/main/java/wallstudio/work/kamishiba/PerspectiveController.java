@@ -14,8 +14,8 @@ import org.opencv.core.Point;
 
 public class PerspectiveController extends FrameLayout {
 
-    public static final Point DEFAULT_VANISHING_RATIO = new Point(0.5, 0.2);
-    public static final double DEFAULT_PAGE_EDGE_Y = 0.65;
+    public static final Point DEFAULT_VANISHING_RATIO = new Point(0.5, 0.05);
+    public static final double DEFAULT_PAGE_EDGE_Y = 0.5;
 
     public Point vanishingRatio = DEFAULT_VANISHING_RATIO;
     public double pageEdgeY = DEFAULT_PAGE_EDGE_Y;
