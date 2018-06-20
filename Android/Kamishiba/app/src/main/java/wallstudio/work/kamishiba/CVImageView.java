@@ -24,6 +24,7 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
 
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
     public static final Size DEFAULT_BUFFER_BITMAP_SIZE = new Size(256, 256);
+    public static final double TRIM_RATIO = 0.2;
 
     public int bufferWidth = 0;
     public int bufferHeight = 0;
@@ -43,9 +44,9 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
     }
 
 
-    public void convert(final Mat frame, final Point vanishingRatio, final double pageEdgeY) {
+    public void convert(final Mat frame, final Point vanishingRatio, final double pageEdgeY, boolean isPerspective) {
         mMatBuffer = frame.clone();
-        process(mMatBuffer, vanishingRatio, pageEdgeY);
+        process(mMatBuffer, vanishingRatio, pageEdgeY, isPerspective);
         if(mBitmapBuffer.getWidth() != mMatBuffer.width() || mBitmapBuffer.getHeight() != mMatBuffer.height())
             Imgproc.resize(mMatBuffer, mMatBuffer, new Size(mBitmapBuffer.getWidth(), mBitmapBuffer.getHeight()));
         Utils.matToBitmap(mMatBuffer, mBitmapBuffer, false);
@@ -53,7 +54,7 @@ public abstract class CVImageView<Return> extends android.support.v7.widget.AppC
         setImageBitmap(mBitmapBuffer);
     }
 
-    protected abstract Return process(final Mat frame, final Point vanishingRatio, final double pageEdgeY);
+    protected abstract Return process(final Mat frame, final Point vanishingRatio, final double pageEdgeY, boolean isPerspective);
 
 
     private void initBitmap(Context context, AttributeSet attrs){

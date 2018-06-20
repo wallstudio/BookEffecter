@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.DMatch;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfDMatch;

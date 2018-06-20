@@ -19,7 +19,7 @@ public class BackgroundView extends CVImageView<Void> {
     public BackgroundView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) { super(context, attrs, defStyleAttr); }
 
     @Override
-    protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY) {
+    protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY, boolean isPerspective) {
         Imgproc.resize(frame, frame, new Size(bufferWidth, bufferHeight));
         Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
         Imgproc.GaussianBlur(frame, frame, new Size(BACKGROUND_BITMAP_BLUR_KERNAL, BACKGROUND_BITMAP_BLUR_KERNAL), 0);

@@ -40,9 +40,10 @@
             android:theme="@style/FullscreenTheme"></activity>
 
         <activity
-            android:name=".HandedActivity"
-            android:screenOrientation="userLandscape"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:name=".HandedCameraActivity"
+            android:label="@string/title_activity_handed_camera"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"></activity>
 
     </application>
 

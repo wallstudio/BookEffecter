@@ -48,8 +48,8 @@ public class StandCameraActivity extends Activity {
 
     public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
     // public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
-    public static final int CAMERA_SIDE = CameraCharacteristics.LENS_FACING_BACK;
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
+    private static final int SMOOTH_BUFFER_SIZE = 5;
 
 
     private String mPackageId;
@@ -175,6 +175,7 @@ public class StandCameraActivity extends Activity {
     };
 
     // メインループ
+    protected boolean mIsLandscape = true;
     private ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
 
         private Mat mOriginal = new Mat();
@@ -191,22 +192,32 @@ public class StandCameraActivity extends Activity {
             Jni.image2Bitmap(image, mOriginalBitmap, true);
             Utils.bitmapToMat(mOriginalBitmap, mOriginal, false);
 
-            // 内面カメラなので D = -C なら向きが一致する
+            // 画像の向きを補正
             int displayOrientation = getDisplayOrientation();
             if (mCameraOrientation == -1)
                 mCameraOrientation = getCameraOrientation();
-            if (Math.abs(360 - mCameraOrientation) != displayOrientation) {
-                Core.flip(mOriginal, mOriginal, 0);
+            if (mIsLandscape) {
+                // 内面カメラなので D = -C なら向きが一致する
+                if (Math.abs(360 - mCameraOrientation) != displayOrientation) {
+                    Core.flip(mOriginal, mOriginal, 0);
+                } else {
+                    Core.flip(mOriginal, mOriginal, 1);
+                }
             } else {
-                Core.flip(mOriginal, mOriginal, 1);
+                if (mCameraOrientation == 90){
+                    Core.flip(mOriginal, mOriginal, 0);
+                } else {
+                    Core.flip(mOriginal, mOriginal, 1);
+                }
+                Core.transpose(mOriginal, mOriginal);
             }
 
             // 処理の呼び出し
-            mBackgroundView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
-            mInputPreviewView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
+            mBackgroundView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
+            mInputPreviewView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
             if (mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED) {
                 // AKAZE抽出は重いので，非同期
-                mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY);
+                mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
                 // 音声
                 mCurrentPage = smooth(mMatchPreviewView.page);
                 action(mCurrentPage);
@@ -225,15 +236,14 @@ public class StandCameraActivity extends Activity {
             setDisplayDebugMessage("similar", String.format("%.3f", mMatchPreviewView.similar));
         }
 
-        private static final int BUFFER_SIZE = 8;
         private List<Integer> mBufferForSmooth = new ArrayList<>();
 
         private int smooth(int value) {
             mBufferForSmooth.add(value);
-            while (mBufferForSmooth.size() > BUFFER_SIZE)
+            while (mBufferForSmooth.size() > SMOOTH_BUFFER_SIZE)
                 mBufferForSmooth.remove(0);
             int ret;
-            if (mBufferForSmooth.size() == BUFFER_SIZE) {
+            if (mBufferForSmooth.size() == SMOOTH_BUFFER_SIZE) {
 
                 int pre = mBufferForSmooth.get(0);
                 boolean isSame = true;
@@ -249,38 +259,47 @@ public class StandCameraActivity extends Activity {
                 ret = -1;
             }
             Log.d("SmoothPage", String.format("smooth=%d (%s), ", ret, mBufferForSmooth.toString()));
+            setDisplayDebugMessage("SmoothPage", String.format("smooth=%d (%s), ", ret, mBufferForSmooth.toString()));
             return ret;
         }
 
         private int mPreCount = -1;
 
         private void action(int count) {
+            setDisplayDebugMessage("Action", String.format("NoCHANGE %d", mPreCount));
             if (mPreCount != count) {
                 Log.d("Action", String.format("CHANGE %d -> %d", mPreCount, count));
+                setDisplayDebugMessage("Action", String.format("CHANGE %d -> %d", mPreCount, count));
                 if (mMediaPlayer.isPlaying()) {
                     mMediaPlayer.pause();
                 }
-                if (count < 0) return;
-                if (count * 2 < mTrackTiming.length) {
-                    mMediaPlayer.seekTo((int) (mTrackTiming[count * 2] * 1000));
-                    mMediaPlayer.start();
-                } else {
-                    Log.e("Action", "Out of range " + count * 2 + ">" + mTrackTiming.length);
+                if (count >= 0) {
+                    if (count * 2 < mTrackTiming.length) {
+                        mMediaPlayer.seekTo((int) (mTrackTiming[count * 2] * 1000));
+                        mMediaPlayer.start();
+                    } else {
+                        Log.e("Action", "Out of range " + count * 2 + ">" + mTrackTiming.length);
+                    }
                 }
             }
-            mPreCount = count < 0 ? mPreCount : count;
+            mPreCount = count;
         }
     };
 
 
+    protected int mLayout = R.layout.activity_stand_camera;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_stand_camera);
+        setContentView(mLayout);
         // Fullscreen
-        this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        if(mIsLandscape) {
+            this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }else{
+
+        }
         // loadOpenCVManagerApp();
 
         mDebugPreview = findViewById(R.id.debugPreview);
@@ -375,12 +394,12 @@ public class StandCameraActivity extends Activity {
         System.gc();
     }
 
-
+    protected int mCameraSide = CameraCharacteristics.LENS_FACING_BACK;
     @SuppressLint("MissingPermission")
     private void openCamera() throws CameraAccessException {
         mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         if( mCameraManager.getCameraIdList().length > 0) {
-            mCameraID = mCameraManager.getCameraIdList()[CAMERA_SIDE];
+            mCameraID = mCameraManager.getCameraIdList()[mCameraSide];
             StreamConfigurationMap map = mCameraManager.getCameraCharacteristics(mCameraID).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             mSupportPreviewSize = map.getOutputSizes(SurfaceTexture.class);
             // Detaile config (buffers and displays)

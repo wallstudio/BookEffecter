@@ -46,7 +46,7 @@ public class LauncherActivity extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             boolean isFront = mCameraSwitch.isChecked();
-            Intent intent = new Intent(getApplication(), isFront ? StandCameraActivity.class : HandedActivity.class);
+            Intent intent = new Intent(getApplication(), isFront ? StandCameraActivity.class : HandedCameraActivity.class);
             intent.putExtra("package", mPackageId);
             intent.putExtra("title", (String) yaml.get("title"));
             intent.putExtra("author", (String) yaml.get("author"));

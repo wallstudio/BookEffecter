@@ -10,9 +10,11 @@ import android.widget.ImageView;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -56,8 +58,8 @@ public class MatchPreviewView extends CVImageView<Void> {
         mSet = set;
     }
 
-    public final void convertAsync(final Mat frame, final Point vanishingRatio, final double pageEdgeY){
-        mTask = new ConvertTask(this, this, mBitmapBuffer);
+    public final void convertAsync(final Mat frame, final Point vanishingRatio, final double pageEdgeY, boolean isPerspective){
+        mTask = new ConvertTask(this, this, mBitmapBuffer, isPerspective);
         // mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
         //         new ConvertTask.MatAndPram(frame.clone(), vanishingRatio, pageEdgeY));
         mTask.execute(new ConvertTask.MatAndPram(frame.clone(), vanishingRatio, pageEdgeY));
@@ -65,19 +67,28 @@ public class MatchPreviewView extends CVImageView<Void> {
     }
 
     @Override
-    protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY) {
+    protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY, boolean isPerspective) {
         if(frame == null || frame.width() == 0 || frame.height() == 0) return null;
 
-        float[] pts1 = calc4Points(frame, vanishingRatio, pageEdgeY);
-        float[] pts2 = new float[]{0, 0, mCorrectedImageWidth, 0, 0, mCorrectedImageHeight, mCorrectedImageWidth, mCorrectedImageHeight};
-        Mat pts1m = new Mat(4,2, CvType.CV_32F);
-        Mat pts2m = new Mat(4,2, CvType.CV_32F);
-        pts1m.put(0,0, pts1);
-        pts2m.put(0,0, pts2);
-        Mat persMatrix = Imgproc.getPerspectiveTransform(pts1m, pts2m);
-        Imgproc.warpPerspective(frame, frame, persMatrix, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
-        Core.flip(frame, frame, 0);
-        persMatrix.release();
+        if(isPerspective) {
+            float[] pts1 = calc4Points(frame, vanishingRatio, pageEdgeY);
+            float[] pts2 = new float[]{0, 0, mCorrectedImageWidth, 0, 0, mCorrectedImageHeight, mCorrectedImageWidth, mCorrectedImageHeight};
+            Mat pts1m = new Mat(4, 2, CvType.CV_32F);
+            Mat pts2m = new Mat(4, 2, CvType.CV_32F);
+            pts1m.put(0, 0, pts1);
+            pts2m.put(0, 0, pts2);
+            Mat persMatrix = Imgproc.getPerspectiveTransform(pts1m, pts2m);
+            Imgproc.warpPerspective(frame, frame, persMatrix, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
+            Core.flip(frame, frame, 0);
+            persMatrix.release();
+        }else{
+            Rect trimArea = new Rect(
+                    (int)(frame.width() * TRIM_RATIO), (int)(frame.height() * TRIM_RATIO),
+                    (int)(frame.width() - frame.width() * TRIM_RATIO), (int)(frame.height() - frame.height() * TRIM_RATIO));
+            Mat trim = new Mat(frame, trimArea);
+            Imgproc.resize(trim, frame, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
+            trim.release();
+        }
 
         mSet.search(frame);
         mSet.inputImageReduction(2);
@@ -107,11 +118,13 @@ public class MatchPreviewView extends CVImageView<Void> {
         private CVImageView mContext;
         private ImageView mImageView;
         private Bitmap mBitmapBuffer;
+        private boolean mIsPerspective;
 
-        public ConvertTask(CVImageView context, ImageView imageView, Bitmap bitmap){
+        public ConvertTask(CVImageView context, ImageView imageView, Bitmap bitmap, boolean isPerspective){
             mContext = context;
             mImageView = imageView;
             mBitmapBuffer = bitmap;
+            mIsPerspective = isPerspective;
         }
 
         @Override
@@ -119,8 +132,11 @@ public class MatchPreviewView extends CVImageView<Void> {
             Mat frame = matAndPrams[0].mat;
             Point vanising = matAndPrams[0].vanising;
             double pageY = matAndPrams[0].pageY;
-
-            mContext.process(frame, vanising, pageY);
+            try {
+                mContext.process(frame, vanising, pageY, mIsPerspective);
+            }catch (CvException cve){
+                cve.printStackTrace();
+            }
             return frame;
         }
 
