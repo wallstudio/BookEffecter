@@ -1,0 +1,11 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h2>Login</h2>
+
+@foreach (var item in Model)
+{
+    <a class="btn btn-primary login-button" asp-action="SignIn" asp-route-provider="@item">@item</a>
+}

@@ -33,11 +33,27 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li><a asp-area="" asp-controller="Authentication" asp-action="SignOut">Sign out</a></li>
+                    }
+                    else
+                    {
+                        <li><a asp-area="" asp-controller="Authentication" asp-action="Login">Login</a></li>
+                    }
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container body-content">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <p>Welcome @User.Identity.Name </p>
+        }
+        else
+        {
+            <p>You are not logged in</p>
+        }
         @RenderBody()
         <hr />
         <footer>
