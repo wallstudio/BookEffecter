@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,8 +33,16 @@ namespace KamishibaServer
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             }).AddTwitter(options =>
             {
-                options.ConsumerKey = "xxxxxxxx";
-                options.ConsumerSecret = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+                options.ConsumerKey = "";
+                options.ConsumerSecret = "";
+                options.Events.OnCreatingTicket = async context =>
+                {
+                    var identity = (ClaimsIdentity)context.Principal.Identity;
+                    identity.AddClaim(new Claim(nameof(context.AccessToken), context.AccessToken));
+                    identity.AddClaim(new Claim(nameof(context.AccessTokenSecret), context.AccessTokenSecret));
+                    identity.AddClaim(new Claim(nameof(context.UserId), context.UserId));
+                    identity.AddClaim(new Claim(nameof(context.ScreenName), context.ScreenName));
+                };
             })
             .AddCookie();
 
@@ -49,6 +61,11 @@ namespace KamishibaServer
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+            });
 
             app.UseAuthentication();
 
