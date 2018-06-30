@@ -1,0 +1,101 @@
+﻿@model IEnumerable<KamishibaServer.Models.Book>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.RegisterID)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.IDName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Title)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Auther)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Contact)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PageCount)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PublishedDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Tags)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Sexy)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Vaiolence)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Grotesque)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.RegisterID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IDName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Auther)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Contact)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PageCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PublishedDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tags)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sexy)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Vaiolence)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Grotesque)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
