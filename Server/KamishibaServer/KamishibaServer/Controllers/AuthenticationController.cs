@@ -41,8 +41,8 @@ namespace KamishibaServer.Controllers
             var accessScreen = User.Claims.FirstOrDefault(x => x.Type == "ScreenName")?.Value;
 
             var tokens = Tokens.Create(
-                "",
-                "",
+                Secret.TwitterConsumerKey,
+                Secret.TwitterConsumerSecret,
                 accessToken, accessSecret);
             //var r = await tokens.Statuses.UpdateAsync("ﾏｷﾏｷｶﾜｲｲﾔｯﾀｰ!!");
             var s = await tokens.Account.UpdateProfileAsync();

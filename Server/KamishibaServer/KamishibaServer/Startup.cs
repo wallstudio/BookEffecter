@@ -14,11 +14,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KamishibaServer
 {
+    public static class Secret{
+        public static string TwitterConsumerKey;
+        public static string TwitterConsumerSecret;
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            Secret.TwitterConsumerKey = configuration["Twitter:ConsumerKey"];
+            Secret.TwitterConsumerSecret = configuration["Twitter:ConsumerSecret"];
         }
 
         public IConfiguration Configuration { get; }
@@ -33,8 +40,8 @@ namespace KamishibaServer
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             }).AddTwitter(options =>
             {
-                options.ConsumerKey = "";
-                options.ConsumerSecret = "";
+                options.ConsumerKey = Secret.TwitterConsumerKey;
+                options.ConsumerSecret = Secret.TwitterConsumerSecret;
                 options.Events.OnCreatingTicket = async context =>
                 {
                     var identity = (ClaimsIdentity)context.Principal.Identity;
