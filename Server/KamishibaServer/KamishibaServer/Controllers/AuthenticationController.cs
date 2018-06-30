@@ -8,15 +8,20 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CoreTweet;
+using KamishibaServer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace KamishibaServer.Controllers
 {
     public class AuthenticationController : Controller
     {
         private readonly IAuthenticationSchemeProvider authenticationSchemeProvider;
-        public AuthenticationController(IAuthenticationSchemeProvider authenticationSchemeProvider)
+        private readonly KamishibaServerContext _context;
+
+        public AuthenticationController(IAuthenticationSchemeProvider authenticationSchemeProvider, KamishibaServerContext context)
         {
             this.authenticationSchemeProvider = authenticationSchemeProvider;
+            _context = context;
         }
 
         public async Task<IActionResult> Login()
@@ -35,17 +40,6 @@ namespace KamishibaServer.Controllers
 
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
-            var accessToken = User.Claims.FirstOrDefault(x => x.Type == "AccessToken")?.Value;
-            var accessSecret = User.Claims.FirstOrDefault(x => x.Type == "AccessTokenSecret")?.Value;
-            var accessUserId = User.Claims.FirstOrDefault(x => x.Type == "UserId")?.Value;
-            var accessScreen = User.Claims.FirstOrDefault(x => x.Type == "ScreenName")?.Value;
-
-            var tokens = Tokens.Create(
-                Secret.TwitterConsumerKey,
-                Secret.TwitterConsumerSecret,
-                accessToken, accessSecret);
-            //var r = await tokens.Statuses.UpdateAsync("ﾏｷﾏｷｶﾜｲｲﾔｯﾀｰ!!");
-            var s = await tokens.Account.UpdateProfileAsync();
 
             var isAuthenticated = User.Identity.IsAuthenticated;
 
@@ -53,9 +47,17 @@ namespace KamishibaServer.Controllers
                 return RedirectToAction(nameof(Login));
             if (!isAuthenticated)
                 return RedirectToAction(nameof(Login));
-                
-            ViewData.Add("nicname", s.Name);
-            return View();
+
+            var c = _context.User.Select(user => user.ID);
+            if (!_context.User.Select(user => user.ID).Contains(TwitterUser.GetID(User)))
+            {
+                _context.Add(new Models.TwitterUser(User));
+                _context.SaveChanges();
+            }
+
+            var name = await _context.User.SingleOrDefaultAsync(m => m.ID == TwitterUser.GetID(User));
+            TempData.Add("info", $"ようこそ {name.Name} 様！ (@{name.ScreenName})");
+            return Redirect("/");
         }
 
 

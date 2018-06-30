@@ -8,6 +8,7 @@
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
+        <link rel="stylesheet" href="~/css/kamishiba.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -26,34 +27,48 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">KamishibaServer</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">かみしば</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Index">TOP</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="About">「かみしば」とは？</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">開発者</a></li>
+                    @if (User.Identity.IsAuthenticated && TwitterUser.GetID(User) == KamishibaServer.Controllers.UsersController.ADMIN_ID)
+                    {
+                        <li><a asp-area="" asp-controller="Users" asp-action="Index">*Users</a></li>
+                    }
+                    <li><a asp-area="" asp-controller="Books" asp-action="Index">同人誌一覧</a></li>
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <li><a asp-area="" asp-controller="Authentication" asp-action="SignOut">Sign out</a></li>
+                        <li><a asp-area="" asp-controller="Authentication" asp-action="SignOut">ログアウト</a></li>
                     }
                     else
                     {
-                        <li><a asp-area="" asp-controller="Authentication" asp-action="Login">Login</a></li>
+                        <li><a asp-area="" asp-controller="Authentication" asp-action="SignIn" asp-route-provider="Twitter">Twitterでログイン</a></li>
                     }
                 </ul>
             </div>
         </div>
     </nav>
     <div class="container body-content">
-        @if (User.Identity.IsAuthenticated)
-        {
-            <p>Welcome @User.Identity.Name </p>
-        }
-        else
-        {
-            <p>You are not logged in</p>
-        }
+        <p class="info-container">
+            @if (TempData["info"] != null)
+            {
+                @TempData["info"]
+            }
+            else
+            {
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <span>＠@User.Identity.Name としてログイン中。</span>
+                }
+                else
+                {
+                    <span>ようこそ、ゲスト様。<a asp-controller="Authentication" asp-action="SignIn" asp-route-provider="Twitter">TwitterIDだけでログインできます。</a></span>
+                }
+            }
+        </p>
         @RenderBody()
         <hr />
         <footer>

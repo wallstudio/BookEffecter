@@ -1,0 +1,15 @@
+﻿.info-container{
+    margin: 10px;
+    padding:5px 10px;
+    background: #59acdc;
+    color:whitesmoke;
+    display: inline-block;
+    border-radius: 5px;
+}
+.info-container a,
+.info-container a:visited,
+.info-container a:link,
+.info-container a:hover,
+.info-container a:focus {
+        color: white;
+}

@@ -259,3 +259,9 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+Server/KamishibaServer/KamishibaServer/db.sqlite
+Server/KamishibaServer/KamishibaServer/db.sqlite
+
+# 追加された個々のファイル
+db.sqlite
+Migrations/
