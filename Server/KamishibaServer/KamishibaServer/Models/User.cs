@@ -17,8 +17,8 @@ namespace KamishibaServer.Models
         public string ScreenName { get; set; }
         public string Name { get; set; }
         public string Url { get; set; }
-        public DateTime LastUpdate;
-        public DateTime CreatedUpdate;
+        public DateTime LastUpdate { get; set; }
+        public DateTime CreatedUpdate { get; set; }
         public string AccessToken { get; set; }
         public string AccessSecret { get; set; }
 
