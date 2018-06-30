@@ -34,7 +34,7 @@
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">TOP</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="About">「かみしば」とは？</a></li>
                     <li><a asp-area="" asp-controller="Home" asp-action="Contact">開発者</a></li>
-                    @if (User.Identity.IsAuthenticated && TwitterUser.GetID(User) == KamishibaServer.Controllers.UsersController.ADMIN_ID)
+                    @if (User.Identity.IsAuthenticated)
                     {
                         <li><a asp-area="" asp-controller="Users" asp-action="Index">*Users</a></li>
                     }

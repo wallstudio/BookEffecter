@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KamishibaServer.Models;
+using System.Security.Claims;
 
 namespace KamishibaServer.Controllers
 {
     public class UsersController : Controller
     {
+        public const int EDITABLE_POWER = TwitterUser.POWER_MODERATOR;
+
         public const long ADMIN_ID = 770906581110095872L;
 
         private readonly KamishibaServerContext _context;
@@ -23,7 +26,8 @@ namespace KamishibaServer.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            
+            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
                 return View(await _context.User.ToListAsync());
             else
                 return Redirect("/");
@@ -32,7 +36,7 @@ namespace KamishibaServer.Controllers
         // GET: Users/Details/5
         public async Task<IActionResult> Details(long? id)
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
             {
                 if (id == null)
                 {
@@ -54,7 +58,7 @@ namespace KamishibaServer.Controllers
         // GET: Users/Create
         public IActionResult Create()
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
                 return View();
             else
                 return Redirect("/");
@@ -67,7 +71,7 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,ScreenName,Name,Url")] TwitterUser user)
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            if(_context.User.SingleOrDefault(_user => _user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
             {
                 if (ModelState.IsValid)
                 {
@@ -83,7 +87,7 @@ namespace KamishibaServer.Controllers
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(long? id)
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
             {
                 if (id == null)
                 {
@@ -107,7 +111,7 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(long id, [Bind("ID,ScreenName,Name,Url")] TwitterUser user)
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            if(_context.User.SingleOrDefault(_user => _user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
             {
                 if (id != user.ID)
                 {
@@ -142,7 +146,7 @@ namespace KamishibaServer.Controllers
         // GET: Users/Delete/5
         public async Task<IActionResult> Delete(long? id)
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
             {
                 if (id == null)
                 {
@@ -166,7 +170,7 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
-            if (TwitterUser.GetID(User) == ADMIN_ID)
+            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
             {
                 var user = await _context.User.SingleOrDefaultAsync(m => m.ID == id);
                 _context.User.Remove(user);

@@ -11,6 +11,11 @@ namespace KamishibaServer.Models
 {
     public class TwitterUser
     {
+        public const int POWER_ADMIN = 0;
+        public const int POWER_MODERATOR = 100;
+        public const int POWER_TRUSTED = 300;
+        public const int POWER_LIMITED = 1001;
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long ID { get; set; }
@@ -21,6 +26,7 @@ namespace KamishibaServer.Models
         public DateTime CreatedUpdate { get; set; }
         public string AccessToken { get; set; }
         public string AccessSecret { get; set; }
+        public int Power { get; set; }
 
         public TwitterUser() { }
         public TwitterUser(ClaimsPrincipal user)
@@ -43,6 +49,7 @@ namespace KamishibaServer.Models
             Url = profile.Url;
             LastUpdate = DateTime.Now;
             CreatedUpdate = DateTime.Now;
+            Power = 1000;
         }
 
         public static long GetID(ClaimsPrincipal user)
