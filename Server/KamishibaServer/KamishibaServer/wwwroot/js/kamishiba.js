@@ -172,11 +172,6 @@ window.addEventListener("load", () => {
         let isOpenedAlt = alt.css("display") != "none";
 
         if (!isOpenedAlt) {
-            if ($("#images-list div").length <= 0 || $("#images-list div").length > 60) {
-                alert("画像は1～60枚の範囲で登録してください。")
-                return;
-            }
-
             let formData = new FormData($("#book-upload-from")[0]);
             $("#images-list .page-prev-image").each((i, e) => {
                 let imageId = e.getAttribute("class").match(/id-is-([0-9a-fA-F]+)/)[1];
@@ -196,8 +191,18 @@ window.addEventListener("load", () => {
             }).done(res => {
                 console.log('Kamishiba: AJAX SUCCESS');
                 let meta = $(res).find(".book-meta-content")[0];
+                let img = $(res).find(".book-images-content .field-validation-error")[0];
+
+                if (!meta || !img) {
+                    $("html")[0].innerHTML = res;
+                    history.pushState('', '', '/Books/Index');
+                }
+
                 let preMeta = $(".book-meta-content")[0];
+                let preImg = $(".book-images-content .field-validation-error")[0];
                 preMeta.innerHTML = meta.innerHTML;
+                preImg.innerHTML = img.innerHTML;
+                scrollTo(0, 0);
             }).fail((jqXHR, textStatus, errorThrown) => {
                 console.log('Kamishiba: AJAX ERROR', jqXHR, textStatus, errorThrown);
             });

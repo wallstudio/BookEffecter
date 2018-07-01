@@ -61,7 +61,7 @@ namespace KamishibaServer.Controllers
             }
 
             var name = await _context.User.SingleOrDefaultAsync(m => m.ID == TwitterUser.GetID(User));
-            TempData.Add("info", $"ようこそ {name.Name} 様！ (@{name.ScreenName})");
+            TempData["info"] = $"ようこそ {name.Name} 様！ (@{name.ScreenName})";
             return Redirect("/");
         }
 

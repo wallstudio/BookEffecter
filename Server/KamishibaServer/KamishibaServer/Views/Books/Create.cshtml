@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Create";
 }
+<div id="next-location">@ViewData["NextLocation"]</div>
 
 <h2>Create</h2>
 
@@ -81,10 +82,13 @@
                 </div>
                 <div class="book-images-content">
                     <h2>原稿画像のアップロード</h2>
-                    <p>本のページだけが写っている画像を用意してください。
-                    デジタルの場合はそのまま、アナログの場合はスキャンした画像が望ましいですが、
-                    真上から撮影した写真でも他の映り込みが無ければ大丈夫です。</p>
+                    <p>
+                        本のページだけが写っている画像を用意してください。
+                        デジタルの場合はそのまま、アナログの場合はスキャンした画像が望ましいですが、
+                        真上から撮影した写真でも他の映り込みが無ければ大丈夫です。
+                    </p>
                     <p>※順番に並んでいると音声の登録がし易くなります。</p>
+                    <span class="text-danger field-validation-error" >@ViewData["images_error_message"]</span>
                     <div id="drop-zone">
                         <span class="here">ここに原稿画像をドロップ</span>
                         <div id="images-list"></div>
