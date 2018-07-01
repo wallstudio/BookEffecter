@@ -8,79 +8,120 @@
 
 <h4>Book</h4>
 <hr />
+<p>フォームへ入力と、画像の登録をしてください。</p>
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+    <div class="col-md-4 book-form-wrap">
+        <form asp-action="Create" enctype="multipart/form-data" id="book-upload-from">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ID" />
-            <div class="form-group">
-                <label asp-for="RegisterID" class="control-label"></label>
-                <input asp-for="RegisterID" class="form-control" readonly="readonly" />
-                <span asp-validation-for="RegisterID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IDName" class="control-label"></label>
-                <input asp-for="IDName" class="form-control" />
-                <span asp-validation-for="IDName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Auther" class="control-label"></label>
-                <input asp-for="Auther" class="form-control" />
-                <span asp-validation-for="Auther" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Contact" class="control-label"></label>
-                <input asp-for="Contact" class="form-control" />
-                <span asp-validation-for="Contact" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="PageCount" />
-            <div class="form-group">
-                <label asp-for="PublishedDate" class="control-label"></label>
-                <input asp-for="PublishedDate" class="form-control" />
-                <span asp-validation-for="PublishedDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Tags" class="control-label"></label>
-                <input asp-for="Tags" class="form-control" />
-                <span asp-validation-for="Tags" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Sexy" /> @Html.DisplayNameFor(model => model.Sexy)
-                    </label>
+            <div class="book-content">
+                <div class="book-meta-content">
+                    <input type="hidden" asp-for="ID" />
+                    <input type="hidden" asp-for="RegisterID" />
+                    <div class="form-group">
+                        <label asp-for="IDName" class="control-label"></label>
+                        <p>「{半角英数字と_}.{半角英数字と_}」の形式で入力してください。<br />「{TwitterID}.{タイトルのローマ字}」がオススメです。
+                        <input asp-for="IDName" class="form-control" />
+                        <span asp-validation-for="IDName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Auther" class="control-label"></label>
+                        <input asp-for="Auther" class="form-control" />
+                        <span asp-validation-for="Auther" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Contact" class="control-label"></label>
+                        <input asp-for="Contact" class="form-control" />
+                        <span asp-validation-for="Contact" class="text-danger"></span>
+                    </div>
+                    <input type="hidden" asp-for="PageCount" />
+                    <div class="form-group">
+                        <label asp-for="PublishedDate" class="control-label"></label>
+                        <input asp-for="PublishedDate" class="form-control" />
+                        <span asp-validation-for="PublishedDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Tags" class="control-label"></label>
+                        <p>（カンマ区切りで複数可）</p>
+                        <input asp-for="Tags" class="form-control" />
+                        <span asp-validation-for="Tags" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="Sexy" /> @Html.DisplayNameFor(model => model.Sexy)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="Vaiolence" /> @Html.DisplayNameFor(model => model.Vaiolence)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="Grotesque" /> @Html.DisplayNameFor(model => model.Grotesque)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <input type="hidden" asp-for="LastUpdate" />
+                    <input type="hidden" asp-for="CreatedUpdate" />
+                </div>
+                <div class="book-images-content">
+                    <h2>原稿画像のアップロード</h2>
+                    <p>本のページだけが写っている画像を用意してください。
+                    デジタルの場合はそのまま、アナログの場合はスキャンした画像が望ましいですが、
+                    真上から撮影した写真でも他の映り込みが無ければ大丈夫です。</p>
+                    <p>※順番に並んでいると音声の登録がし易くなります。</p>
+                    <div id="drop-zone">
+                        <span class="here">ここに原稿画像をドロップ</span>
+                        <div id="images-list"></div>
+                    </div>
+                    <div id="open-alt-btn" class="btn-default btn"></div>
+                    <span class="text-list">▼ドラッグ＆ドロップが使えない場合,▲ドラッグ＆ドロップフォームに戻す</span>
+                    <div class="form-group" id="alt-image-upload">
+                        <p>登録したい全ての画像を一括で選択してください。（複数選択ができます。）</p>
+                        <input type="file" name="Images" multiple />
+                        <span asp-validation-for="Images" class="text-danger"></span>
+                        <ul id="alt-images-list"></ul>
+                    </div>
+
                 </div>
             </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Vaiolence" /> @Html.DisplayNameFor(model => model.Vaiolence)
-                    </label>
+            <div class="book-conform">
+
+                <h3>利用規約</h3>
+                <div class="book-agreement">
+                    <p>
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                    </p>
+                    <p class="check-wrap">
+                        <input type="checkbox" id="is-agreed" class="checkbox" /><span class="checkbox-label"> 同意する</span>
+                    </p>
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Grotesque" /> @Html.DisplayNameFor(model => model.Grotesque)
-                    </label>
+                <div class="form-group">
+                    <div value="Create" class="btn btn-default" > Create</div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-                <span asp-validation-for="Tags" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="LastUpdate" />
-            <input type="hidden" asp-for="CreatedUpdate" />
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-default" />
             </div>
         </form>
+        <script src="~/js/Sortable.js"></script>
+        <script src="~/js/kamishiba.js"></script>
     </div>
 </div>
 

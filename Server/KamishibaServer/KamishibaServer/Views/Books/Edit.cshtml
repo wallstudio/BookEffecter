@@ -13,11 +13,7 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ID" />
-            <div class="form-group">
-                <label asp-for="RegisterID" class="control-label"></label>
-                <input asp-for="RegisterID" class="form-control" readonly="readonly" />
-                <span asp-validation-for="RegisterID" class="text-danger"></span>
-            </div>
+            <input type="hidden" asp-for="RegisterID" />
             <div class="form-group">
                 <label asp-for="IDName" class="control-label"></label>
                 <input asp-for="IDName" class="form-control" readonly="readonly" />

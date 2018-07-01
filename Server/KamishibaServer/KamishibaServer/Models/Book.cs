@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -31,6 +32,7 @@ namespace KamishibaServer.Models
         [DisplayName("連絡先")]
         [Required]
         public string Contact { get; set; }
+        [DisplayName("ページ数")]
         [Required]
         public int PageCount { get; set; }
         // public int AudioCount;
@@ -39,8 +41,9 @@ namespace KamishibaServer.Models
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime PublishedDate { get; set; }
-        [DisplayName("タグ（カンマ区切りで複数可）")]
-        [MaxLength(40)]
+        [DisplayName("タグ")]
+        [RegularExpression(@"(^ *$|^( *[^!""#$%&'()\*\+\-\.,\/:;<=>?@\[\\\]^ `{|}~]+ *)( *, *[^!""#$%&'()\*\+\-\.,\/:;<=>?@\[\\\]^ `{|}~]+)* *$)")]
+        [MaxLength(100)]
         public string Tags { get; set; }
         [DisplayName("性的表現の有無")]
         public bool Sexy { get; set; }
@@ -53,6 +56,8 @@ namespace KamishibaServer.Models
 
         public DateTime LastUpdate { get; set; }
         public DateTime CreatedUpdate { get; set; }
+
+        public List<IFormFile> Images;
 
         public Book() { }
     }

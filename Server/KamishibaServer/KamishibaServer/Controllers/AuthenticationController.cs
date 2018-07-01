@@ -24,6 +24,11 @@ namespace KamishibaServer.Controllers
             _context = context;
         }
 
+        public IActionResult NeedLoginRedirect()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> Login()
         {
             var allSchemeProvider = (await authenticationSchemeProvider.GetAllSchemesAsync())

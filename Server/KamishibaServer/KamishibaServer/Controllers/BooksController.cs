@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KamishibaServer.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace KamishibaServer.Controllers
 {
@@ -45,6 +47,9 @@ namespace KamishibaServer.Controllers
         // GET: Books/Create
         public IActionResult Create()
         {
+            if (!User.Identity.IsAuthenticated)
+                return Redirect("/Authentication/NeedLoginRedirect");
+
             var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
             var book = new Book
             {
@@ -62,7 +67,10 @@ namespace KamishibaServer.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,RegisterID,IDName,Title,Auther,Contact,PageCount,PublishedDate,Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate")] Book book)
+        public async Task<IActionResult> Create(
+            [Bind("ID,RegisterID,IDName,Title,Auther,Contact,PageCount,PublishedDate," +
+                "Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate,Images")]
+            Book book, List<IFormFile> images)
         {
             if (ModelState.IsValid)
             {
@@ -74,7 +82,7 @@ namespace KamishibaServer.Controllers
             }
             return View(book);
         }
-
+        
         // GET: Books/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {

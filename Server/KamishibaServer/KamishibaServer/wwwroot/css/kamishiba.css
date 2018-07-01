@@ -13,3 +13,120 @@
 .info-container a:focus {
         color: white;
 }
+
+.book-content {
+    display: flex;
+    flex-flow: row;
+}
+.book-meta-content {
+    flex: 1 1 200px;
+    margin-right: 16px;
+    border-radius: 6px;
+    padding: 20px;
+    background-color: #EEEEEE;
+}
+.book-images-content {
+    flex: 1 1 600px;
+    border-radius: 6px;
+    padding: 10px;
+}
+#drop-zone{
+    min-height:300px;
+    width:100%;
+    background-color:#dbdbdb;
+    border-style:dashed;
+    border-radius:6px;
+    border-width:1px;
+    padding:10px;
+}
+#drop-zone > span{
+    margin:5px;
+}
+.book-conform {
+    display: block;
+    float: none;
+    margin:auto;
+    max-width: 800px
+}
+.book-agreement{
+    border-color: black;
+    border-radius: 6px;
+    padding: 10px;
+    background-color:#EEEEEE;
+}
+.check-wrap {
+    line-height: 50px;
+    text-align:center;
+}
+.book-agreement .checkbox {
+    width: 30px;
+    height: 30px;
+    margin:0 10px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.book-agreement .checkbox-label {
+    font-size: large;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal;
+}
+.book-conform .btn {
+    margin: 20px auto;
+    max-width: 200px;
+    width: 100%;
+    font-size: x-large;
+    display: block;
+}
+.book-conform .form-group{
+}
+.book-form-wrap {
+    width: 100%;
+}
+
+/* Drop zone */
+.sortable-chosen {
+    background-color: #59acdc;
+}
+#images-list {
+    overflow: hidden
+}
+.page-prev {
+    float: left;
+    width: 180px;
+    height: 250px;
+    position:relative;
+}
+.page-prev:hover {
+    background-color: #59acdc;
+}
+.page-prev img {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    object-fit: contain;
+}
+.page-prev .cancel {
+    width: 70px;
+    height: 70px;
+    position: absolute;
+    top: -8px;
+    left: 117px;
+    display:none;
+}
+
+/* Altanative */
+#open-alt-btn{
+    margin: 10px;
+}
+#alt-image-upload {
+    display: none;
+    background-color: #dbdbdb;
+    border-style: dashed;
+    border-radius: 6px;
+    border-width: 1px;
+    padding: 10px;
+}
+.text-list{
+    display:none;
+}
