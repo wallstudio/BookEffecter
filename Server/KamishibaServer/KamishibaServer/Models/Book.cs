@@ -19,7 +19,7 @@ namespace KamishibaServer.Models
         [DisplayName("ID")]
         [Required]
         [MaxLength(40)]
-        [RegularExpression(@" *[a-zA-Z0-9_-~]+ *")]
+        [RegularExpression(@"( *[a-zA-Z0-9_-~]+\.[a-zA-Z0-9_-~]+ *| *[a-zA-Z0-9_-~]+ *)")]
         public string IDName { get; set; }
         [DisplayName("本のタイトル")]
         [Required]

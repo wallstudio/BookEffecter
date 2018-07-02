@@ -79,59 +79,84 @@ namespace KamishibaServer.Controllers
                 "Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate,Images")]
             Book book, List<IFormFile> images)
         {
+            var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
             string imageErrorMessage = "";
             string idErrorMessage = "";
             if (ModelState.IsValid)
             {
-                // 画像の検証
-                if (null == images || images.Count <= 0)
-                {
-                    imageErrorMessage += "画像は1～60枚の範囲で登録してください。";
-                }
-                imageErrorMessage += await SaveImagesAsync(book.IDName, images);
+                book.IDName = book.IDName.Trim();
+
+                // IDNameが半分のチェック
+                if (book.IDName.Contains("."))
+                    imageErrorMessage += "IDは半角英数とアンダーバーしか使えません。";
 
                 // IDNameの重複チェック
                 var duplicate = _context.Book.SingleOrDefault(b => b.IDName == book.IDName);
                 if (duplicate != null)
                     idErrorMessage += "IDは既に登録されています。";
 
-                if (imageErrorMessage == "" && idErrorMessage == "")
+                if (idErrorMessage == "")
                 {
-                    var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
-                    if (book.Auther == null || book.Auther == "")
-                        book.Auther = twitterUser.Name;
-                    if (book.Contact == null || book.Contact == "")
-                        book.Contact = $"https://twitter.com/{twitterUser.ScreenName}";
-                    if (book.PublishedDate == null)
-                        book.PublishedDate = DateTime.Now.Date;
-                    book.PageCount = images.Count;
-                    book.CreatedUpdate = DateTime.Now;
-                    book.LastUpdate = DateTime.Now;
-                    book.IDName = twitterUser.ScreenName + "." + book.IDName.Trim();
-                    _context.Add(book);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+
+                    // 画像の検証
+                    if (null == images || images.Count <= 0)
+                    {
+                        imageErrorMessage += "画像は1～60枚の範囲で登録してください。";
+                    }
+                    imageErrorMessage += await SaveImagesAsync(twitterUser.ScreenName + "." + book.IDName, images);
+
+
+                    if (imageErrorMessage == "")
+                    {
+                        // エントリーの正規化
+                        if (book.Auther == null || book.Auther == "")
+                            book.Auther = twitterUser.Name;
+                        else
+                            book.Auther = book.Auther.Trim();
+
+                        if (book.Contact == null || book.Contact == "")
+                            book.Contact = $"https://twitter.com/{twitterUser.ScreenName}";
+                        else
+                            book.Contact = book.Contact.Trim();
+
+                        if (book.PublishedDate == null)
+                            book.PublishedDate = DateTime.Now.Date;
+
+                        book.PageCount = images.Count;
+                        book.CreatedUpdate = DateTime.Now;
+                        book.LastUpdate = DateTime.Now;
+                        book.IDName = twitterUser.ScreenName + "." + book.IDName;
+
+                        if (book.Tags == null) book.Tags = "";
+                        book.Tags = string.Join(",",
+                            book.Tags.Split(',').Select(s => s.Trim().Replace(" ", "_")).ToArray());
+
+                        // DBに登録
+                        _context.Add(book);
+                        if (book.Description == null) book.Description = "";
+                        else book.Description = book.Description.Trim();
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
             }
+
+            // 修正を促す
             ViewData["id_error_message"] = idErrorMessage;
             ViewData["images_error_message"] = imageErrorMessage;
-            // 修正を促す
             return View(book);
         }
 
         // GET: Books/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
             var book = await _context.Book.SingleOrDefaultAsync(m => m.ID == id);
-            if (book == null)
-            {
-                return NotFound();
-            }
+
+            if (twitterUser.ID != book.RegisterID) return NotFound();
+            if (id == null) return NotFound();
+            if (book == null) return NotFound();
+
             return View(book);
         }
 
@@ -140,18 +165,43 @@ namespace KamishibaServer.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,RegisterID,IDName,Title,Auther,Contact,PageCount,PublishedDate,Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate")] Book book)
+        public async Task<IActionResult> Edit(int id, 
+            [Bind("ID,RegisterID,IDName,Title,Auther,Contact,PageCount,PublishedDate," +
+                "Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate")]
+            Book book)
         {
-            if (id != book.ID)
-            {
-                return NotFound();
-            }
+            var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
 
+            if (twitterUser.ID != book.RegisterID) return NotFound();
+            if (book == null) return NotFound();
+            if (id != book.ID) return NotFound();
+            
             if (ModelState.IsValid)
             {
+
                 try
                 {
+                    // エントリーの正規化
+                    if (book.Auther == null || book.Auther == "")
+                        book.Auther = twitterUser.Name;
+                    else
+                        book.Auther = book.Auther.Trim();
+
+                    if (book.Contact == null || book.Contact == "")
+                        book.Contact = $"https://twitter.com/{twitterUser.ScreenName}";
+                    else
+                        book.Contact = book.Contact.Trim();
+
+                    if (book.PublishedDate == null)
+                        book.PublishedDate = DateTime.Now.Date;
+                    
                     book.LastUpdate = DateTime.Now;
+
+                    if (book.Tags == null) book.Tags = "";
+                    book.Tags = string.Join(",",
+                        book.Tags.Split(',').Select(s => s.Trim().Replace(" ", "_")).ToArray());
+                    
+                    // 更新
                     _context.Update(book);
                     await _context.SaveChangesAsync();
                 }
@@ -174,17 +224,12 @@ namespace KamishibaServer.Controllers
         // GET: Books/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
+            var book = await _context.Book.SingleOrDefaultAsync(m => m.ID == id);
 
-            var book = await _context.Book
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (book == null)
-            {
-                return NotFound();
-            }
+            if (twitterUser.ID != book.RegisterID) return NotFound();
+            if (id == null) return NotFound();
+            if (book == null) return NotFound();
 
             return View(book);
         }
@@ -194,7 +239,12 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
             var book = await _context.Book.SingleOrDefaultAsync(m => m.ID == id);
+
+            if (twitterUser.ID != book.RegisterID) return NotFound();
+            if (book == null) return NotFound();
+
             _context.Book.Remove(book);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
