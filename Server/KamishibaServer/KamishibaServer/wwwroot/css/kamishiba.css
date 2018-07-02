@@ -1,4 +1,8 @@
-﻿.info-container{
+﻿.red{
+    color: #ff7878;
+    font-weight:bold;
+}
+.info-container{
     margin: 10px;
     padding:5px 10px;
     background: #59acdc;

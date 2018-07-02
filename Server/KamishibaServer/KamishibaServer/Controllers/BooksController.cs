@@ -63,9 +63,9 @@ namespace KamishibaServer.Controllers
             var book = new Book
             {
                 RegisterID = TwitterUser.GetID(User),
-                IDName = twitterUser.ScreenName + ".",
+                IDName = "",
                 Auther = twitterUser.Name,
-                Contact = $"https:twitter.com/{twitterUser.ScreenName}",
+                Contact = $"https://twitter.com/{twitterUser.ScreenName}",
                 PublishedDate = DateTime.Now.Date
             };
             return View(book);
@@ -80,6 +80,7 @@ namespace KamishibaServer.Controllers
             Book book, List<IFormFile> images)
         {
             string imageErrorMessage = "";
+            string idErrorMessage = "";
             if (ModelState.IsValid)
             {
                 // 画像の検証
@@ -87,18 +88,32 @@ namespace KamishibaServer.Controllers
                 {
                     imageErrorMessage += "画像は1～60枚の範囲で登録してください。";
                 }
-
                 imageErrorMessage += await SaveImagesAsync(book.IDName, images);
 
-                if (imageErrorMessage == "")
+                // IDNameの重複チェック
+                var duplicate = _context.Book.SingleOrDefault(b => b.IDName == book.IDName);
+                if (duplicate != null)
+                    idErrorMessage += "IDは既に登録されています。";
+
+                if (imageErrorMessage == "" && idErrorMessage == "")
                 {
+                    var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
+                    if (book.Auther == null || book.Auther == "")
+                        book.Auther = twitterUser.Name;
+                    if (book.Contact == null || book.Contact == "")
+                        book.Contact = $"https://twitter.com/{twitterUser.ScreenName}";
+                    if (book.PublishedDate == null)
+                        book.PublishedDate = DateTime.Now.Date;
+                    book.PageCount = images.Count;
                     book.CreatedUpdate = DateTime.Now;
                     book.LastUpdate = DateTime.Now;
+                    book.IDName = twitterUser.ScreenName + "." + book.IDName.Trim();
                     _context.Add(book);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
             }
+            ViewData["id_error_message"] = idErrorMessage;
             ViewData["images_error_message"] = imageErrorMessage;
             // 修正を促す
             return View(book);

@@ -19,25 +19,21 @@ namespace KamishibaServer.Models
         [DisplayName("ID")]
         [Required]
         [MaxLength(40)]
-        [RegularExpression(@"[a-zA-Z0-9_-~]+\.[a-zA-Z0-9_-~]+")]
+        [RegularExpression(@" *[a-zA-Z0-9_-~]+ *")]
         public string IDName { get; set; }
         [DisplayName("本のタイトル")]
         [Required]
         [MaxLength(40)]
         public string Title { get; set; }
         [DisplayName("著者のペンネーム")]
-        [Required]
         [MaxLength(40)]
         public string Auther { get; set; }
         [DisplayName("連絡先")]
-        [Required]
         public string Contact { get; set; }
         [DisplayName("ページ数")]
-        [Required]
         public int PageCount { get; set; }
         // public int AudioCount;
         [DisplayName("発行日")]
-        [Required]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime PublishedDate { get; set; }
