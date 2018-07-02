@@ -101,16 +101,18 @@
                 </dl>
             </div>
             <div class="book-images-content">
-                @for (var i = 0; i < Model.PageCount; i++) {
-                <div class="page-prev">
-                    <img src="/@Model.IDName/@(i).jpg" class="page-prev-image"/>
-                </div>
+                @for (var i = 0; i < Model.PageCount; i++)
+                {
+                    <div class="page-prev">
+                        <img src="/@Model.IDName/@(i).jpg" class="page-prev-image" />
+                    </div>
                 }
             </div>
         </div>
+        <div class="nav-footer">
+            <a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.ID">編集</a> 
+            <a class="btn btn-default" asp-action="Delete" asp-route-id="@Model.ID">削除</a> 
+            <a  asp-action="Index">戻る</a>
+        </div>
     </div>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
 </div>

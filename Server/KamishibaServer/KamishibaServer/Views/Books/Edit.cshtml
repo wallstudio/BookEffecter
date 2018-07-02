@@ -9,78 +9,90 @@
 <h4>Book</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-4 book-form-wrap">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ID" />
-            <input type="hidden" asp-for="RegisterID" />
-            <div class="form-group">
-                <label asp-for="IDName" class="control-label"></label>
-                <input asp-for="IDName" class="form-control" readonly="readonly" />
-                <span asp-validation-for="IDName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Auther" class="control-label"></label>
-                <input asp-for="Auther" class="form-control" />
-                <span asp-validation-for="Auther" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Contact" class="control-label"></label>
-                <input asp-for="Contact" class="form-control" />
-                <span asp-validation-for="Contact" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="PageCount" />
-            <div class="form-group">
-                <label asp-for="PublishedDate" class="control-label"></label>
-                <input asp-for="PublishedDate" class="form-control" />
-                <span asp-validation-for="PublishedDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Tags" class="control-label"></label>
-                <input asp-for="Tags" class="form-control" />
-                <span asp-validation-for="Tags" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Sexy" /> @Html.DisplayNameFor(model => model.Sexy)
-                    </label>
+            <div class="book-content">
+                <div class="book-meta-content">
+                    <input type="hidden" asp-for="ID" />
+                    <input type="hidden" asp-for="RegisterID" />
+                    <div class="form-group">
+                        <label asp-for="IDName" class="control-label"></label>
+                        <input asp-for="IDName" class="form-control" readonly="readonly" />
+                        <span asp-validation-for="IDName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Auther" class="control-label"></label>
+                        <input asp-for="Auther" class="form-control" />
+                        <span asp-validation-for="Auther" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Contact" class="control-label"></label>
+                        <input asp-for="Contact" class="form-control" />
+                        <span asp-validation-for="Contact" class="text-danger"></span>
+                    </div>
+                    <input type="hidden" asp-for="PageCount" />
+                    <div class="form-group">
+                        <label asp-for="PublishedDate" class="control-label"></label>
+                        <input asp-for="PublishedDate" class="form-control" />
+                        <span asp-validation-for="PublishedDate" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Tags" class="control-label"></label>
+                        <input asp-for="Tags" class="form-control" />
+                        <span asp-validation-for="Tags" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="Sexy" /> @Html.DisplayNameFor(model => model.Sexy)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="Vaiolence" /> @Html.DisplayNameFor(model => model.Vaiolence)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="Grotesque" /> @Html.DisplayNameFor(model => model.Grotesque)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <input asp-for="Description" class="form-control" />
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <input type="hidden" asp-for="LastUpdate" />
+                    <input type="hidden" asp-for="CreatedUpdate" />
+
+                    <div class="form-group">
+                        <input type="submit" value="保存" class="btn btn-default" />
+                    </div>
+                </div>
+                <div class="book-images-content">
+                    @for (var i = 0; i < Model.PageCount; i++)
+                    {
+                        <div class="page-prev">
+                            <img src="/@Model.IDName/@(i).jpg" class="page-prev-image" />
+                        </div>
+                    }
                 </div>
             </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Vaiolence" /> @Html.DisplayNameFor(model => model.Vaiolence)
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Grotesque" /> @Html.DisplayNameFor(model => model.Grotesque)
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="LastUpdate" />
-            <input type="hidden" asp-for="CreatedUpdate" />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
+            <div class="nav-footer">
+                <a asp-action="Index">戻る</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 

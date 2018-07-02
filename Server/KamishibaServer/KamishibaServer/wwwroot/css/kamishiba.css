@@ -5,6 +5,9 @@
 .index-list-row:hover {
     background-color: rgba(224, 251, 255, 1);
 }
+.nav-footer{
+    margin:10px;
+}
 .info-container {
     margin: 10px;
     padding: 5px 10px;
