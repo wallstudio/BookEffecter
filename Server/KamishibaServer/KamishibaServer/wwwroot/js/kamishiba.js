@@ -121,9 +121,6 @@ window.addEventListener("load", () => {
     });
 
     // Agree
-    $(".check-wrap span").on("click", e => {
-        $("#is-agreed")[0].checked = !$("#is-agreed")[0].checked;
-    });
 
     // Altanative button 
     $("#open-alt-btn")[0].innerHTML
