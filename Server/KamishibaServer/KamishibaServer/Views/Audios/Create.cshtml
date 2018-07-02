@@ -1,0 +1,103 @@
+﻿@model KamishibaServer.Models.Audio
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h2>Create</h2>
+
+<h4>Audio</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4 book-form-wrap">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="RegisterID" />
+            <input type="hidden" asp-for="BookID" />
+            <div class="book-content">
+                <div class="book-meta-content">
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="TrackTiming" class="control-label"></label>
+                        <input asp-for="TrackTiming" class="form-control" readonly />
+                        <span asp-validation-for="TrackTiming" class="text-danger"></span>
+                    </div>
+                    <input type="hidden" asp-for="PublishedDate" />
+                    <input type="hidden" asp-for="LastUpdate" />
+                    <input type="hidden" asp-for="CreatedUpdate" />
+                </div>
+                <div class="book-images-content">
+                    <!-- 音声編集 -->
+                    <div class="book-images-content">
+                        <table class="audio-edit-table">
+                            @for (var i = 0; i < ((Book)ViewData["book"]).PageCount; i++)
+                            {
+                            <tr>
+                                <th>@(i + 1) / @(((Book)ViewData["book"]).PageCount) P</th>
+                                <td class="img-column">
+                                    <div class="page-prev-half">
+                                        <img src="/@(((Book)ViewData["book"]).IDName)/@(i).jpg"
+                                             class="page-prev-image" />
+                                    </div>
+                                </td>
+                                @if (i == 0)
+                                {
+                                    <td class="wave-wrap first-wave-cell"
+                                        rowspan="@(((Book)ViewData["book"]).PageCount)">
+                                        <div id="audio-drop-zone"><span class="here">ここに音声をドロップ</span></div>         
+                                        <div id="select-span-@i" class="select-span">
+                                            <canvas></canvas>
+                                        </div>
+                                        <div id="waveform-@i" class="waveform"></div>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="wave-wrap other-wave-cell">
+
+                                        <div id="select-span-@i" class="select-span">
+                                            <canvas></canvas>
+                                        </div>
+                                        <div id="waveform-@i" class="waveform"></div>
+                                    </td>
+                                }
+
+                            </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="book-conform">
+
+                <h3>利用規約</h3>
+                <div class="book-agreement">
+                    <p>
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                        ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+                    </p>
+                    <p class="check-wrap">
+                        <label><input type="checkbox" id="is-agreed" class="checkbox" />同意する</label>
+                    </p>
+                </div>
+                <div class="form-group">
+                    <div value="Create" class="btn btn-default"> Create</div>
+                </div>
+            </div>
+        </form>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/wavesurfer.min.js"></script>
+        <script src="~/js/kamishiba2.js"></script>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

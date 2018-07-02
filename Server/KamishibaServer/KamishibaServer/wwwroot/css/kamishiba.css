@@ -3,6 +3,12 @@
     --main-accent-color: #59acdc;
     --main-enphasize-color: #ff7878;
     --main-background-color: #dbdbdb;
+    --page-prev-width: 180px;
+    --page-prev-height: 250px;
+    --page-prev-width-half: 90px;
+    --page-prev-height-half: 125px;
+    --page-prev-width-quarter: 45px;
+    --page-prev-height-quarter: 64px;
 }
 
 /* Common */
@@ -78,8 +84,8 @@
 }
 .page-prev {
     float: left;
-    width: 180px;
-    height: 250px;
+    width: var(--page-prev-width);
+    height: var(--page-prev-height);
     position:relative;
 }
 .page-prev:hover {
@@ -104,7 +110,7 @@
 }
 
 /* Altanative */
-#open-alt-btn{
+#open-alt-btn {
     margin: 10px;
 }
 #alt-image-upload {
@@ -114,6 +120,73 @@
     border-radius: 6px;
     border-width: 1px;
     padding: 10px;
+}
+
+/* Audio Edit */
+.audio-edit-table{
+    width: 100%;
+}
+.audio-edit-table .img-column {
+    width: var(--page-prev-width-quarter);
+}
+.audio-edit-table th {
+    width: var(--page-prev-width-quarter);
+}
+.wave-wrap {
+    position: relative;
+}
+.select-span > canvas {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+.select-span {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    pointer-events: none;
+    z-index:10;
+}
+.waveform {
+    width: 100%;
+    border-style: dashed;
+    border-radius: 6px;
+    border-width: 1px;
+    cursor: text;
+}
+.page-prev-half {
+    float: left;
+    width: var(--page-prev-width-quarter);
+    height: var(--page-prev-height-quarter);
+    position: relative;
+}
+.page-prev-half img {
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    object-fit: contain;
+}
+
+/* Audio drop zone*/
+#audio-drop-zone {
+    height: 100%;
+    width: 100%;
+    background-color: var(--main-background-color);
+    border-style: dashed;
+    border-radius: 6px;
+    border-width: 1px;
+    padding: 10px;
+    margin:10px;
+}
+#audio-drop-zone span {
+    margin: 5px;
+}
+.first-wave-cell .waveform, .first-wave-cell .select-span {
+    display: none;
+}
+.other-wave-cell {
+    display: none;
 }
 
 /* Agreement */

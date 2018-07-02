@@ -40,5 +40,7 @@ namespace KamishibaServer.Models
         }
 
         public DbSet<KamishibaServer.Models.Book> Book { get; set; }
+
+        public DbSet<KamishibaServer.Models.Audio> Audio { get; set; }
     }
 }
