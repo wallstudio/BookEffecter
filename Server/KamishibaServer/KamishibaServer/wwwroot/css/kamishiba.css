@@ -13,8 +13,8 @@
 
 /* Common */
 .red{
-    color: var(--main-enphasize-color)
-    font-weight:bold;
+    color: var(--main-enphasize-color);
+    font-weight: bold;
 }
 .text-list {
     display: none;
