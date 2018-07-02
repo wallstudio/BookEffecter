@@ -109,10 +109,17 @@
                 }
             </div>
         </div>
+        <div class="book-conform">
+            <div class="form-group">
+                <a asp-controller="Audios" asp-action="Create" asp-route-id="@Model.ID">
+                    <div value="Create" class="btn btn-default"> 音声を追加</div>
+                </a>
+            </div>
+        </div>
         <div class="nav-footer">
-            <a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.ID">編集</a> 
-            <a class="btn btn-default" asp-action="Delete" asp-route-id="@Model.ID">削除</a> 
-            <a  asp-action="Index">戻る</a>
+            <a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.ID">編集</a>
+            <a class="btn btn-default" asp-action="Delete" asp-route-id="@Model.ID">削除</a>
+            <a asp-action="Index">戻る</a>
         </div>
     </div>
 </div>
