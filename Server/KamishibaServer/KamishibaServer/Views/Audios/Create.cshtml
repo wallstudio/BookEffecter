@@ -53,7 +53,16 @@
                                 {
                                     <td class="wave-wrap first-wave-cell"
                                         rowspan="@(((Book)ViewData["book"]).PageCount)">
-                                        <div id="audio-drop-zone"><span class="here">ここに音声をドロップ</span></div>
+                                        <div id="audio-drop-zone">
+                                            <div class="audio-upload-method">
+                                                <p><span class="here">ここに音声をドロップ</span></p>
+                                            </div>
+
+                                            <div class="audio-upload-method">
+                                                <p>（ドラッグ＆ドロップが使えない場合）</p>
+                                                <p><input type="file" name="AudioFiles" id="alt-audio-upload" /></p>
+                                            </div>
+                                        </div>
                                         <div id="select-span-@i" class="select-span">
                                             <canvas></canvas>
                                         </div>

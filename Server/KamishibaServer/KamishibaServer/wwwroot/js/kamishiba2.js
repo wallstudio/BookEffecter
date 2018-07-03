@@ -5,13 +5,11 @@
     let rowHeight = parseInt($(".page-prev-half").css("height"));
     let margin = parseInt($("#audio-drop-zone").css("margin-top"));
     $("#audio-drop-zone").css("height", rowCount * rowHeight - margin * 2);
-    
-    $("#audio-drop-zone").on("drop", e => {
-        e.preventDefault();
+
+    let loadFile = files => {
         // デザイン
         $(this).css("border", "2px dotted #0B85A1");
         // ロジック
-        let files = e.originalEvent.dataTransfer.files;
         if (!files || files.length != 1) {
             alert("読み込めるファイルは1つだけです。")
             return;
@@ -42,6 +40,7 @@
             hideScrollbar: true,
             normalize: true,
             responsive: true,
+            closeAudioContext: true,
             plugins: [
                 WaveSurfer.timeline.create({
                     container: "#wave-timeline1"
@@ -77,6 +76,8 @@
             let tlGraphic = originalTLCanvas.getContext("2d")
                 .getImageData(0, 0, originalTLCanvas.width, originalTLCanvas.height);;
             tLCanvas.getContext("2d").putImageData(tlGraphic, 0, 0);
+
+            ig = wavesurfer.exportImage();
         };
         let stateCopy = () => {
             let originalStyle = $("#waveform-0 > wave > wave");
@@ -87,93 +88,147 @@
                 }
             });
         };
-        
+
         // ReadyしてもすぐにCanvasが描画されない？
-        let isGraphicInited = -5;
+        let graphicCopyLoop;
         wavesurfer.on("ready", () => {
             graphicCopy();
-            wavesurfer.play();
+            // 力業💛
+            graphicCopyLoop = setInterval(graphicCopy, 500);
         });
-        wavesurfer.on("audioprocess", () => {
-            if (isGraphicInited < 0) {
-                graphicCopy();
-                isGraphicInited ++;
-            }
-            stateCopy();
-        });
+        wavesurfer.on("audioprocess", stateCopy);
         wavesurfer.on("seek", stateCopy);
 
-        // 選択領域のキャンバスの初期化
-        $(".select-span canvas").each((i, e) => {
-            e.setAttribute("width", $(e).css("width"));
-            e.setAttribute("height", $(e).css("height"));
-        });
-
-        // コピーのシーク操作戻し
+        // UIの設定
         let clickStatus = [];
         let dragStatus = [];
         let startEnd = [];
-        $(".waveform").each((i, e) => {
-            clickStatus.push(false);
-            dragStatus.push(false);
-            startEnd.push([0, 0]);
-            let selectSpan = $("#select-span-" + i + " canvas")[0];
-            let selectSpanContext = selectSpan.getContext("2d");
-            selectSpanContext.globalAlpha = 0.4;
-            let x;
-            $(e).mousedown(me => {
-                me.offsetX += 3;
-                x = me.offsetX;
-                clickStatus[i] = true;
-            }).mouseup(me => {
-                me.offsetX += 3;
-                let delta = x - me.offsetX;
-                let seek = x / $(e).find("wave > canvas")[0].width;
-                if (clickStatus && Math.abs(delta) <= 2) {
-                    wavesurfer.seekTo(seek);
-                    wavesurfer.play();
-                } else if (dragStatus[i]) {
-                    let p0 = x / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
-                    let p1 = me.offsetX / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
-                    wavesurfer.play(Math.min(p0, p1), Math.max(p0, p1));
-                }
-                clickStatus.fill(false);
-                dragStatus.fill(false);
-            }).mouseleave(me => {
-                me.offsetX += 3;
-                if (dragStatus[i]) {
-                    let p0 = x / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
-                    let p1 = me.offsetX / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
-                    wavesurfer.play(Math.min(p0, p1), Math.max(p0, p1));
-                }
-                clickStatus.fill(false);
-                dragStatus.fill(false);
-            }).mousemove(me => {
-                me.offsetX += 3;
-                if (!clickStatus[i]) return;
-                let delta = x - me.offsetX;
-                if (Math.abs(delta) > 2) {
-                    dragStatus.fill(false);
-                    dragStatus[i] = true;
-                    selectSpanContext.clearRect(0, 0, selectSpan.width, selectSpan.height);
-                    selectSpanContext.fillStyle = "rgb(64, 255, 128)";
-                    selectSpanContext.fillRect(x, 0, -delta, selectSpan.height);
-
-                    let p0 = x / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
-                    let p1 = me.offsetX / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
-                    startEnd[i] = [Math.min(p0, p1).toFixed(1), Math.max(p0, p1).toFixed(1)];
-                    $("#TrackTiming")[0].value =
-                        "[" + startEnd.map(de => de.join(", ")).join(", ") + "]";
-                }
+        let resizeTask;
+        let configSelescSpan = () => {
+            // 選択領域のキャンバスの初期化
+            $(".select-span canvas").each((i, e) => {
+                e.setAttribute("width", $(e).css("width"));
+                e.setAttribute("height", $(e).css("height"));
             });
-        });
 
-        $(e.target).css("display", "none");
-        //$("#waveform").css("display", "block");
+            // コピーのシーク操作戻し
+            $(".waveform").each((i, e) => {
+                clickStatus.push(false);
+                dragStatus.push(false);
+                startEnd.push([0, 0]);
+                let selectSpan = $("#select-span-" + i + " canvas")[0];
+                let selectSpanContext = selectSpan.getContext("2d");
+                selectSpanContext.globalAlpha = 0.4;
+                let x;
+                $(e).mousedown(me => {
+                    me.offsetX += 3;
+                    x = me.offsetX;
+                    clickStatus[i] = true;
+                }).mouseup(me => {
+                    me.offsetX += 3;
+                    let delta = x - me.offsetX;
+                    let seek = x / $(e).find("wave > canvas")[0].width;
+                    if (clickStatus && Math.abs(delta) <= 2) {
+                        wavesurfer.seekTo(seek);
+                        wavesurfer.play();
+                    } else if (dragStatus[i]) {
+                        let p0 = x / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
+                        let p1 = me.offsetX / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
+                        wavesurfer.play(Math.min(p0, p1), Math.max(p0, p1));
+                    }
+                    clickStatus.fill(false);
+                    dragStatus.fill(false);
+                }).mouseleave(me => {
+                    me.offsetX += 3;
+                    if (dragStatus[i]) {
+                        let p0 = x / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
+                        let p1 = me.offsetX / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
+                        wavesurfer.play(Math.min(p0, p1), Math.max(p0, p1));
+                    }
+                    clickStatus.fill(false);
+                    dragStatus.fill(false);
+                }).mousemove(me => {
+                    me.offsetX += 3;
+                    if (!clickStatus[i]) return;
+                    let delta = x - me.offsetX;
+                    if (Math.abs(delta) > 2) {
+                        dragStatus.fill(false);
+                        dragStatus[i] = true;
+                        selectSpanContext.clearRect(0, 0, selectSpan.width, selectSpan.height);
+                        selectSpanContext.fillStyle = "rgb(64, 255, 128)";
+                        selectSpanContext.fillRect(x, 0, -delta, selectSpan.height);
+
+                        let p0 = x / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
+                        let p1 = me.offsetX / $(e).find("wave > canvas")[0].width * wavesurfer.getDuration();
+                        startEnd[i] = [Math.min(p0, p1).toFixed(1), Math.max(p0, p1).toFixed(1)];
+                        $("#TrackTiming")[0].value =
+                            "[" + startEnd.map(de => de.join(", ")).join(", ") + "]";
+                    }
+                });
+            });
+        }
+        let unConfigSelectSpan = () => {
+            $(".waveform").each((i, e) => {
+                $(e).unbind("mousedown").unbind("mouseup")
+                    .unbind("mouseleave").unbind("mousemove");
+            });
+        };
+        let refrectFromData = (dataStr) => {
+            let dataSeq = dataStr.replace(/[\[\]]/, "").split(",");
+            let data = [];
+            for (let i = 0; i < Math.floor(dataStr.length / 2); i++) {
+                data[i] = [parseFloat(dataSeq[i * 2]), parseFloat(dataSeq[i * 2 + 1])];
+            }
+            $(".waveform").each((i, e) => {
+                if (i >= data.length) return;
+                let start = data[i][0];
+                let end = data[i][1]
+                let selectSpan = $("#select-span-" + i + " canvas")[0];
+                let selectSpanContext = selectSpan.getContext("2d");
+                let a = start * $(e).find("wave > canvas")[0].width / wavesurfer.getDuration();
+                let b = end * $(e).find("wave > canvas")[0].width / wavesurfer.getDuration();
+                selectSpanContext.globalAlpha = 0.4;
+                selectSpanContext.clearRect(0, 0, selectSpan.width, selectSpan.height);
+                selectSpanContext.fillStyle = "rgb(64, 255, 128)";
+                selectSpanContext.fillRect(a, 0, b - a, selectSpan.height);
+            });
+        };
+        unConfigSelectSpan();
+        configSelescSpan();
+        //$(window).resize(() => {
+        //    if (resizeTask) clearInterval(resizeTask);
+        //    resizeTask = setTimeout(() => {
+        //        unConfigSelectSpan();
+        //        configSelescSpan();
+        //        refrectFromData($("#TrackTiming")[0].value);
+        //        console.log("Kamishiba: Resize window.");
+        //    }, 100);
+        //});
+
+        $("#audio-drop-zone").css("display", "none");
 
         wavesurfer.load(blobUrl);
+
+        // ページを閉じてもオーディオが解放されないときがある（高負荷時？）
+        // 本来解放されるはずなので…気休めに
+        $(window).on("beforeunload", () => {
+            clearInterval(graphicCopyLoop);
+            wavesurfer.stop();
+            wavesurfer.destroy();
+            console.log("Kamishiba: Destroy audio.");
+            return;
+        });
+
         console.log("Kamishiba: Loaded audio & converted " + files.length)
-    })
+    }
+
+    $("#audio-drop-zone").on("drop", e => {
+        e.preventDefault();
+        loadFile(e.originalEvent.dataTransfer.files);
+    });
+    $("#alt-audio-upload").on("change", e => {
+        loadFile(e.target.files);
+    });
 
     $("#audio-drop-zone").on('dragenter', e => {
         e.stopPropagation();
