@@ -8,9 +8,10 @@
 
 <h4>Audio</h4>
 <hr />
+<p>フォームへ入力と、音声の登録をしてください。</p>
 <div class="row">
     <div class="col-md-4 book-form-wrap">
-        <form asp-action="Create">
+        <form asp-action="Create" id="audio-upload-from">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="RegisterID" />
             <input type="hidden" asp-for="BookID" />
@@ -33,6 +34,13 @@
                 <div class="book-images-content">
                     <!-- 音声編集 -->
                     <div class="book-images-content">
+                        <h2>音声のアップロード</h2>
+                        <p>
+                            一続きの音声をアップロードします。
+                            ページごとに流したい範囲をドラッグで指定します。
+                        </p>
+                        <p>※ページは2ページずつ開かれる為、アプリの設定によっては2ページ束ねて再生されます。</p>
+                        <span class="text-danger field-validation-error">@ViewData["audio_error_message"]</span>
                         <table class="audio-edit-table">
                             <tr>
                                 <td></td>
@@ -41,46 +49,46 @@
                             </tr>
                             @for (var i = 0; i < ((Book)ViewData["book"]).PageCount; i++)
                             {
-                            <tr>
-                                <th>@(i + 1) / @(((Book)ViewData["book"]).PageCount) P</th>
-                                <td class="img-column">
-                                    <div class="page-prev-half">
-                                        <img src="/@(((Book)ViewData["book"]).IDName)/@(i).jpg"
-                                                class="page-prev-image" />
-                                    </div>
-                                </td>
-                                @if (i == 0)
-                                {
-                                    <td class="wave-wrap first-wave-cell"
-                                        rowspan="@(((Book)ViewData["book"]).PageCount)">
-                                        <div id="audio-drop-zone">
-                                            <div class="audio-upload-method">
-                                                <p><span class="here">ここに音声をドロップ</span></p>
-                                            </div>
-
-                                            <div class="audio-upload-method">
-                                                <p>（ドラッグ＆ドロップが使えない場合）</p>
-                                                <p><input type="file" name="AudioFiles" id="alt-audio-upload" /></p>
-                                            </div>
+                                <tr>
+                                    <th>@(i + 1) / @(((Book)ViewData["book"]).PageCount) P</th>
+                                    <td class="img-column">
+                                        <div class="page-prev-half">
+                                            <img src="/@(((Book)ViewData["book"]).IDName)/@(i).jpg"
+                                                 class="page-prev-image" />
                                         </div>
-                                        <div id="select-span-@i" class="select-span">
-                                            <canvas></canvas>
-                                        </div>
-                                        <div id="waveform-@i" class="waveform"></div>
                                     </td>
-                                }
-                                else
-                                {
-                                    <td class="wave-wrap other-wave-cell">
+                                    @if (i == 0)
+                                    {
+                                        <td class="wave-wrap first-wave-cell"
+                                            rowspan="@(((Book)ViewData["book"]).PageCount)">
+                                            <div id="audio-drop-zone">
+                                                <div class="audio-upload-method">
+                                                    <p><span class="here">ここに音声をドロップ</span></p>
+                                                </div>
 
-                                        <div id="select-span-@i" class="select-span">
-                                            <canvas></canvas>
-                                        </div>
-                                        <div id="waveform-@i" class="waveform"></div>
-                                    </td>
-                                }
+                                                <div class="audio-upload-method">
+                                                    <p>（ドラッグ＆ドロップが使えない場合）</p>
+                                                    <p><input type="file" name="AudioFiles" id="alt-audio-upload" /></p>
+                                                </div>
+                                            </div>
+                                            <div id="select-span-@i" class="select-span">
+                                                <canvas></canvas>
+                                            </div>
+                                            <div id="waveform-@i" class="waveform"></div>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="wave-wrap other-wave-cell">
 
-                            </tr>
+                                            <div id="select-span-@i" class="select-span">
+                                                <canvas></canvas>
+                                            </div>
+                                            <div id="waveform-@i" class="waveform"></div>
+                                        </td>
+                                    }
+
+                                </tr>
                             }
                             <tr>
                                 <td></td>

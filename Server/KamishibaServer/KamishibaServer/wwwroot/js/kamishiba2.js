@@ -1,4 +1,6 @@
-﻿window.addEventListener("load", () => {
+﻿
+var GlobalAudio = {};
+window.addEventListener("load", () => {
 
     // 
     let rowCount = $(".wave-wrap").length;
@@ -20,6 +22,9 @@
             alert("読み込める音声は MP3 または WAV だけです。もしくはファイルが破損している可能性があります。")
             return;
         }
+
+        GlobalAudio["file"] = file;
+        GlobalAudio["extension"] = file.type == "audio/mpeg" ? ".mp3" : "wav";
 
         $("#audio-drop-zone").css("display", "none");
         $(".first-wave-cell .select-span").css("display", "block");
@@ -245,5 +250,47 @@
         e.stopPropagation();
         e.preventDefault();
     });
+
+    // Send Button
+    $(".book-conform .btn").on("click", e => {
+
+        if (!$("#is-agreed")[0].checked) {
+            alert("同意するにチェックを入れてください。");
+            return;
+        }
+        
+        let formData = new FormData($("#audio-upload-from")[0]);
+        console.log("Kamishiba: Upload audio blob");
+        console.log(GlobalAudio["file"]);
+        formData.append("AudioFiles", GlobalAudio["file"], "" + GlobalAudio["extension"]);
+
+        $.ajax({
+            url: $("#audio-upload-from")[0].getAttribute("action"),
+            method: 'post',
+            dataType: 'html',
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(res => {
+            console.log('Kamishiba: AJAX SUCCESS');
+            let meta = $(res).find(".book-meta-content")[0];
+            let img = $(res).find(".book-images-content .field-validation-error")[0];
+
+            if (!meta || !img) {
+                $("html")[0].innerHTML = res;
+                history.pushState('', '', '/Books/Index');
+            }
+
+            let preMeta = $(".book-meta-content")[0];
+            let preImg = $(".book-images-content .field-validation-error")[0];
+            preMeta.innerHTML = meta.innerHTML;
+            preImg.innerHTML = img.innerHTML;
+            scrollTo(0, 0);
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            console.log('Kamishiba: AJAX ERROR', jqXHR, textStatus, errorThrown);
+        });
+    });
+
+
     console.log("Kamishiba: Drop zone was initialized.");
 });

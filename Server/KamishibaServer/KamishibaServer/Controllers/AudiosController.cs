@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KamishibaServer.Models;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace KamishibaServer.Controllers
 {
@@ -70,7 +72,8 @@ namespace KamishibaServer.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,RegisterID,BookID,Title,TrackTiming,PublishedDate,LastUpdate,CreatedUpdate")] Audio audio)
+        public async Task<IActionResult> Create([Bind("ID,RegisterID,BookID,Title,TrackTiming," +
+            "PublishedDate,LastUpdate,CreatedUpdate")] Audio audio, IFormFile audioFiles)
         {
             if (ModelState.IsValid)
             {
@@ -166,4 +169,5 @@ namespace KamishibaServer.Controllers
             return _context.Audio.Any(e => e.ID == id);
         }
     }
+
 }
