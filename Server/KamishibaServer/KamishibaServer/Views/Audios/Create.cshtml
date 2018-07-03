@@ -34,6 +34,11 @@
                     <!-- 音声編集 -->
                     <div class="book-images-content">
                         <table class="audio-edit-table">
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td><div id="wave-timeline1" class="wave-timeline"></div></td>
+                            </tr>
                             @for (var i = 0; i < ((Book)ViewData["book"]).PageCount; i++)
                             {
                             <tr>
@@ -41,14 +46,14 @@
                                 <td class="img-column">
                                     <div class="page-prev-half">
                                         <img src="/@(((Book)ViewData["book"]).IDName)/@(i).jpg"
-                                             class="page-prev-image" />
+                                                class="page-prev-image" />
                                     </div>
                                 </td>
                                 @if (i == 0)
                                 {
                                     <td class="wave-wrap first-wave-cell"
                                         rowspan="@(((Book)ViewData["book"]).PageCount)">
-                                        <div id="audio-drop-zone"><span class="here">ここに音声をドロップ</span></div>         
+                                        <div id="audio-drop-zone"><span class="here">ここに音声をドロップ</span></div>
                                         <div id="select-span-@i" class="select-span">
                                             <canvas></canvas>
                                         </div>
@@ -68,6 +73,11 @@
 
                             </tr>
                             }
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td><div id="wave-timeline2" class="wave-timeline"></div></td>
+                            </tr>
                         </table>
                     </div>
                 </div>
@@ -92,7 +102,8 @@
                 </div>
             </div>
         </form>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/wavesurfer.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/wavesurfer.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/plugin/wavesurfer.timeline.min.js"></script>
         <script src="~/js/kamishiba2.js"></script>
     </div>
 </div>

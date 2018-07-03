@@ -40,11 +40,13 @@
             barWidth: 2,
             cursorWidth: 1,
             hideScrollbar: true,
-            normalize: true
-        });
-        wavesurfer.load(blobUrl);
-        wavesurfer.on("ready", () => {
-            wavesurfer.play();
+            normalize: true,
+            responsive: true,
+            plugins: [
+                WaveSurfer.timeline.create({
+                    container: "#wave-timeline1"
+                })
+            ]
         });
 
         // 各行にコピー
@@ -66,10 +68,40 @@
                     fgCanvas.getContext("2d").putImageData(fgData, 0, 0);
                 }
             });
+
+            let originalTLHtml = $("#wave-timeline1")[0];
+            let tLHtml = $("#wave-timeline2")[0];
+            tLHtml.innerHTML = originalTLHtml.innerHTML;
+            let originalTLCanvas = $("#wave-timeline1 canvas")[0];
+            let tLCanvas = $("#wave-timeline2 canvas")[0];
+            let tlGraphic = originalTLCanvas.getContext("2d")
+                .getImageData(0, 0, originalTLCanvas.width, originalTLCanvas.height);;
+            tLCanvas.getContext("2d").putImageData(tlGraphic, 0, 0);
         };
-        wavesurfer.on("ready", graphicCopy);
-        wavesurfer.on("audioprocess", graphicCopy);
-        wavesurfer.on("seek", graphicCopy);
+        let stateCopy = () => {
+            let originalStyle = $("#waveform-0 > wave > wave");
+            $(".waveform").each((i, e) => {
+                if (i > 0) {
+                    let style = $("#waveform-" + i + " > wave > wave");
+                    style.css("width", originalStyle.css("width"));
+                }
+            });
+        };
+        
+        // ReadyしてもすぐにCanvasが描画されない？
+        let isGraphicInited = -5;
+        wavesurfer.on("ready", () => {
+            graphicCopy();
+            wavesurfer.play();
+        });
+        wavesurfer.on("audioprocess", () => {
+            if (isGraphicInited < 0) {
+                graphicCopy();
+                isGraphicInited ++;
+            }
+            stateCopy();
+        });
+        wavesurfer.on("seek", stateCopy);
 
         // 選択領域のキャンバスの初期化
         $(".select-span canvas").each((i, e) => {
@@ -139,6 +171,7 @@
         $(e.target).css("display", "none");
         //$("#waveform").css("display", "block");
 
+        wavesurfer.load(blobUrl);
         console.log("Kamishiba: Loaded audio & converted " + files.length)
     })
 
@@ -157,4 +190,5 @@
         e.stopPropagation();
         e.preventDefault();
     });
+    console.log("Kamishiba: Drop zone was initialized.");
 });

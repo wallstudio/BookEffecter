@@ -167,6 +167,9 @@
     padding: 0px;
     object-fit: contain;
 }
+.wave-timeline {
+    height:20px;
+}
 
 /* Audio drop zone*/
 #audio-drop-zone {
