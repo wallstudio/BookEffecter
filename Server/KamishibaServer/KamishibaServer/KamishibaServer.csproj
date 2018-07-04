@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="CoreTweet" Version="0.9.0.415" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.3" />
     <PackageReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
@@ -19,4 +20,9 @@
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="GroovyCodecs">
+      <HintPath>GroovyCodecs.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

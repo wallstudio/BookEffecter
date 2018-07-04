@@ -33,3 +33,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 This work is licensed under a BSD 3-Clause License.
 
 https://opensource.org/licenses/BSD-3-Clause
+
+### GroovyCodecs
+
+Released under the LGPL v3.0.
+
+https://www.gnu.org/licenses/lgpl-3.0.ja.html

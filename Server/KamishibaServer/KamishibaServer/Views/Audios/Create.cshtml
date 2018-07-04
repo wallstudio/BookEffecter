@@ -13,6 +13,7 @@
     <div class="col-md-4 book-form-wrap">
         <form asp-action="Create" id="audio-upload-from">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
             <input type="hidden" asp-for="RegisterID" />
             <input type="hidden" asp-for="BookID" />
             <div class="book-content">
@@ -47,7 +48,7 @@
                                 <td></td>
                                 <td><div id="wave-timeline1" class="wave-timeline"></div></td>
                             </tr>
-                            @for (var i = 0; i < ((Book)ViewData["book"]).PageCount; i++)
+                            @for (var i = 0; ViewData["book"] != null && i < ((Book)ViewData["book"]).PageCount; i++)
                             {
                                 <tr>
                                     <th>@(i + 1) / @(((Book)ViewData["book"]).PageCount) P</th>
