@@ -3,8 +3,7 @@
 window.addEventListener("load", () => {
 
     // Drop-zone
-    const MAX_WIDTH = 340;
-    const MAX_HEIGHT = 480;
+    const MAX_WIDTH = 1920;
     
     $("#drop-zone").on("drop", e => {
         e.preventDefault();
@@ -16,15 +15,19 @@ window.addEventListener("load", () => {
             alert("一度に読み込める画像は30舞までです。")
             return;
         };
+        let sortedFiles = [];
         for (let i = 0; i < files.length; i++) {
             if (files[i].type != 'image/jpeg' && files[i].type != 'image/png') {
                 alert("読み込める画像はJEPGまたはPNGだけです。もしくはファイルが破損している可能性があります。")
                 return;
             }
+            sortedFiles.push(files[i]);
         }
+        sortedFiles.sort((a, b) => a.name > b.name ? 1 : -1);
 
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
+        let domBuffer = [];
+        for (let i = 0; i < sortedFiles.length; i++) {
+            let file = sortedFiles[i];
             if (!file) return;
             if (file.type != 'image/jpeg' && file.type != 'image/png') return;
 
@@ -32,30 +35,35 @@ window.addEventListener("load", () => {
             let image = new Image();
             let reader = new FileReader();
 
+            let resized = false;
             reader.onload = f => {
                 image.onload = () => {
-                    let w, h;
-                    if (image.width > image.height) {
-                        let aspect = image.height / image.width;
-                        w = MAX_WIDTH;
-                        h = MAX_WIDTH * aspect;
-                    } else {
-                        let aspect = image.width / image.height;
-                        w = MAX_HEIGHT * aspect;
-                        h = MAX_HEIGHT;
-                    }
+                    // 大きすぎる画像を送られないように
+                    if (image.width > MAX_WIDTH || image.width > MAX_WIDTH) {
+                        resized = true;
+                        let w, h;
+                        if (image.width > image.height) {
+                            let aspect = image.height / image.width;
+                            w = MAX_WIDTH;
+                            h = MAX_WIDTH * aspect;
+                        } else {
+                            let aspect = image.width / image.height;
+                            w = MAX_WIDTH * aspect;
+                            h = MAX_WIDTH;
+                        }
 
-                    canvas.width = w;
-                    canvas.height = h;
-                    canvas.getContext("2d").drawImage(image, 0, 0, image.width, image.height, 0, 0, w, h);
-                    let dataurl = canvas.toDataURL('image/jpeg');
-                    let bin = atob(dataurl.split(',')[1]);
-                    let buffer = new Uint8Array(bin.length);
-                    for (let j = 0; j < bin.length; j++) {
-                        buffer[j] = bin.charCodeAt(j);
+                        canvas.width = w;
+                        canvas.height = h;
+                        canvas.getContext("2d").drawImage(image, 0, 0, image.width, image.height, 0, 0, w, h);
+                        let dataurl = canvas.toDataURL('image/jpeg');
+                        let bin = atob(dataurl.split(',')[1]);
+                        let buffer = new Uint8Array(bin.length);
+                        for (let j = 0; j < bin.length; j++) {
+                            buffer[j] = bin.charCodeAt(j);
+                        }
+                        let blob = new Blob([buffer.buffer], { type: 'image/jpeg' });
+                        file = blob;
                     }
-                    let blob = new Blob([buffer.buffer], { type: 'image/jpeg' });
-                    file = blob;
 
                     let id = (("00000000" + Math.floor(Math.abs(Math.random() * (1 << 31))).toString(16)).slice(-8)
                         + ("00000000" + Math.floor(Math.abs(Math.random() * (1 << 31))).toString(16)).slice(-8)).toUpperCase();
@@ -92,13 +100,22 @@ window.addEventListener("load", () => {
                     }, e => {
                         $(e.target).css("display", "none");
                     });
-                    $("#images-list").append(div.append(img).append(cancel));
+                    // 画像のロードの待ち合わせ
+                    domBuffer.push({ index: i, dom: div.append(img).append(cancel) });
+                    if (domBuffer.length >= sortedFiles.length) {
+                        domBuffer.forEach((e, i, a) => {
+                            let dom = domBuffer.filter(v => v.index == i)[0].dom;
+                            $("#images-list").append(dom)
+                        });
+                        console.log("Kamishiba: Placed images " + domBuffer.length);
+                    }
                 }
                 image.src = f.target.result;
             }
             reader.readAsDataURL(file);
 
-            console.log("Kamishiba: Loaded image & resized " + (i+1) + "/" + files.length)
+            console.log("Kamishiba: Loaded image " + (resized ? "& resized " : " ")
+                + (i + 1) + "/" + files.length + " \"" + file.name + "\"");
         }
 
         Sortable.create($("#images-list")[0], { animation: 100 });

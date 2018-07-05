@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace KamishibaServer.Controllers
 {
@@ -231,6 +232,11 @@ namespace KamishibaServer.Controllers
             return context.Book.Any(e => e.ID == id);
         }
 
+        public const int IMAGE_SIZE = 480;
+        public const double IMAGE_MAX_ASPECT = 17 / 9;
+        public const string JPG_EXTENTION = ".jpg";
+        public const string PNG_EXTENTION = ".png";
+        public const string TMP_EXTENTION = ".tmp";
         private async Task<string> SaveImagesAsync(string id, List<IFormFile> images)
         {
             var dir = "wwwroot" + Path.DirectorySeparatorChar + id;
@@ -244,7 +250,10 @@ namespace KamishibaServer.Controllers
             for (var i = 0; i < images.Count(); i++)
             {
                 var image = images[i];
-                var path = dir + Path.DirectorySeparatorChar + i + ".jpg";
+                var dirName = dir + Path.DirectorySeparatorChar + i;
+                if (System.IO.File.Exists(dirName + JPG_EXTENTION))
+                    return "重複があります。トップページからやり直してください。";
+
                 try
                 {
                     if (image.Length <= 0)
@@ -252,28 +261,39 @@ namespace KamishibaServer.Controllers
                     if (image.Length > 2000000)
                         throw new Exception($"ファイルが2MBを超えています。（{id}_{i}）");
 
-                    using (var stream = new FileStream(path, FileMode.Create))
+                    string extention;
+                    using (var stream = new FileStream(dirName + TMP_EXTENTION, FileMode.Create))
+                    {
                         await image.CopyToAsync(stream);
+                    }
 
-                    using (var img = Image.FromFile(path))
+                    // フォーマットとサイズ解析
+                    using (var img = Image.FromFile(dirName + TMP_EXTENTION))
                     using (var bmp = new Bitmap(img))
                     {
-                        if (!img.RawFormat.Equals(ImageFormat.Jpeg))
+                        if (img.RawFormat.Equals(ImageFormat.Png))
+                            extention = PNG_EXTENTION;
+                        else if (img.RawFormat.Equals(ImageFormat.Jpeg))
+                            extention = JPG_EXTENTION;
+                        else
                             throw new Exception($"JPEG画像でアップロードしなおしてみてください。（{id}_{i}）");
 
-                        if (bmp.Width < 300 || bmp.Height < 400)
+                        if (bmp.Width < IMAGE_SIZE || bmp.Height < IMAGE_SIZE)
                             throw new Exception($"画像が小さすぎます。{bmp.Width}x{bmp.Height} （{id}_{i}）");
 
-                        if (bmp.Width > 340 && bmp.Height > 480)
-                            Normalize(path);
+                        double aspect = Math.Max(bmp.Width, bmp.Height) / Math.Min(bmp.Width, bmp.Height);
+                        if (aspect > IMAGE_MAX_ASPECT)
+                            throw new Exception($"16:9よりも正方形に近い画像にしてください。 アスペクト比:{aspect.ToString("#0.00")} （{id}_{i}）");
                     }
+
+                    ConvertAny2Jpeg(dirName);
                 }
-                catch (IOException e)
+                catch (IOException)
                 {
                     Directory.Delete(dir, true);
                     return $"保存できませんでした。管理者にお問い合わせください。（{id}_{i}）";
                 }
-                catch(OutOfMemoryException e)
+                catch(OutOfMemoryException)
                 {
                     Directory.Delete(dir, true);
                     return $"画像ファイルではないようです。もしくは破損している可能性があります。（{id}_{i}）";
@@ -283,13 +303,39 @@ namespace KamishibaServer.Controllers
                     Directory.Delete(dir, true);
                     return e.Message;
                 }
+                finally
+                {
+                    if (System.IO.File.Exists(dirName + TMP_EXTENTION))
+                        System.IO.File.Delete(dirName + TMP_EXTENTION);
+                }
             }
             return "";
         }
 
-        private void Normalize(string path)
+        private void ConvertAny2Jpeg(string dirName)
         {
+            using (var src = new Bitmap(dirName + TMP_EXTENTION))
+            {
+                int dstW, dstH;
+                if (src.Width > src.Height)
+                {
+                    dstW = IMAGE_SIZE;
+                    dstH = (int)(IMAGE_SIZE / (double)src.Width * src.Height);
+                }
+                else
+                {
+                    dstH = IMAGE_SIZE;
+                    dstW = (int)(IMAGE_SIZE / (double)src.Height * src.Width);
+                }
 
+                using(var dst = new Bitmap(dstW, dstH, PixelFormat.Format24bppRgb))
+                {
+                    var graphic = Graphics.FromImage(dst);
+                    graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphic.DrawImage(src, 0, 0, dst.Width, dst.Height);
+                    dst.Save(dirName + JPG_EXTENTION, ImageFormat.Jpeg);
+                }
+            }
         }
     }
 }
