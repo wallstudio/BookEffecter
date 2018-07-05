@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using GroovyCodecs.Mp3;
 using GroovyCodecs.Types;
 using GroovyCodecs.WavFile;
+using System.Text;
 
 namespace KamishibaServer.Controllers
 {
@@ -86,22 +87,27 @@ namespace KamishibaServer.Controllers
                 if (null == audio)
                     audioErrorMessage += "画像は1～60枚の範囲で登録してください。";
 
+                // エントリーの正規化
+                if (audio.PublishedDate == null)
+                    audio.PublishedDate = DateTime.Now.Date;
+                audio.CreatedUpdate = DateTime.Now;
+                audio.LastUpdate = DateTime.Now;
+
+                // DBに登録
+                audio = _context.Add(audio).Entity;
+                await _context.SaveChangesAsync();
+
                 var book = _context.Book.SingleOrDefault(b => b.ID == audio.BookID);
-                audioErrorMessage += await SaveAudioAsync(book.IDName, audio.ID.ToString(), audioFiles);
+                    audioErrorMessage += await SaveAudioAsync(book.IDName, audio.ID.ToString(), audioFiles);
 
-                if (audioErrorMessage == "")
-                {
-                    // エントリーの正規化
-                    if (audio.PublishedDate == null)
-                        audio.PublishedDate = DateTime.Now.Date;
-                    audio.CreatedUpdate = DateTime.Now;
-                    audio.LastUpdate = DateTime.Now;
-
-                    // DBに登録
-                    _context.Add(audio);
-                    await _context.SaveChangesAsync();
+                if(audioErrorMessage == "")
                     return RedirectToAction(nameof(Index));
-                }
+                else
+                {
+                    _context.Remove(audio);
+                    await _context.SaveChangesAsync();
+                } 
+
             }
             ViewData["audio_error_message"] = audioErrorMessage;
             // 修正を促す
@@ -192,7 +198,10 @@ namespace KamishibaServer.Controllers
         {
             return _context.Audio.Any(e => e.ID == id);
         }
-        
+
+        private const string MP3_EXTENTION = ".mp3"; 
+        private const string WAV_EXTENTION = ".wav"; 
+        private const string TMP_EXTENTION = ".tmp";
         private async Task<string> SaveAudioAsync(string packId, string id, IFormFile audio)
         {
             var dir = "wwwroot"
@@ -202,10 +211,10 @@ namespace KamishibaServer.Controllers
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
-            //if (Directory.GetFiles(dir).Length > 0) // Always false
-            //    return "重複があります。IDを変えてください。";
-            
-            var path = dir + Path.DirectorySeparatorChar + id + ".mp3"; // wavの可能性？
+            var dirName = dir + Path.DirectorySeparatorChar + id;
+            if (System.IO.File.Exists(dirName + MP3_EXTENTION))
+                return "重複があります。トップページからやり直してください。";
+
             try
             {
                 if (audio.Length <= 0)
@@ -213,52 +222,40 @@ namespace KamishibaServer.Controllers
                 if (audio.Length > 20000000)
                     throw new Exception($"ファイルが20MBを超えています。（{packId}_{id}）");
 
-                using (var stream = new FileStream(path, FileMode.Create))
+                string extension;
+                using (var stream = new FileStream(dirName + TMP_EXTENTION, FileMode.Create))
+                {
                     await audio.CopyToAsync(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    extension = CheckMp3OrWave(stream);
+                }
 
-                try
+                if (extension == WAV_EXTENTION)
                 {
-                    var bitrate = 64;
-                    var encoder = new Mp3Encoder(new AudioFormat(),
-                        bitrate, Mp3Encoder.CHANNEL_MODE_MONO, Mp3Encoder.QUALITY_MIDDLE, true);
-                    var audioFile = new WavReader();
-                    audioFile.OpenFile(path);
-                    var srcFormat = audioFile.GetFormat();
-                    encoder.SetFormat(srcFormat, srcFormat);
-                    var inBuffer = audioFile.readWav();
-                    var outBuffer = new byte[inBuffer.Length];
-
-                    var len = encoder.EncodeBuffer(inBuffer, 0, inBuffer.Length, outBuffer);
-                    encoder.Close();
-
-                    using (var outfile = System.IO.File.Create(
-                        Path.GetDirectoryName(path) + Path.DirectorySeparatorChar + id + ".mp3"))
+                    try
                     {
-                        outfile.Write(outBuffer, 0, len);
+                        ComvertWav2Mp3(dirName);
                     }
-
-                    Normalize(path);
+                    catch (IOException)
+                    {
+                        throw new Exception($"変換できませんでした。管理者にお問い合わせください。（{packId}_{id}）");
+                    }
+                    catch (Exception)
+                    {
+                        throw new Exception($"ファイルが壊れている可能性があります。（{packId}_{id}）");
+                    }
                 }
-                catch (IOException e)
+                else if(extension == MP3_EXTENTION)
                 {
-                    throw new Exception($"変換できませんでした。管理者にお問い合わせください。（{packId}_{id}）");
-                }
-                catch(Exception e)
-                {
-                    throw new Exception($"ファイルが壊れている可能性があります。（{packId}_{id}）");
-                }
-                finally
-                {
-                    if (System.IO.File.Exists(path))
-                        System.IO.File.Delete(path);
+                    System.IO.File.Copy(dirName + TMP_EXTENTION, dirName + MP3_EXTENTION);
                 }
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 Directory.Delete(dir, true);
                 return $"保存できませんでした。管理者にお問い合わせください。（{packId}_{id}）";
             }
-            catch (OutOfMemoryException e)
+            catch (OutOfMemoryException)
             {
                 Directory.Delete(dir, true);
                 return $"画像ファイルではないようです。もしくは破損している可能性があります。（{packId}_{id}）";
@@ -268,8 +265,53 @@ namespace KamishibaServer.Controllers
                 Directory.Delete(dir, true);
                 return e.Message;
             }
+            finally
+            {
+                if (System.IO.File.Exists(dirName + TMP_EXTENTION))
+                    System.IO.File.Delete(dirName + TMP_EXTENTION);
+            }
 
             return "";
+        }
+
+        private static void ComvertWav2Mp3(string dirName)
+        {
+            var bitrate = 64;
+            var encoder = new Mp3Encoder(new AudioFormat(),
+                bitrate, Mp3Encoder.CHANNEL_MODE_MONO, Mp3Encoder.QUALITY_MIDDLE, true);
+            var audioFile = new WavReader();
+            audioFile.OpenFile(dirName + TMP_EXTENTION);
+            var srcFormat = audioFile.GetFormat();
+            encoder.SetFormat(srcFormat, srcFormat);
+            var inBuffer = audioFile.readWav();
+            var outBuffer = new byte[inBuffer.Length];
+
+            var len = encoder.EncodeBuffer(inBuffer, 0, inBuffer.Length, outBuffer);
+            encoder.Close();
+
+            using (var outfile = System.IO.File.Create(dirName + MP3_EXTENTION))
+                outfile.Write(outBuffer, 0, len);
+        }
+
+        private string CheckMp3OrWave(Stream stream)
+        {
+            var current = stream.Position;
+            stream.Seek(0, SeekOrigin.Begin);
+            var sign = new byte[3];
+            stream.Read(sign, 0, sign.Length);
+            var signStr = Encoding.ASCII.GetString(sign);
+
+            if (signStr == "ID3") return MP3_EXTENTION;
+
+            if(signStr == "RIF")
+            {
+                stream.Seek(8, SeekOrigin.Begin);
+                stream.Read(sign, 0, sign.Length);
+                signStr = Encoding.ASCII.GetString(sign);
+                if (signStr == "WAV") return WAV_EXTENTION;
+            }
+
+            throw new Exception("未知のファイル");
         }
 
         private void Normalize(string path)

@@ -24,7 +24,7 @@ window.addEventListener("load", () => {
         }
 
         GlobalAudio["file"] = file;
-        GlobalAudio["extension"] = file.type == "audio/mpeg" ? ".mp3" : "wav";
+        GlobalAudio["extension"] = file.type == "audio/mpeg" ? ".mp3" : ".wav";
 
         $("#audio-drop-zone").css("display", "none");
         $(".first-wave-cell .select-span").css("display", "block");
