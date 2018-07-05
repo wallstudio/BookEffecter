@@ -15,51 +15,45 @@ using System.Text;
 
 namespace KamishibaServer.Controllers
 {
-    public class AudiosController : Controller
+    public class AudiosController : KamishibaController
     {
-        private readonly KamishibaServerContext _context;
+        public const int ACCESSBLE = TUser.POWER_NORMAL;
+        public const int SUPER_EDITABLE = TUser.POWER_MODERATOR;
 
-        public AudiosController(KamishibaServerContext context)
-        {
-            _context = context;
-        }
+        public AudiosController(KamishibaServerContext context) : base(context) { }
 
         // GET: Audios
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Audio.ToListAsync());
+            return View(await context.Audio.ToListAsync());
         }
 
         // GET: Audios/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var audio = await _context.Audio
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (audio == null)
-            {
-                return NotFound();
-            }
-
+            var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
+            if (audio == null) return NotFound();
             return View(audio);
         }
 
         // GET: Audios/Create
         public async Task<IActionResult> Create(int? bid)
         {
+            if (TUser.Power > ACCESSBLE) return NeedLogin();
+
             if (bid == null) return NotFound();
-            var book = await _context.Book.SingleOrDefaultAsync(m => m.ID == bid);
+            var book = await context.Book.SingleOrDefaultAsync(m => m.ID == bid);
             if (book == null) return NotFound();
 
-            var twitterUser = _context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User));
+            // 3rdの許可がされていない本では3rdを弾く
+            if (TUser.Power > SUPER_EDITABLE &&book.LimitedOffcial && book.RegisterID != TUser.ID)
+                return NotAllowd();
 
             var audio = new Audio()
             {
-                RegisterID = twitterUser.ID,
+                RegisterID = TUser.ID,
                 BookID = (int)bid,
                 TrackTiming = "[0,1]",
                 PublishedDate = DateTime.Now.Date,
@@ -72,13 +66,20 @@ namespace KamishibaServer.Controllers
         }
 
         // POST: Audios/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,RegisterID,BookID,Title,TrackTiming," +
             "PublishedDate,LastUpdate,CreatedUpdate")] Audio audio, IFormFile audioFiles)
         {
+            if (TUser.Power > ACCESSBLE) return NeedLogin();
+
+            var book = await context.Book.SingleOrDefaultAsync(m => m.ID == audio.BookID);
+            if (book == null) return NotFound();
+
+            // 3rdの許可がされていない本では3rdを弾く
+            if (TUser.Power > SUPER_EDITABLE && book.LimitedOffcial && book.RegisterID != TUser.ID)
+                return NotAllowd();
+
             string audioErrorMessage = "";
 
             if (ModelState.IsValid)
@@ -86,28 +87,24 @@ namespace KamishibaServer.Controllers
                 // 画像の検証
                 if (null == audio)
                     audioErrorMessage += "画像は1～60枚の範囲で登録してください。";
-
                 // エントリーの正規化
                 if (audio.PublishedDate == null)
                     audio.PublishedDate = DateTime.Now.Date;
                 audio.CreatedUpdate = DateTime.Now;
                 audio.LastUpdate = DateTime.Now;
-
                 // DBに登録
-                audio = _context.Add(audio).Entity;
-                await _context.SaveChangesAsync();
-
-                var book = _context.Book.SingleOrDefault(b => b.ID == audio.BookID);
-                    audioErrorMessage += await SaveAudioAsync(book.IDName, audio.ID.ToString(), audioFiles);
+                audio = context.Add(audio).Entity;
+                await context.SaveChangesAsync();
+                
+                audioErrorMessage += await SaveAudioAsync(book.IDName, audio.ID.ToString(), audioFiles);
 
                 if(audioErrorMessage == "")
                     return RedirectToAction(nameof(Index));
                 else
                 {
-                    _context.Remove(audio);
-                    await _context.SaveChangesAsync();
+                    context.Remove(audio);
+                    await context.SaveChangesAsync();
                 } 
-
             }
             ViewData["audio_error_message"] = audioErrorMessage;
             // 修正を促す
@@ -117,48 +114,38 @@ namespace KamishibaServer.Controllers
         // GET: Audios/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            // 一般ユーザーは編集できない
+            if (TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
-            var audio = await _context.Audio.SingleOrDefaultAsync(m => m.ID == id);
-            if (audio == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
+            var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
+            if (audio == null) return NotFound();
             return View(audio);
         }
 
         // POST: Audios/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,RegisterID,BookID,Title,TrackTiming,PublishedDate,LastUpdate,CreatedUpdate")] Audio audio)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,RegisterID,BookID,Title,TrackTiming," +
+            "PublishedDate,LastUpdate,CreatedUpdate")] Audio audio)
         {
-            if (id != audio.ID)
-            {
-                return NotFound();
-            }
+            // 一般ユーザーは編集できない
+            if (TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
+            if (id != audio.ID) return NotFound();
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(audio);
-                    await _context.SaveChangesAsync();
+                    context.Update(audio);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!AudioExists(audio.ID))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -168,18 +155,14 @@ namespace KamishibaServer.Controllers
         // GET: Audios/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (TUser.Power > ACCESSBLE) return NeedLogin();
 
-            var audio = await _context.Audio
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (audio == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
+            var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
+            // 本人（＋管理者）以外は弾く
+            if (TUser.Power > SUPER_EDITABLE && TUser.ID != audio.RegisterID) NotAllowd();
+            if (audio == null) return NotFound();
+            
             return View(audio);
         }
 
@@ -188,15 +171,19 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var audio = await _context.Audio.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Audio.Remove(audio);
-            await _context.SaveChangesAsync();
+            if (TUser.Power > ACCESSBLE) return NeedLogin();
+
+            var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
+            // 本人（＋管理者）以外は弾く
+            if (TUser.Power > SUPER_EDITABLE && TUser.ID != audio.RegisterID) NotAllowd();
+            context.Audio.Remove(audio);
+            await context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool AudioExists(int id)
         {
-            return _context.Audio.Any(e => e.ID == id);
+            return context.Audio.Any(e => e.ID == id);
         }
 
         private const string MP3_EXTENTION = ".mp3"; 
@@ -312,11 +299,6 @@ namespace KamishibaServer.Controllers
             }
 
             throw new Exception("未知のファイル");
-        }
-
-        private void Normalize(string path)
-        {
-
         }
     }
 }

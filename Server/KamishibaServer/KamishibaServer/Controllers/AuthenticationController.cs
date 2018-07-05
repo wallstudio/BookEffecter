@@ -13,18 +13,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KamishibaServer.Controllers
 {
-    public class AuthenticationController : Controller
+    public class AuthenticationController : KamishibaController
     {
         private readonly IAuthenticationSchemeProvider authenticationSchemeProvider;
-        private readonly KamishibaServerContext _context;
 
-        public AuthenticationController(IAuthenticationSchemeProvider authenticationSchemeProvider, KamishibaServerContext context)
+        public AuthenticationController(IAuthenticationSchemeProvider authenticationSchemeProvider, KamishibaServerContext context):base(context)
         {
             this.authenticationSchemeProvider = authenticationSchemeProvider;
-            _context = context;
         }
 
         public IActionResult NeedLoginRedirect()
+        {
+            return View();
+        }
+
+        public new IActionResult NotAllowd()
         {
             return View();
         }
@@ -53,14 +56,14 @@ namespace KamishibaServer.Controllers
             if (!isAuthenticated)
                 return RedirectToAction(nameof(Login));
 
-            var c = _context.User.Select(user => user.ID);
-            if (!_context.User.Select(user => user.ID).Contains(TwitterUser.GetID(User)))
+            var c = context.TUser.Select(user => user.ID);
+            if (!context.TUser.Select(user => user.ID).Contains(TUser.GetID(User)))
             {
-                _context.Add(new Models.TwitterUser(User));
-                _context.SaveChanges();
+                context.Add(new Models.TUser(User));
+                context.SaveChanges();
             }
 
-            var name = await _context.User.SingleOrDefaultAsync(m => m.ID == TwitterUser.GetID(User));
+            var name = await context.TUser.SingleOrDefaultAsync(m => m.ID == TUser.GetID(User));
             TempData["info"] = $"ようこそ {name.Name} 様！ (@{name.ScreenName})";
             return Redirect("/");
         }

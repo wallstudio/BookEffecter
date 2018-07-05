@@ -10,159 +10,102 @@ using System.Security.Claims;
 
 namespace KamishibaServer.Controllers
 {
-    public class UsersController : Controller
+    public class UsersController : KamishibaController
     {
-        public const int EDITABLE_POWER = TwitterUser.POWER_MODERATOR;
+        public const int SUPER_EDITABLE = TUser.POWER_MODERATOR;
 
-        public const long ADMIN_ID = 770906581110095872L;
-
-        private readonly KamishibaServerContext _context;
-
-        public UsersController(KamishibaServerContext context)
-        {
-            _context = context;
-        }
+        public UsersController(KamishibaServerContext context) : base(context) { }
 
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            
-            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
-                return View(await _context.User.ToListAsync());
-            else
-                return Redirect("/");
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
+
+            return View(await context.TUser.ToListAsync());
         }
 
         // GET: Users/Details/5
         public async Task<IActionResult> Details(long? id)
         {
-            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
-            {
-                if (id == null)
-                {
-                    return NotFound();
-                }
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
-                var user = await _context.User
-                    .SingleOrDefaultAsync(m => m.ID == id);
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                return View(user);
-            }
-            return Redirect("/");
+            if (id == null) return NotFound();
+            var user = await context.TUser.SingleOrDefaultAsync(m => m.ID == id);
+            if (user == null) return NotFound();
+            return View(user);
         }
 
         // GET: Users/Create
         public IActionResult Create()
         {
-            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
-                return View();
-            else
-                return Redirect("/");
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
+
+            return View();
         }
 
         // POST: Users/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,ScreenName,Name,Url")] TwitterUser user)
+        public async Task<IActionResult> Create([Bind("ID,ScreenName,Name,Url")] TUser user)
         {
-            if(_context.User.SingleOrDefault(_user => _user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
+
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
-                {
-                    _context.Add(user);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(user);
+                context.Add(user);
+                await context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            return Redirect("/");
+            return View(user);
         }
 
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(long? id)
         {
-            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
-            {
-                if (id == null)
-                {
-                    return NotFound();
-                }
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
-                var user = await _context.User.SingleOrDefaultAsync(m => m.ID == id);
-                if (user == null)
-                {
-                    return NotFound();
-                }
-                return View(user);
-            }
-            return Redirect("/");
+            if (id == null) return NotFound();
+            var user = await context.TUser.SingleOrDefaultAsync(m => m.ID == id);
+            if (user == null) return NotFound();
+            return View(user);
         }
 
         // POST: Users/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("ID,ScreenName,Name,Url")] TwitterUser user)
+        public async Task<IActionResult> Edit(long id, [Bind("ID,ScreenName,Name,Url")] TUser user)
         {
-            if(_context.User.SingleOrDefault(_user => _user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
-            {
-                if (id != user.ID)
-                {
-                    return NotFound();
-                }
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
-                if (ModelState.IsValid)
+            if (id != user.ID) return NotFound();
+            if (ModelState.IsValid)
+            {
+                try
                 {
-                    try
-                    {
-                        _context.Update(user);
-                        await _context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!UserExists(user.ID))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    return RedirectToAction(nameof(Index));
+                    context.Update(user);
+                    await context.SaveChangesAsync();
                 }
-                return View(user);
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(user.ID)) return NotFound();
+                    else throw;
+                }
+                return RedirectToAction(nameof(Index));
             }
-            return Redirect("/");
+            return View(user);
+            
         }
 
         // GET: Users/Delete/5
         public async Task<IActionResult> Delete(long? id)
         {
-            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
-            {
-                if (id == null)
-                {
-                    return NotFound();
-                }
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
-                var user = await _context.User
-                    .SingleOrDefaultAsync(m => m.ID == id);
-                if (user == null)
-                {
-                    return NotFound();
-                }
+            if (id == null) return NotFound();
+            var user = await context.TUser.SingleOrDefaultAsync(m => m.ID == id);
+            if (user == null) return NotFound();
 
-                return View(user);
-            }
-            return Redirect("/");
+            return View(user);
         }
 
         // POST: Users/Delete/5
@@ -170,19 +113,18 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
-            if(_context.User.SingleOrDefault(user => user.ID == TwitterUser.GetID(User)).Power <= EDITABLE_POWER)
-            {
-                var user = await _context.User.SingleOrDefaultAsync(m => m.ID == id);
-                _context.User.Remove(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return Redirect("/");
+            if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
+
+            var user = await context.TUser.SingleOrDefaultAsync(m => m.ID == id);
+            context.TUser.Remove(user);
+            await context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+            
         }
 
         private bool UserExists(long id)
         {
-            return _context.User.Any(e => e.ID == id);
+            return context.TUser.Any(e => e.ID == id);
         }
     }
 }

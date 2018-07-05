@@ -9,12 +9,14 @@ using System.Threading.Tasks;
 
 namespace KamishibaServer.Models
 {
-    public class TwitterUser
+    public class TUser
     {
         public const int POWER_ADMIN = 0;
         public const int POWER_MODERATOR = 100;
         public const int POWER_TRUSTED = 300;
-        public const int POWER_LIMITED = 1001;
+        public const int POWER_NORMAL = 1000;
+        public const int POWER_LIMITED = 10000;
+        public const int POWER_ANONYMOUSE = 100000;
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -28,8 +30,8 @@ namespace KamishibaServer.Models
         public string AccessSecret { get; set; }
         public int Power { get; set; }
 
-        public TwitterUser() { }
-        public TwitterUser(ClaimsPrincipal user)
+        public TUser() { }
+        public TUser(ClaimsPrincipal user)
         {
             AccessToken = user.Claims.FirstOrDefault(x => x.Type == "AccessToken")?.Value;
             AccessSecret = user.Claims.FirstOrDefault(x => x.Type == "AccessTokenSecret")?.Value;
@@ -57,5 +59,12 @@ namespace KamishibaServer.Models
             var isInt = long.TryParse(user.Claims.FirstOrDefault(x => x.Type == "UserId")?.Value, out long id);
             return isInt ? id : -1;
         }
+
+        public static TUser Anonymous = new TUser
+        {
+            ID = -1,
+            Name = "Anonymous",
+            Power = POWER_ANONYMOUSE
+        };
     }
 }
