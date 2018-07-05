@@ -20,10 +20,11 @@
                     <input type="hidden" asp-for="RegisterID" />
                     <div class="form-group">
                         <label asp-for="IDName" class="control-label"></label><span class="red">（必須）</span>
-                        <p>半角英数字とアンダーバーで入力してください。<br>タイトル名の英語表記・ローマ字を推奨します。
-                        <input asp-for="IDName" class="form-control" />
-                        <span asp-validation-for="IDName" class="text-danger"></span>
-                        <span class="text-danger field-validation-error" >@ViewData["id_error_message"]</span>
+                        <p>
+                            半角英数字とアンダーバーで入力してください。<br>タイトル名の英語表記・ローマ字を推奨します。
+                            <input asp-for="IDName" class="form-control" />
+                            <span asp-validation-for="IDName" class="text-danger"></span>
+                            <span class="text-danger field-validation-error">@ViewData["id_error_message"]</span>
                     </div>
                     <div class="form-group">
                         <label asp-for="Title" class="control-label"></label><span class="red">（必須）</span>
@@ -52,6 +53,14 @@
                         <input asp-for="Tags" class="form-control" />
                         <span asp-validation-for="Tags" class="text-danger"></span>
                     </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input asp-for="LimitedOffcial" /> @Html.DisplayNameFor(model => model.LimitedOffcial)
+                            </label>
+                        </div>
+                    </div>
+                    <hr />
                     <div class="form-group">
                         <div class="checkbox">
                             <label>

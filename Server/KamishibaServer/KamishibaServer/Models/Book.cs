@@ -21,6 +21,9 @@ namespace KamishibaServer.Models
         [MaxLength(40)]
         [RegularExpression(@"( *[a-zA-Z0-9_-~]+\.[a-zA-Z0-9_-~]+ *| *[a-zA-Z0-9_-~]+ *)")]
         public string IDName { get; set; }
+        [DisplayName("音声の追加をあなただけに限定")]
+        [Required]
+        public bool LimitedOffcial { get; set; }
         [DisplayName("本のタイトル")]
         [Required]
         [MaxLength(40)]

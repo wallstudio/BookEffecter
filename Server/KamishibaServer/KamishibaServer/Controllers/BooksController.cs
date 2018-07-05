@@ -64,6 +64,7 @@ namespace KamishibaServer.Controllers
             {
                 RegisterID = TwitterUser.GetID(User),
                 IDName = "",
+                LimitedOffcial = false,
                 Auther = twitterUser.Name,
                 Contact = $"https://twitter.com/{twitterUser.ScreenName}",
                 PublishedDate = DateTime.Now.Date
@@ -75,7 +76,7 @@ namespace KamishibaServer.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("ID,RegisterID,IDName,Title,Auther,Contact,PageCount,PublishedDate," +
+            [Bind("ID,RegisterID,IDName,LimitedOffcial,Title,Auther,Contact,PageCount,PublishedDate," +
                 "Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate,Images")]
             Book book, List<IFormFile> images)
         {
@@ -166,7 +167,7 @@ namespace KamishibaServer.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, 
-            [Bind("ID,RegisterID,IDName,Title,Auther,Contact,PageCount,PublishedDate," +
+            [Bind("ID,RegisterID,IDName,LimitedOffcial,Title,Auther,Contact,PageCount,PublishedDate," +
                 "Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate")]
             Book book)
         {
