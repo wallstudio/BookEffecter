@@ -46,7 +46,7 @@ namespace KamishibaServer.Controllers
         // POST: Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,ScreenName,Name,Url")] TUser user)
+        public async Task<IActionResult> Create([Bind("Power,ID,ScreenName,Name,Url")] TUser user)
         {
             if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
@@ -73,7 +73,7 @@ namespace KamishibaServer.Controllers
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("ID,ScreenName,Name,Url")] TUser user)
+        public async Task<IActionResult> Edit(long id, [Bind("Power,ID,ScreenName,Name,Url")] TUser user)
         {
             if(TUser.Power > SUPER_EDITABLE) return NotAllowd();
 

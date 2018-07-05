@@ -12,33 +12,39 @@
 <table class="table">
     <thead>
         <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.ScreenName)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Name)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Url)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.LastUpdate)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.CreatedUpdate)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.AccessToken)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.AccessSecret)
-                </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Power)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ScreenName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Url)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastUpdate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedUpdate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AccessToken)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AccessSecret)
+            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
         <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Power)
+            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ScreenName)
             </td>
