@@ -27,7 +27,7 @@ namespace KamishibaServer.Controllers
             var books = await context.Book.ToListAsync();
             foreach(var book in books)
             {
-                book.AudioCount = context.Audio.Select(a => a.BookID == book.ID).Count();
+                book.AudioCount = context.Audio.Where(a => a.BookID == book.ID).Count();
             }
             return View(books);
         }
@@ -38,6 +38,10 @@ namespace KamishibaServer.Controllers
             if (id == null) return NotFound();
             var book = await context.Book.SingleOrDefaultAsync(m => m.ID == id);
             if (book == null) return NotFound();
+
+            book.AudioList = context.Audio.Where(a => a.BookID == book.ID).ToList();
+            foreach(var a in book.AudioList)
+                a.Register = context.TUser.Single(u => u.ID == a.RegisterID);
 
             return View(book);
         }

@@ -139,11 +139,117 @@ p.pac-meta-des {
     font-size: 12px;
 }
 
+/* Detail */
+.book-detail-thumbnail-wrap{
+    position:relative;
+}
+.book-detail-thumbnail {
+    width: 80%;
+    padding: 5%;
+    background-color: whitesmoke;
+    margin: 10px 10% 20px 10%;
+}
+.book-detail-qr {
+    width: 30%;
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background-color: white;
+    border-radius: 20%;
+}
+.book-detail-qr > img {
+    width: 100%;
+    border-radius: 20%;
+}
+.book-detail-qr > p {
+    width: 100%;
+    text-align:center;
+    font-size:small;
+    margin:0 0 20px 0;
+    padding:0;
+    font-weight:bold;
+}
+.book-detail-datalist > p {
+    font-size: x-large;
+margin: 10px 10px 10px 20px;
+}
+span.r18-tag{
+    background-color: #b934ff;
+}
+span.limited-positive-tag {
+    background-color: #2bbf33;
+}
+span.limited-negative-tag {
+    background-color: #ff3434;
+}
+.tag {
+    display: inline-block;
+    background-color: #8f8f8f;
+    color: white;
+    padding: 5px;
+    margin: 3px;
+    border-radius: 5px;
+    font-size: medium;
+}
+.audio-list{
+    max-width: 450px;
+    width:100%;
+    margin: 10px;
+}
+.audio-list > ol {
+    list-style:none;
+    padding-left: 10px;
+}
+.audio-list > ol > li:nth-child(odd){
+    background-color:whitesmoke;
+}
+.audio-list > ol > li:hover {
+    box-shadow: 0px 0px 5px 3px var(--main-accent-color);
+}
+.audio-list-icon {
+    float: left;
+    width: 50px;
+    height:70px;
+    margin: 0 10px;
+    object-fit:contain;
+}
+.audio-list-official {
+    float: right;
+    width: 50px;
+    height: 70px;
+    margin: 0 10px;
+    object-fit: contain;
+}
+.audio-list-center {
+    margin: 5px 50px;
+    padding: 0 10px;
+    overflow: hidden;
+}
+.audio-list-center > h4{
+    height: 20px;
+    overflow:hidden;
+}
+.audio-list-center > p{
+    height: 20px;
+    overflow: hidden;
+}
+.audio-list-center > p {
+    text-align: right;
+}
+.book-detail-imagelist > img {
+    height: 70px;
+    width: 60px;
+    margin: 3px;
+    padding: 3px;
+    background-color: whitesmoke;
+    object-fit: contain;
+}
+
 /* Column layout */
-    .book-content {
-        display: flex;
-        flex-flow: row;
-    }
+.book-content {
+    display: flex;
+    flex-flow: row;
+}
 .book-meta-content {
     flex: 1 1 200px;
     margin-right: 16px;

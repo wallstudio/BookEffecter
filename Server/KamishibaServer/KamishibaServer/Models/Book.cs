@@ -60,6 +60,8 @@ namespace KamishibaServer.Models
 
         [NotMapped]
         public int AudioCount = 0;
+        [NotMapped]
+        public IEnumerable<Audio> AudioList;
 
         public Book() { }
     }

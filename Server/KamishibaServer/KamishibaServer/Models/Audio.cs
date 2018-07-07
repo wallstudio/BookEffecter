@@ -31,5 +31,8 @@ namespace KamishibaServer.Models
         public DateTime PublishedDate { get; set; }
         public DateTime LastUpdate { get; set; }
         public DateTime CreatedUpdate { get; set; }
+
+        [NotMapped]
+        public TUser Register;
     }
 }

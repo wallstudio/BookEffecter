@@ -12,107 +12,195 @@
 
     <div class="col-md-4 book-form-wrap">
         <div class="book-content">
-            <div class="book-meta-content">
-                <dl class="dl-horizontal">
-                    <dt>
-                        @Html.DisplayNameFor(model => model.RegisterID)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.RegisterID)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.IDName)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.IDName)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.LimitedOffcial)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.LimitedOffcial)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Title)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Title)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Auther)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Auther)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Contact)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Contact)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.PageCount)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.PageCount)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.PublishedDate)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.PublishedDate)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Tags)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Tags)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Sexy)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Sexy)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Vaiolence)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Vaiolence)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Grotesque)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Grotesque)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.Description)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.Description)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.LastUpdate)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.LastUpdate)
-                    </dd>
-                    <dt>
-                        @Html.DisplayNameFor(model => model.CreatedUpdate)
-                    </dt>
-                    <dd>
-                        @Html.DisplayFor(model => model.CreatedUpdate)
-                    </dd>
-                </dl>
-            </div>
-            <div class="book-images-content">
-                @for (var i = 0; i < Model.PageCount; i++)
-                {
-                    <div class="page-prev">
-                        <img src="/@Model.IDName/@(i).jpg" class="page-prev-image" />
+            <div class="book-meta-content book-detail-datalist">
+                <div class="book-detail-thumbnail-wrap">
+                    <img class="book-detail-thumbnail" src="/@Model.IDName/0.jpg" />
+                    <div class="book-detail-qr">
+                        <img src="/qr.png" />
+                        <p>アプリで読取り！</p>
                     </div>
+                </div>
+                <h3>
+                    ID
+                </h3>
+                <p>
+                    @Html.DisplayFor(model => model.IDName)
+                </p>
+                <h3>
+                    発行日
+                </h3>
+                <p>
+                    @Html.DisplayFor(model => model.PublishedDate)
+                </p>
+                <h3>
+                    タイトル
+                </h3>
+                <p>
+                    <strong>@Html.DisplayFor(model => model.Title)</strong>
+                </p>
+                <h3>
+                    著者
+                </h3>
+                <p>
+                    <a href="@(Model.Contact)" target="_blank">
+                        @Html.DisplayFor(model => model.Auther)
+                    </a>
+                </p>
+                <hr />
+                <p>
+                    @if (!Model.LimitedOffcial)
+                    {
+                        <span class="tag limited-positive-tag">著者以外の音声登録可</span>
+                    }
+                    else
+                    {
+                        <span class="tag limited-negative-tag">著者以外の音声登録不可</span>
+                    }
+                    @if (Model.Sexy)
+                    {
+                        <span class="tag r18-tag">成人向け</span>
+                    }
+                    @if (Model.Vaiolence)
+                    {
+                        <span class="tag r18-tag">凶器・暴力</span>
+                    }
+                    @if (Model.Grotesque)
+                    {
+                        <span class="tag r18-tag">グロテスク</span>
+                    }
+                    @foreach (var tag in Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <span class="tag">@tag</span>
+                    }
+                </p>
+
+
+                @if (true && ViewBag.TUser.Power <= TUser.POWER_MODERATOR)
+                {
+                    <dl class="dl-horizontal">
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RegisterID)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.RegisterID)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.IDName)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.IDName)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.LimitedOffcial)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.LimitedOffcial)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Title)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Title)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Auther)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Auther)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Contact)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Contact)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.PageCount)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.PageCount)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.PublishedDate)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.PublishedDate)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Tags)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Tags)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Sexy)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Sexy)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Vaiolence)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Vaiolence)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Grotesque)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Grotesque)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Description)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Description)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.LastUpdate)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.LastUpdate)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.CreatedUpdate)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.CreatedUpdate)
+                        </dd>
+                    </dl>
                 }
+            </div>
+            <div>
+                <div class="audio-list">
+                    <ol>
+                        @{int j = 1;}
+                        @foreach (var audio in Model.AudioList)
+                        {
+                        <li>
+                            <a href="/Audios/Details/@(audio.ID)">
+                                <div>
+                                    <img src="/sound.png" class="audio-list-icon">
+                                    @if (audio.RegisterID == Model.RegisterID)
+                                    {
+                                        <img src="/favicon.ico" class="audio-list-official">
+                                    }
+                                    <div class="audio-list-center">
+                                        <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
+                                        <p>@Html.DisplayFor(_ => audio.Register.Name)</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        }
+                    </ol>
+                </div>
+                <div class="book-detail-imagelist">
+                    @for (var i = 0; i < Model.PageCount; i++)
+                    {
+                        <img src="/@Model.IDName/@(i).jpg" class="page-prev-image" />
+                    }
+                </div>
             </div>
         </div>
         <div class="book-conform">
