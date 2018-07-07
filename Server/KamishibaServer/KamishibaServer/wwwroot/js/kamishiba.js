@@ -219,6 +219,7 @@ window.addEventListener("load", () => {
                 scrollTo(0, 0);
             }).fail((jqXHR, textStatus, errorThrown) => {
                 console.log('Kamishiba: AJAX ERROR', jqXHR, textStatus, errorThrown);
+                alert("サーバー側で問題が発生しました。");
             });
         } else {
             $("#book-upload-from")[0].submit();

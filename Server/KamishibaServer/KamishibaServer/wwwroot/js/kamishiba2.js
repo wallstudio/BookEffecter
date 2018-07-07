@@ -293,8 +293,9 @@ window.addEventListener("load", () => {
             preMeta.innerHTML = meta.innerHTML;
             preImg.innerHTML = img.innerHTML;
             scrollTo(0, 0);
-        }).fail((jqXHR, textStatus, errorThrown) => {
-            console.log('Kamishiba: AJAX ERROR', jqXHR, textStatus, errorThrown);
+            }).fail((jqXHR, textStatus, errorThrown) => {
+                console.log('Kamishiba: AJAX ERROR', jqXHR, textStatus, errorThrown);
+                alert("サーバー側で問題が発生しました。");
         });
     });
 
