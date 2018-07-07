@@ -44,5 +44,30 @@ namespace KamishibaServer.Controllers
         {
             return Redirect("/Authentication/NotAllowd");
         }
+
+        [NonAction]
+        public override ViewResult View()
+        {
+            ViewData["power"] = TUser.Power;
+            return base.View();
+        }
+        [NonAction]
+        public override ViewResult View(string viewName, object model)
+        {
+            ViewData["power"] = TUser.Power;
+            return base.View(viewName, model);
+        }
+        [NonAction]
+        public override ViewResult View(object model)
+        {
+            ViewData["power"] = TUser.Power;
+            return base.View(model);
+        }
+        [NonAction]
+        public override ViewResult View(string viewName)
+        {
+            ViewData["power"] = TUser.Power;
+            return base.View(viewName);
+        }
     }
 }
