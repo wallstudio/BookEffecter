@@ -24,7 +24,12 @@ namespace KamishibaServer.Controllers
         // GET: Books
         public async Task<IActionResult> Index()
         {
-            return View(await context.Book.ToListAsync());
+            var books = await context.Book.ToListAsync();
+            foreach(var book in books)
+            {
+                book.AudioCount = context.Audio.Select(a => a.BookID == book.ID).Count();
+            }
+            return View(books);
         }
 
         // GET: Books/Details/5

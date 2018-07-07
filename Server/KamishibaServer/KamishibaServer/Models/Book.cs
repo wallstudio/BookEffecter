@@ -58,6 +58,9 @@ namespace KamishibaServer.Models
 
         public List<IFormFile> Images;
 
+        [NotMapped]
+        public int AudioCount = 0;
+
         public Book() { }
     }
 }
