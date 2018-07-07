@@ -187,7 +187,8 @@ window.addEventListener("load", () => {
             $(".waveform").each((i, e) => {
                 if (i >= data.length) return;
                 let start = data[i][0];
-                let end = data[i][1]
+                let end = data[i][1];
+                startEnd[i] = [start, end];
                 let selectSpan = $("#select-span-" + i + " canvas")[0];
                 let selectSpanContext = selectSpan.getContext("2d");
                 let a = start * $(e).find("wave > canvas")[0].width / wavesurfer.getDuration();
@@ -209,10 +210,14 @@ window.addEventListener("load", () => {
         //        console.log("Kamishiba: Resize window.");
         //    }, 100);
         //});
-
-        $("#audio-drop-zone").css("display", "none");
-
-        wavesurfer.load(blobUrl);
+        
+        // サムネを押すと再生
+        $(".img-column").each((i, e) => {
+            $(e).on("click", () => wavesurfer.play(startEnd[i][0], startEnd[i][1]));
+        });
+        $(".count-column").each((i, e) => {
+            $(e).on("click", () => wavesurfer.play(startEnd[i][0], startEnd[i][1]));
+        });
 
         // ページを閉じてもオーディオが解放されないときがある（高負荷時？）
         // 本来解放されるはずなので…気休めに
@@ -223,6 +228,8 @@ window.addEventListener("load", () => {
             console.log("Kamishiba: Destroy audio.");
             return;
         });
+
+        wavesurfer.load(blobUrl);
 
         console.log("Kamishiba: Loaded audio & converted " + files.length)
     }

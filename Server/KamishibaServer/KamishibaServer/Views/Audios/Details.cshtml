@@ -4,57 +4,148 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Details</h2>
+<h2>@Model.Parent.Title > @Model.Title ♪</h2>
 
 <div>
-    <h4>Audio</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.RegisterID)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.RegisterID)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.BookID)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.BookID)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.TrackTiming)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.TrackTiming)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.PublishedDate)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.PublishedDate)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.LastUpdate)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.LastUpdate)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.CreatedUpdate)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.CreatedUpdate)
-        </dd>
-    </dl>
+
+    <div class="book-content">
+        <div class="book-meta-content book-detail-datalist">
+            <div class="edit-nav">
+                <a class="btn btn-default" asp-action="Delete" asp-route-id="@Model.ID">削除</a>
+                <a class="btn btn-default" asp-controller="Books" asp-action="Details" asp-route-id="@Model.BookID">戻る</a>
+            </div>
+            <div class="book-detail-thumbnail-wrap">
+                <img class="book-detail-thumbnail" src="/@Model.Parent.IDName/0.jpg" />
+                <div class="book-detail-qr">
+                    <img src="/qr.png" />
+                    <p>アプリで読取り！</p>
+                </div>
+            </div>
+            <h3>
+                投稿日
+            </h3>
+            <p>
+                @Html.DisplayFor(_ => Model.PublishedDate)
+            </p>
+            <h3>
+                タイトル
+            </h3>
+            <p>
+                <strong>@Html.DisplayFor(_ => Model.Title)</strong>
+            </p>
+            <h3>
+                著者
+            </h3>
+            <p>
+                <a href="https://twitter.com/@Model.Register.ScreenName" target="_blank">
+                    @Html.DisplayFor(_ => Model.Register.Name)
+                </a>
+            </p>
+            @if (ViewBag.TUser.Power <= TUser.POWER_MODERATOR)
+            {
+                <div>
+                    <dl class="dl-horizontal">
+                        <dt>
+                            @Html.DisplayNameFor(model => model.RegisterID)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.RegisterID)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.BookID)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.BookID)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Title)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Title)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.TrackTiming)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.TrackTiming)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.PublishedDate)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.PublishedDate)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.LastUpdate)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.LastUpdate)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.CreatedUpdate)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.CreatedUpdate)
+                        </dd>
+                    </dl>
+                </div>
+            }
+        </div>
+        <div class="book-images-content">
+            <!-- 音声編集 -->
+            <div class="book-images-content">
+                <p>※編集は出来ません。変更したい場合、削除して新しく登録してください。</p>
+                <table class="audio-edit-table">
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td><div id="wave-timeline1" class="wave-timeline"></div></td>
+                    </tr>
+                    @for (var i = 0; Model.Parent != null && i < Model.Parent.PageCount; i++)
+                    {
+                        <tr>
+                            <th class="count-column">@(i + 1) / @Model.Parent.PageCount P</th>
+                            <td class="img-column">
+                                <div class="page-prev-half">
+                                    <img src="/@Model.Parent.IDName/@(i).jpg"
+                                         class="page-prev-image" />
+                                </div>
+                            </td>
+                            @if (i == 0)
+                            {
+                                <td class="wave-wrap first-wave-cell"
+                                    rowspan="@(Model.Parent.PageCount)s">
+                                    <div id="select-span-@i" class="select-span">
+                                        <canvas></canvas>
+                                    </div>
+                                    <div id="waveform-@i" class="waveform" 
+                                         data="/@(Model.Parent.IDName)/audio/@(Model.ID).mp3;@(Model.TrackTiming)"></div>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="wave-wrap other-wave-cell">
+
+                                    <div id="select-span-@i" class="select-span">
+                                        <canvas></canvas>
+                                    </div>
+                                    <div id="waveform-@i" class="waveform"></div>
+                                </td>
+                            }
+
+                        </tr>
+                    }
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td><div id="wave-timeline2" class="wave-timeline"></div></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/wavesurfer.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.6/plugin/wavesurfer.timeline.min.js"></script>
+<script src="~/js/kamishiba3.js"></script>

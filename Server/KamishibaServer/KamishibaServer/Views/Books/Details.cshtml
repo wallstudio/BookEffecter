@@ -4,15 +4,22 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Details</h2>
+<h2>@Model.Title</h2>
 
 <div>
-    <h4>Book</h4>
     <hr />
 
     <div class="col-md-4 book-form-wrap">
         <div class="book-content">
             <div class="book-meta-content book-detail-datalist">
+                <div class="edit-nav">
+                    @if (ViewBag.TUser.Power <= TUser.POWER_MODERATOR || ViewBag.TUser.ID == Model.RegisterID)
+                    {
+                        <a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.ID">編集</a>
+                        <a class="btn btn-default" asp-action="Delete" asp-route-id="@Model.ID">削除</a>
+                    }
+                    <a class="btn btn-default" asp-action="Index">戻る</a>
+                </div>
                 <div class="book-detail-thumbnail-wrap">
                     <img class="book-detail-thumbnail" src="/@Model.IDName/0.jpg" />
                     <div class="book-detail-qr">
@@ -75,7 +82,7 @@
                 </p>
 
 
-                @if (true && ViewBag.TUser.Power <= TUser.POWER_MODERATOR)
+                @if (ViewBag.TUser.Power <= TUser.POWER_MODERATOR)
                 {
                     <dl class="dl-horizontal">
                         <dt>
@@ -174,24 +181,54 @@
             <div>
                 <div class="audio-list">
                     <ol>
+                        @if (!Model.LimitedOffcial || ViewBag.TUser.ID == Model.RegisterID)
+                        {
+                            <li class="create-audio">
+                                <a asp-controller="Audios" asp-action="Create" asp-route-bid="@Model.ID">
+                                    <div>
+                                        <img src="~/newaudio.png" class="audio-list-icon">
+                                        <div class="audio-list-center">
+                                            <h4>新しい音声を追加！</h4>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        }
                         @{int j = 1;}
                         @foreach (var audio in Model.AudioList)
                         {
-                        <li>
-                            <a href="/Audios/Details/@(audio.ID)">
-                                <div>
-                                    <img src="/sound.png" class="audio-list-icon">
-                                    @if (audio.RegisterID == Model.RegisterID)
-                                    {
-                                        <img src="/favicon.ico" class="audio-list-official">
-                                    }
-                                    <div class="audio-list-center">
-                                        <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
-                                        <p>@Html.DisplayFor(_ => audio.Register.Name)</p>
+                            <li>
+                                @if (!Model.LimitedOffcial || ViewBag.TUser.ID == Model.RegisterID)
+                                {
+                                    <a href="/Audios/Details/@(audio.ID)">
+                                        <div>
+                                            <img src="/sound.png" class="audio-list-icon">
+                                            @if (audio.RegisterID == Model.RegisterID)
+                                            {
+                                                <img src="/favicon.ico" class="audio-list-official">
+                                            }
+                                            <div class="audio-list-center">
+                                                <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
+                                                <p>@Html.DisplayFor(_ => audio.Register.Name)</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <img src="/sound.png" class="audio-list-icon">
+                                        @if (audio.RegisterID == Model.RegisterID)
+                                        {
+                                            <img src="/favicon.ico" class="audio-list-official">
+                                        }
+                                        <div class="audio-list-center">
+                                            <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
+                                            <p>@Html.DisplayFor(_ => audio.Register.Name)</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </a>
-                        </li>
+                                }
+                            </li>
                         }
                     </ol>
                 </div>
@@ -202,18 +239,6 @@
                     }
                 </div>
             </div>
-        </div>
-        <div class="book-conform">
-            <div class="form-group">
-                <a asp-controller="Audios" asp-action="Create" asp-route-bid="@Model.ID">
-                    <div value="Create" class="btn btn-default"> 音声を追加</div>
-                </a>
-            </div>
-        </div>
-        <div class="nav-footer">
-            <a class="btn btn-default" asp-action="Edit" asp-route-id="@Model.ID">編集</a>
-            <a class="btn btn-default" asp-action="Delete" asp-route-id="@Model.ID">削除</a>
-            <a asp-action="Index">戻る</a>
         </div>
     </div>
 </div>
