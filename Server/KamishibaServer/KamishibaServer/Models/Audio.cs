@@ -34,5 +34,7 @@ namespace KamishibaServer.Models
 
         [NotMapped]
         public TUser Register;
+        [NotMapped]
+        public Book Parent;
     }
 }

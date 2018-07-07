@@ -35,6 +35,10 @@ namespace KamishibaServer.Controllers
 
             var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
             if (audio == null) return NotFound();
+
+            audio.Parent = await context.Book.SingleOrDefaultAsync(b => b.ID == audio.BookID);
+            audio.Register = await context.TUser.SingleOrDefaultAsync(u => u.ID == audio.RegisterID);
+
             return View(audio);
         }
 
@@ -61,7 +65,7 @@ namespace KamishibaServer.Controllers
                 CreatedUpdate = DateTime.Now
             };
 
-            ViewData["book"] = book;
+            audio.Parent = book;
             return View(audio);
         }
 
@@ -99,7 +103,7 @@ namespace KamishibaServer.Controllers
                 audioErrorMessage += await SaveAudioAsync(book.IDName, audio.ID.ToString(), audioFiles);
 
                 if(audioErrorMessage == "")
-                    return RedirectToAction(nameof(Index));
+                    return Redirect($"/Books/Details/{book.ID}");
                 else
                 {
                     context.Remove(audio);
@@ -162,6 +166,8 @@ namespace KamishibaServer.Controllers
             // 本人（＋管理者）以外は弾く
             if (TUser.Power > SUPER_EDITABLE && TUser.ID != audio.RegisterID) NotAllowd();
             if (audio == null) return NotFound();
+
+            audio.Parent = await context.Book.SingleOrDefaultAsync(b => b.ID == audio.BookID);
             
             return View(audio);
         }

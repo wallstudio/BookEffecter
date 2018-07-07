@@ -41,7 +41,7 @@ namespace KamishibaServer.Controllers
 
             book.AudioList = context.Audio.Where(a => a.BookID == book.ID).ToList();
             foreach(var a in book.AudioList)
-                a.Register = context.TUser.Single(u => u.ID == a.RegisterID);
+                a.Register = await context.TUser.SingleOrDefaultAsync(u => u.ID == a.RegisterID);
 
             return View(book);
         }
@@ -126,7 +126,7 @@ namespace KamishibaServer.Controllers
                         if (book.Description == null) book.Description = "";
                         else book.Description = book.Description.Trim();
                         await context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
+                        return Redirect($"/Books/Details/{book.ID}");
                     }
                 }
             }
