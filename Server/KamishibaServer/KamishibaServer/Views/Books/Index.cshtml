@@ -49,44 +49,81 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-    <tr onclick="location.href='/Books/Details/@item.ID'" class="index-list-row">
-        <td>
-            @Html.DisplayFor(modelItem => item.PublishedDate)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.IDName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.LimitedOffcial)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Title)
-        </td>
-        <td>
-            <a href=" @Html.DisplayFor(modelItem => item.Contact)">
-                @Html.DisplayFor(modelItem => item.Auther)
-            </a>
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Tags)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Sexy)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Vaiolence)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Grotesque)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.PageCount)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>
-    </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr onclick="location.href='/Books/Details/@item.ID'" class="index-list-row">
+                <td>
+                    @Html.DisplayFor(modelItem => item.PublishedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IDName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LimitedOffcial)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    <a href=" @Html.DisplayFor(modelItem => item.Contact)">
+                        @Html.DisplayFor(modelItem => item.Auther)
+                    </a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Tags)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Sexy)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Vaiolence)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Grotesque)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PageCount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+<div class="pacs-wrap">
+    @foreach (var item in Model)
+    {
+    <a href="/Books/Details/@item.ID">
+        <div class="pac">
+            <div class="pac-thumb">
+                <img src="/@item.IDName/0.jpg" />
+            </div>
+            <div class="pac-meta">
+                <h3>@Html.DisplayFor(_ => item.Title)</h3>
+                <p class="pac-meta-auther">@Html.DisplayFor(_ => item.Auther)</p>
+                <p class="pac-meta-tag">タグ: @Html.DisplayFor(_ => item.Tags)</p>
+                <p class="pac-meta-des">@Html.DisplayFor(_ => item.Description)</p>
+            </div>
+            <div class="pac-audios">
+                <ul>
+                    <li>
+                        <img class="play-symble" src="favicon.ico" />
+                        <div>
+                            <h4>1. AAAAA</h4><p>aaaaaa</p>
+                        </div>
+                        <img class="official-symble" src="favicon.ico" />
+                    </li>
+                    <li>
+                        <img class="play-symble" src="favicon.ico" />
+                        <div>
+                            <h4>1. AAAAA</h4><p>aaaaaa</p>
+                        </div>
+                        <img class="official-symble" src="favicon.ico" />
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </a>
+    }
+</div>
