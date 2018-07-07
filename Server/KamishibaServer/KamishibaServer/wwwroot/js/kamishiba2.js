@@ -285,7 +285,7 @@ window.addEventListener("load", () => {
 
             if (!meta || !img) {
                 $("html")[0].innerHTML = res;
-                history.pushState('', '', '/Books/Index');
+                history.pushState("", "", "/Books/Details/" + location.href.match(/.*=([0-9]+)/)[1]);
             }
 
             let preMeta = $(".book-meta-content")[0];
@@ -294,8 +294,9 @@ window.addEventListener("load", () => {
             preImg.innerHTML = img.innerHTML;
             scrollTo(0, 0);
             }).fail((jqXHR, textStatus, errorThrown) => {
-                console.log('Kamishiba: AJAX ERROR', jqXHR, textStatus, errorThrown);
+                console.log("Kamishiba: AJAX ERROR", jqXHR, textStatus, errorThrown);
                 alert("サーバー側で問題が発生しました。");
+                $("html")[0].innerHTML = jqXHR.responseText;
         });
     });
 
