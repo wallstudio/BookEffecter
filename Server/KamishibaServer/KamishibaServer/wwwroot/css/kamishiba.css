@@ -141,7 +141,7 @@ div.about-btn-wrap {
     color: var(--flat-font-color);
 }
 .pac {
-    width: 370px;
+    max-width: 370px;
     height: 200px;
     margin: 10px;
     float: left;
