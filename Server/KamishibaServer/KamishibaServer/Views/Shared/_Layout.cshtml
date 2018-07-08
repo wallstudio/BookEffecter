@@ -32,12 +32,8 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">TOP</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">「かみしば」とは？</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">開発者</a></li>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <li><a asp-area="" asp-controller="Users" asp-action="Index">*Users</a></li>
-                    }
+                    <li><a href="https://play.google.com/store/apps/developer?id=WallStudio">Androidアプリ</a></li>
+                    <li><a href="https://itunes.apple.com/us/developer/akinobu-haruta/id1352239694?mt=8">iOSアプリ</a></li>
                     <li><a asp-area="" asp-controller="Books" asp-action="Index">同人誌一覧</a></li>
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -46,6 +42,10 @@
                     else
                     {
                         <li><a asp-area="" asp-controller="Authentication" asp-action="SignIn" asp-route-provider="Twitter">Twitterでログイン</a></li>
+                    }
+                    @if (ViewBag.TUser.Power <= TUser.POWER_ADMIN)
+                    {
+                        <li><a asp-area="" asp-controller="Users" asp-action="Index">*Users</a></li>
                     }
                 </ul>
             </div>
@@ -70,10 +70,7 @@
             }
         </p>
         @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2018 - KamishibaServer</p>
-        </footer>
+        @await Html.PartialAsync("Footer")
     </div>
 
     <environment include="Development">

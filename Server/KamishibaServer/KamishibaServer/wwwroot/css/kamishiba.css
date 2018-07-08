@@ -22,6 +22,34 @@
 .text-list {
     display: none;
 }
+footer {
+    background-color: #222;
+    margin: 80px 0 0 0;
+    border-radius: 5px 5px 0 0;
+    border-color: #080808;
+    border-width:1px;
+    border-style:solid;
+    color: #9d9d9d;
+    padding: 10px;
+}
+footer > p{
+    margin: 0 0 0 20px;
+}
+body{
+    padding-bottom:0;
+}
+.footer-meta > div {
+    font-size: medium;
+}
+.footer-agreement{
+    font-size:small;
+}
+.twitter-timeline {
+    border-style: solid !important;
+    border-width: 1px !important;
+    border-color: #8f8f8f !important;
+    border-radius: 5px;
+}
 
 /* Information */
 .info-container {
@@ -40,9 +68,65 @@
         color: white;
 }
 
+/* About */
+.about > div {
+    width: 100%;
+}
+h3.about-sec-tip {
+    margin: 0px;
+    text-align: center;
+    font-size:x-large;
+}
+.about p{
+    margin:5px 0;
+}
+.about > div{
+    margin: 40px 0;
+    display:table;
+}
+.insertion-left {
+    display: table-cell;
+    vertical-align: middle;
+}
+.about-sec-text {
+    display: table-cell;
+    vertical-align: middle;
+}
+div.about-btn-wrap {
+    text-align: center;
+    display:block;
+}
+.about-btn {
+    display: inline-block;
+}
+.about-btn {
+    box-shadow: 0px 0px 5px 3px var(--main-accent-color);
+}
+@media only screen and (max-device-width: 480px) {
+    .insertion-left {
+        width: 150px;
+    }
+    .about-btn {
+        white-space: normal;
+    }
+}
+@media only screen and (max-device-width: 350px) {
+    .about > div {
+        display: block;
+    }
+
+    .insertion-left {
+        display: block;
+    }
+
+    .about-sec-text {
+        display: block;
+    }
+}
+
 /* Jump navigations */
-.nav-footer{
-    margin:10px;
+.nav-footer {
+    margin: 10px;
 }
 
 /* Index list */
@@ -250,10 +334,12 @@ span.limited-negative-tag {
     background-color: whitesmoke;
     object-fit: contain;
 }
-
+.book-form-wrap{
+    float:none;
+}
 /* Audio detail */
-#play-and-stop-button{
-    margin:20px;
+#play-and-stop-button {
+    margin: 20px;
 }
 
 /* Column layout */
@@ -428,7 +514,7 @@ span.limited-negative-tag {
 .book-conform {
     display: block;
     float: none;
-    margin: auto;
+    margin: 50px auto;
     max-width: 800px
 }
 .book-agreement {
