@@ -65,7 +65,11 @@ namespace KamishibaServer.Controllers
 
             var name = await context.TUser.SingleOrDefaultAsync(m => m.ID == TUser.GetID(User));
             TempData["info"] = $"ようこそ {name.Name} 様！ (@{name.ScreenName})";
-            return Redirect("/");
+
+            if (TempData["login_redirect"] != null)
+                return Redirect(TempData["login_redirect"].ToString());
+            else
+                return Redirect("/");
         }
 
 

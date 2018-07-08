@@ -32,6 +32,7 @@ namespace KamishibaServer.Controllers
 
         protected IActionResult NeedLogin()
         {
+            TempData["login_redirect"] = Request.Path + Request.QueryString;
             return Redirect("/Authentication/NeedLoginRedirect");
         }
 
