@@ -19,6 +19,9 @@
     color: var(--main-enphasize-color);
     font-weight: bold;
 }
+.gohst{
+    color:transparent;
+}
 .text-list {
     display: none;
 }
