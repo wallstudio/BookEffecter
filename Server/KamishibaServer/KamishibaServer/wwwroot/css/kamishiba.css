@@ -202,8 +202,11 @@ span.limited-negative-tag {
 .audio-list > ol > li:nth-child(odd){
     background-color:whitesmoke;
 }
-.audio-list > ol > li:hover {
+.audio-list > ol > li.editable-audio:hover {
     box-shadow: 0px 0px 5px 3px var(--main-accent-color);
+}
+.audio-list a:hover {
+    text-decoration:none;
 }
 .audio-list-icon {
     float: left;

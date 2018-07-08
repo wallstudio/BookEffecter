@@ -183,7 +183,7 @@
                     <ol>
                         @if (!Model.LimitedOffcial || ViewBag.TUser.ID == Model.RegisterID)
                         {
-                            <li class="create-audio">
+                            <li class="create-audio editable-audio">
                                 <a asp-controller="Audios" asp-action="Create" asp-route-bid="@Model.ID">
                                     <div>
                                         <img src="~/newaudio.png" class="audio-list-icon">
@@ -197,9 +197,9 @@
                         @{int j = 1;}
                         @foreach (var audio in Model.AudioList)
                         {
-                            <li>
-                                @if (!Model.LimitedOffcial || ViewBag.TUser.ID == Model.RegisterID)
-                                {
+                            @if (ViewBag.TUser.ID == audio.RegisterID || ViewBag.TUser.ID == Model.RegisterID)
+                            {
+                                <li class="editable-audio">
                                     <a href="/Audios/Details/@(audio.ID)">
                                         <div>
                                             <img src="/sound.png" class="audio-list-icon">
@@ -213,9 +213,11 @@
                                             </div>
                                         </div>
                                     </a>
-                                }
-                                else
-                                {
+                                </li>
+                            }
+                            else
+                            {
+                                <li>
                                     <div>
                                         <img src="/sound.png" class="audio-list-icon">
                                         @if (audio.RegisterID == Model.RegisterID)
@@ -227,8 +229,8 @@
                                             <p>@Html.DisplayFor(_ => audio.Register.Name)</p>
                                         </div>
                                     </div>
-                                }
-                            </li>
+                                </li>
+                            }
                         }
                     </ol>
                 </div>

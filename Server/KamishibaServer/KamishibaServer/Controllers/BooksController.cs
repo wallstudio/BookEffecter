@@ -18,6 +18,7 @@ namespace KamishibaServer.Controllers
     public class BooksController : KamishibaController
     {
         public const int ACCESSBLE = TUser.POWER_NORMAL;
+        public const int OVERRIDEBLE = TUser.POWER_MODERATOR;
 
         public BooksController(KamishibaServerContext context) : base(context) { }
 
@@ -144,7 +145,7 @@ namespace KamishibaServer.Controllers
                 return NeedLogin();
 
             var book = await context.Book.SingleOrDefaultAsync(m => m.ID == id);
-            if (TUser.ID != book.RegisterID) return NotAllowd();
+            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (id == null) return NotFound();
             if (book == null) return NotFound();
 
@@ -163,7 +164,7 @@ namespace KamishibaServer.Controllers
         {
             if (TUser.Power > ACCESSBLE) return NeedLogin();
 
-            if (TUser.ID != book.RegisterID) return NotAllowd();
+            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (book == null) return NotFound();
             if (id != book.ID) return NotFound();
             
@@ -213,7 +214,7 @@ namespace KamishibaServer.Controllers
             if (TUser.Power > ACCESSBLE) return NeedLogin();
             var book = await context.Book.SingleOrDefaultAsync(m => m.ID == id);
 
-            if (TUser.ID != book.RegisterID) return NotAllowd();
+            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (id == null) return NotFound();
             if (book == null) return NotFound();
 
@@ -228,7 +229,7 @@ namespace KamishibaServer.Controllers
             if (TUser.Power > ACCESSBLE) return NeedLogin();
             var book = await context.Book.SingleOrDefaultAsync(m => m.ID == id);
 
-            if (TUser.ID != book.RegisterID) return NotAllowd();
+            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (book == null) return NotFound();
 
             context.Book.Remove(book);
