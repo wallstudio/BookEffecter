@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using CoreTweet;
 using KamishibaServer.Models;
 using Microsoft.EntityFrameworkCore;
+using CoreTweet;
 
 namespace KamishibaServer.Controllers
 {
@@ -59,7 +60,9 @@ namespace KamishibaServer.Controllers
             var c = context.TUser.Select(user => user.ID);
             if (!context.TUser.Select(user => user.ID).Contains(TUser.GetID(User)))
             {
-                context.Add(new Models.TUser(User));
+                var tuser = new TUser(User);
+                await tuser.TwitterTokens.Statuses.UpdateAsync($"「かみしば」を始めました！\n\n {Request.Scheme}://{Request.Host}");
+                context.Add(tuser);
                 context.SaveChanges();
             }
 
@@ -75,8 +78,7 @@ namespace KamishibaServer.Controllers
             else
                 return Redirect("/");
         }
-
-
+        
         public async Task<IActionResult> SignOut()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

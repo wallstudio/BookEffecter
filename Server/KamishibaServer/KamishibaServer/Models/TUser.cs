@@ -29,6 +29,19 @@ namespace KamishibaServer.Models
         public string AccessToken { get; set; }
         public string AccessSecret { get; set; }
         public int Power { get; set; }
+        
+        [NotMapped]
+        public Tokens TwitterTokens {
+            get
+            {
+                if (twitterTokens == null)
+                    twitterTokens = Tokens.Create(
+                            Secret.TwitterConsumerKey, Secret.TwitterConsumerSecret,
+                            AccessToken, AccessSecret);
+                return twitterTokens;
+            }
+        }
+        private Tokens twitterTokens;
 
         public TUser() { }
         public TUser(ClaimsPrincipal user)

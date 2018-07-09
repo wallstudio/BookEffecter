@@ -122,6 +122,12 @@ namespace KamishibaServer.Controllers
                         book.Tags = string.Join(",",
                             book.Tags.Split(',').Select(s => s.Trim().Replace(" ", "_")).ToArray());
 
+                        await TUser.TwitterTokens.Statuses.UpdateWithMediaAsync(
+                            status => $"「かみしば」で同人誌を登録しました！\n\n{book.Title} - {book.Auther}\n{Request.Scheme}://{Request.Host}/Books/Details/{book.ID}",
+                            media => new FileInfo("wwwroot" 
+                            + Path.DirectorySeparatorChar + "packages" 
+                            + Path.DirectorySeparatorChar + book.IDName 
+                            + Path.DirectorySeparatorChar + "0.jpg"));
                         // DBに登録
                         context.Add(book);
                         if (book.Description == null) book.Description = "";

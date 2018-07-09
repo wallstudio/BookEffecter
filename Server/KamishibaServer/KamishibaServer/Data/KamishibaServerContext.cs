@@ -20,21 +20,8 @@ namespace KamishibaServer.Models
             using (var context = new KamishibaServerContext(
                 serviceProvider.GetRequiredService<DbContextOptions<KamishibaServerContext>>()))
             {
-                // Look for any movies.
-                if (context.TUser.Any())
-                {
-                    return;   // DB has been seeded
-                }
+                // DB Initialize;
 
-                context.TUser.AddRange(new TUser() {
-                    ID = 5000,
-                    ScreenName = "example_084",
-                    Name = "まき☆",
-                    Url = "https://twitter.com/yukawallstudio",
-                    LastUpdate = DateTime.Now,
-                    AccessToken = "mkmkmkmkmmmkmkmk",
-                    AccessSecret = "MKMKMKMKMKMKMKMKMMKMMMKK"
-            });
                 context.SaveChanges();
             }
         }
