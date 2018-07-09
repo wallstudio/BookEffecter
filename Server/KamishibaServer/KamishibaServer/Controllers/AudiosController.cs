@@ -79,11 +79,11 @@ namespace KamishibaServer.Controllers
         {
             if (TUser.Power > ACCESSBLE) return NeedLogin();
 
-            var book = await context.Book.SingleOrDefaultAsync(m => m.ID == audio.BookID);
-            if (book == null) return NotFound();
+            audio.Parent = await context.Book.SingleOrDefaultAsync(m => m.ID == audio.BookID);
+            if (audio.Parent == null) return NotFound();
 
             // 3rdの許可がされていない本では3rdを弾く
-            if (TUser.Power > SUPER_EDITABLE && book.LimitedOffcial && book.RegisterID != TUser.ID)
+            if (TUser.Power > SUPER_EDITABLE && audio.Parent.LimitedOffcial && audio.Parent.RegisterID != TUser.ID)
                 return NotAllowd();
 
             string audioErrorMessage = "";
@@ -101,10 +101,10 @@ namespace KamishibaServer.Controllers
                 try
                 {
                     await TUser.TwitterTokens.Statuses.UpdateWithMediaAsync(
-                            status => $"「かみしば」で同人誌に音声を登録しました！\n\n{audio.Title} ( {book.Title} )\n{Request.Scheme}://{Request.Host}/Books/Details/{book.ID}",
+                            status => $"「かみしば」で同人誌に音声を登録しました！\n\n{audio.Title} ( {audio.Parent.Title} )\n{Request.Scheme}://{Request.Host}/Books/Details/{audio.Parent.ID}",
                             media => new FileInfo("wwwroot"
                             + Path.DirectorySeparatorChar + "packages"
-                            + Path.DirectorySeparatorChar + book.IDName
+                            + Path.DirectorySeparatorChar + audio.Parent.IDName
                             + Path.DirectorySeparatorChar + "0.jpg"));
                 }
                 catch { }
@@ -112,10 +112,10 @@ namespace KamishibaServer.Controllers
                 audio = context.Add(audio).Entity;
                 await context.SaveChangesAsync();
                 
-                audioErrorMessage += await SaveAudioAsync(book.IDName, audio.ID.ToString(), audioFiles);
+                audioErrorMessage += await SaveAudioAsync(audio.Parent.IDName, audio.ID.ToString(), audioFiles);
 
                 if(audioErrorMessage == "")
-                    return Redirect($"/Books/Details/{book.ID}");
+                    return Redirect($"/Books/Details/{audio.Parent.ID}");
                 else
                 {
                     context.Remove(audio);
