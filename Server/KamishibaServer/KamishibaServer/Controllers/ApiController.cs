@@ -24,7 +24,7 @@ namespace KamishibaServer.Controllers
             public DateTime publish_date { get; set; }
             public List<string> genre { get; set; }
             public bool sexy { get; set; }
-            public bool vaiolence { get; set; }
+            public bool violence { get; set; }
             public bool grotesque { get; set; }
             public bool download_status { get; set; }
 
@@ -41,7 +41,7 @@ namespace KamishibaServer.Controllers
                 publish_date = book.PublishedDate;
                 genre = book.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList();
                 sexy = book.Sexy;
-                vaiolence = book.Vaiolence;
+                violence = book.Violence;
                 grotesque = book.Grotesque;
                 download_status = false;
             }
@@ -79,11 +79,11 @@ namespace KamishibaServer.Controllers
             public int page_count { get; set; }
             public int audio_count { get; set; }
             public DateTime publish_date { get; set; }
-            List<string> genre { get; set; }
-            bool sexy { get; set; }
-            bool vaiolence { get; set; }
-            bool grotesque { get; set; }
-            bool download_status { get; set; }
+            public List<string> genre { get; set; }
+            public bool sexy { get; set; }
+            public bool Violence { get; set; }
+            public bool grotesque { get; set; }
+            public bool download_status { get; set; }
             public string description { get; set; }
             public List<Audio> audio { get; set; }
 
@@ -100,7 +100,7 @@ namespace KamishibaServer.Controllers
                 publish_date = book.PublishedDate;
                 genre = book.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList();
                 sexy = book.Sexy;
-                vaiolence = book.Vaiolence;
+                Violence = book.Violence;
                 grotesque = book.Grotesque;
                 download_status = false;
                 description = book.Description;

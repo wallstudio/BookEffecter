@@ -66,7 +66,7 @@
                     {
                         <span class="tag r18-tag">成人向け</span>
                     }
-                    @if (Model.Vaiolence)
+                    @if (Model.Violence)
                     {
                         <span class="tag r18-tag">凶器・暴力</span>
                     }
@@ -145,10 +145,10 @@
                             @Html.DisplayFor(model => model.Sexy)
                         </dd>
                         <dt>
-                            @Html.DisplayNameFor(model => model.Vaiolence)
+                            @Html.DisplayNameFor(model => model.Violence)
                         </dt>
                         <dd>
-                            @Html.DisplayFor(model => model.Vaiolence)
+                            @Html.DisplayFor(model => model.Violence)
                         </dd>
                         <dt>
                             @Html.DisplayNameFor(model => model.Grotesque)
@@ -187,7 +187,7 @@
                                     <div>
                                         <img src="~/images/newaudio.png" class="audio-list-icon">
                                         <div class="audio-list-center">
-                                            <h4>新しい音声を追加！</h4>
+                                            <h4>新しい音声を追加！<span class="gohst"> _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</span></h4>
                                         </div>
                                     </div>
                                 </a>
@@ -207,7 +207,7 @@
                                                 <img src="~/images/official.png" class="audio-list-official">
                                             }
                                             <div class="audio-list-center">
-                                                <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
+                                                <h4>@(j++). @Html.DisplayFor(_ => audio.Title)<span class="gohst"> _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</span></h4>
                                                 <p>@Html.DisplayFor(_ => audio.Register.Name)</p>
                                             </div>
                                         </div>
@@ -224,7 +224,7 @@
                                             <img src="~/images/official.png" class="audio-list-official">
                                         }
                                         <div class="audio-list-center">
-                                            <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
+                                            <h4>@(j++). @Html.DisplayFor(_ => audio.Title)<span class="gohst"> _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</span></h4>
                                             <p>@Html.DisplayFor(_ => audio.Register.Name)</p>
                                         </div>
                                     </div>

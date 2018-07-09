@@ -47,7 +47,7 @@ namespace KamishibaServer.Models
         [DisplayName("性的表現の有無")]
         public bool Sexy { get; set; }
         [DisplayName("暴力表現の有無")]
-        public bool Vaiolence { get; set; }
+        public bool Violence { get; set; }
         [DisplayName("グロテスクな表現の有無")]
         public bool Grotesque { get; set; }
         [DisplayName("説明")]

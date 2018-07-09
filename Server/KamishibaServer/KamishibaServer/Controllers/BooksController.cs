@@ -69,7 +69,7 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             [Bind("ID,RegisterID,IDName,LimitedOffcial,Title,Auther,Contact,PageCount,PublishedDate," +
-                "Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate,Images")]
+                "Tags,Sexy,Violence,Grotesque,Description,LastUpdate,CreatedUpdate,Images")]
             Book book, List<IFormFile> images)
         {
             if (TUser.Power > ACCESSBLE) return NeedLogin();
@@ -166,7 +166,7 @@ namespace KamishibaServer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, 
             [Bind("ID,RegisterID,IDName,LimitedOffcial,Title,Auther,Contact,PageCount,PublishedDate," +
-                "Tags,Sexy,Vaiolence,Grotesque,Description,LastUpdate,CreatedUpdate")]
+                "Tags,Sexy,Violence,Grotesque,Description,LastUpdate,CreatedUpdate")]
             Book book)
         {
             if (TUser.Power > ACCESSBLE) return NeedLogin();
