@@ -15,11 +15,12 @@ public class LibraryTapAdapter extends FragmentPagerAdapter {
     public LibraryTapAdapter(FragmentManager fm) {
         super(fm);
         tabTitles = Arrays.asList("Local", "Cloud", "QR");
-        tabFragments = Arrays.asList(
-                new LoacalLibraryTabFragment(),
-                new CloudLibraryTabFragment(),
-                new QRScanerFragment()
-        );
+
+        // 各タブのエントリ
+        TabFragment local = new LocalLibraryTabFragment();
+        TabFragment cloud = new CloudLibraryTabFragment();
+        TabFragment qr = new QRScanerFragment();
+        tabFragments = Arrays.asList(local, cloud, qr);
     }
 
     public String getTitle(int position){
@@ -28,7 +29,7 @@ public class LibraryTapAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return (CharSequence)tabTitles.get(position);
+        return tabTitles.get(position);
     }
 
     @Override

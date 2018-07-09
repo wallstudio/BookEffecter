@@ -20,20 +20,39 @@ import java.util.Map;
 public class QRScanerFragment extends TabFragment {
 
     public static final String TITLE = "ライブラリ ＞ QR読み取り";
+    @Override public String getTitle() {
+        return TITLE;
+    }
 
     private DecoratedBarcodeView mBarcodeView;
-    private boolean mIsUserVisible = false;
     private boolean decoded = false;
 
-    // ref. https://qiita.com/sakuna63/items/653452eb48029d53d44f
+    // QRカメラの設定
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_qrscaner, container, false);
+        mBarcodeView = v.findViewById(R.id.decoratedBarcodeView);
+        mBarcodeView.decodeContinuous(new BarcodeCallback() {
+            @Override
+            public void barcodeResult(BarcodeResult barcodeResult) {
+                if(!decoded) {
+                    String input = barcodeResult.getText().trim();
+                    startLauncher(input);
+                    decoded = true;
+                }
+            }
+            @Override
+            public void possibleResultPoints(List<ResultPoint> list) {}
+        });
+        return v;
+    }
+
+    // タブの表示に合わせてカメラをON/OFFする
+    @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
 
-        mIsUserVisible = isVisibleToUser;
-
-        if(isVisibleToUser && getActivity() != null)
-            getActivity().setTitle(TITLE);
-
+        // ref. https://qiita.com/sakuna63/items/653452eb48029d53d44f
         if(mBarcodeView != null) {
             if (isVisibleToUser) {
                 mBarcodeView.resume();
@@ -49,7 +68,7 @@ public class QRScanerFragment extends TabFragment {
     public void onResume() {
         decoded = false;
         super.onResume();
-        if(mIsUserVisible) {
+        if(isUserVisible) {
             mBarcodeView.resume();
             Log.d("QR_CAMERA", "onResume ");
         }else {
@@ -63,39 +82,6 @@ public class QRScanerFragment extends TabFragment {
         super.onPause();
         mBarcodeView.pause();
         Log.d("QR_CAMERA" , "onPause " );
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_qrscaner, container, false);
-        mBarcodeView = v.findViewById(R.id.decoratedBarcodeView);
-        mBarcodeView.decodeContinuous(new BarcodeCallback() {
-            @Override
-            public void barcodeResult(BarcodeResult barcodeResult) {
-                if(!decoded) {
-                    decoded = true;
-                    String input = barcodeResult.getText().trim();
-                    boolean downloadStatus = false;
-                    String localPath = LoadUtil.getLocalPackageSummaryListPath(getContext());
-                    try {
-                        List<Map> localSummaries = (List<Map>) LoadUtil.getYamlFromPath(localPath);
-                        Map localSummary = LoadUtil.getSummaryYamlInList(localSummaries, input);
-                        if(localSummary != null) downloadStatus = true;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    startLauncher(input, downloadStatus);
-                }
-            }
-            @Override
-            public void possibleResultPoints(List<ResultPoint> list) {}
-        });
-        return v;
-    }
-
-    @Override
-    public String getTitle() {
-        return TITLE;
     }
 
 }

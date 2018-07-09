@@ -42,7 +42,7 @@ public class LearndImageSet {
     public DMatch[] bestMatch;
     public Mat resultImage = new Mat();
 
-    public LearndImageSet(Activity context, String path, int count){
+    public LearndImageSet(Activity context, String dir, int count){
         if(null == sBFMatcher)
             sBFMatcher = BFMatcher.create(Core.NORM_HAMMING, true);
 
@@ -52,7 +52,7 @@ public class LearndImageSet {
 
         try {
             for (int srcId = 0; srcId < count; srcId++) {
-                Bitmap bitmap = LoadUtil.getBitmapFromPath(path + String.valueOf(srcId) + ".jpg");
+                Bitmap bitmap = LoadUtil.getBitmapFromPath(dir + "/" +String.valueOf(srcId) + ".jpg");
                 Mat imageMat = new Mat();
                 Utils.bitmapToMat(bitmap, imageMat, false);
                 LearndImage learndImage = new LearndImage(imageMat);
@@ -60,7 +60,7 @@ public class LearndImageSet {
                 bitmap.recycle();
             }
         }catch (IOException e){
-            Toast.makeText(context,"Failed load bitmap", Toast.LENGTH_SHORT);
+            Toast.makeText(context,"Failed load bitmap", Toast.LENGTH_SHORT).show();
             context.finish();
         }
     }

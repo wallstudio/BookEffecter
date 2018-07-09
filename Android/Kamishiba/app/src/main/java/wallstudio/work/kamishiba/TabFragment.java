@@ -15,15 +15,22 @@ import java.util.Map;
 
 public abstract class TabFragment extends Fragment {
 
-    public static final String CLOUD_PACKAGE_SUMMARY_LIST_PATH = "packages.yml";
-    public static final String LOCAL_PACKAGE_SUMMATY_LIST_PATH = "local_packages.yml";
+    public boolean isUserVisible = false;
 
     public abstract String getTitle();
 
-    protected void startLauncher(String id, boolean isDownloaded){
+    protected void startLauncher(String id){
         Intent intent = new Intent(((Activity) (getContext())).getApplication(), LauncherActivity.class);
-        intent.putExtra("package_id", id);
-        intent.putExtra("download_status", isDownloaded);
+        intent.putExtra(LauncherActivity.INTENT_KEY_PACKAGE_ID, id);
         getActivity().startActivity(intent);
+    }
+
+    // タブの切り替えに対応してアクションバーにタイトルを表示
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        isUserVisible = isVisibleToUser;
+        super.setUserVisibleHint(isVisibleToUser);
+        if(isVisibleToUser && getActivity() != null)
+            getActivity().setTitle(getTitle());
     }
 }

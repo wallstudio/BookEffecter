@@ -54,8 +54,8 @@ public class StandCameraActivity extends Activity {
 
     private String mPackageId;
     private int mImageCount;
-    private int mAudioIndex;
-    private double[] mTrackTiming;
+    private int mAudioPosition;
+    private double[][] mTrackTiming;
 
     private TextureView mDebugPreview;
     private TextView mDebugPrint;
@@ -223,7 +223,7 @@ public class StandCameraActivity extends Activity {
                 action(mCurrentPage);
                 // 音声止める
                 if (mMediaPlayer.isPlaying()){
-                    int end = (int) (mTrackTiming[mCurrentPage * 2 + 1] * 1000);
+                    int end = (int) (mTrackTiming[mCurrentPage][1] * 1000);
                     int now = mMediaPlayer.getCurrentPosition();
                     if(end < now){
                         mMediaPlayer.pause();
@@ -274,11 +274,11 @@ public class StandCameraActivity extends Activity {
                     mMediaPlayer.pause();
                 }
                 if (count >= 0) {
-                    if (count * 2 < mTrackTiming.length) {
-                        mMediaPlayer.seekTo((int) (mTrackTiming[count * 2] * 1000));
+                    if (count < mTrackTiming.length) {
+                        mMediaPlayer.seekTo((int) (mTrackTiming[count][0] * 1000));
                         mMediaPlayer.start();
                     } else {
-                        Log.e("Action", "Out of range " + count * 2 + ">" + mTrackTiming.length);
+                        Log.e("Action", "Out of range " + count + ">" + mTrackTiming.length);
                     }
                 }
             }
@@ -315,32 +315,36 @@ public class StandCameraActivity extends Activity {
         mController = findViewById(R.id.controller_view);
 
         mPackageId = getIntent().getStringExtra("package");
-        mTitleView.setText(getIntent().getStringExtra("title"));
-        mAuthorView.setText(getIntent().getStringExtra("author"));
-        mImageCount = getIntent().getIntExtra("image_count", -1);
-        mAudioIndex = getIntent().getIntExtra("audio_index", -1);
-        mTrackTiming = getIntent().getDoubleArrayExtra("track_timing");
-
-        mCoverView.setImageBitmap(LoadUtil.getBitmapFromUrlWithCache(this,
-                getResources().getString(R.string.root_url) + mPackageId + "/" + LauncherActivity.COVER_PATH));
-
-        String imagePath = LoadUtil.getPackagePath(this, mPackageId) + "set/";
-        // TODO: これ重いから非同期にしたい
-        mLearndImageSet = new LearndImageSet(this, imagePath, mImageCount);
-        mLearndImageSet.setImageReduction(2);
-        mMatchPreviewView.setSet(mLearndImageSet);
-
+        mAudioPosition = getIntent().getIntExtra("audio", -1);
         try {
-            String audioPath = LoadUtil.getPackagePath(this, mPackageId) + "audio/" + mAudioIndex + ".mp3";
-            mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setDataSource(audioPath);
-            mMediaPlayer.prepare();
-            mMediaPlayer.setLooping(false);
-        }catch (IOException e){
-            mMediaPlayer.release();
-            mMediaPlayer = null;
-            Toast.makeText(this, "Failed load audio source", Toast.LENGTH_LONG).show();
-        }
+            Map packageData = (Map) LoadUtil.getYamlFromPath(getFilesDir() + "/" + mPackageId + "/" + LoadUtil.LOCAL_PACKAGE_FILENAME);
+            mImageCount = (int)packageData.get("page_count");
+            mTitleView.setText((String) packageData.get("title"));
+            mAuthorView.setText((String)packageData.get("author"));
+            mCoverView.setImageBitmap(LoadUtil.getBitmapFromPath(getFilesDir() + "/" + mPackageId + "/0.jpg"));
+            Map audioData = ((List<Map>)packageData.get("audio")).get(mAudioPosition);
+            List<Number> trackTimingSQ = (List<Number>) audioData.get("track_timing");
+            mTrackTiming = new double[trackTimingSQ.size() / 2][];
+            for(int i = 0; i < trackTimingSQ.size() / 2; i++)
+                mTrackTiming[i] = new double[]{trackTimingSQ.get(i * 2).doubleValue(), trackTimingSQ.get(i * 2 + 1).doubleValue()};
+
+            // TODO: これ重いから非同期にしたい
+            mLearndImageSet = new LearndImageSet(this, getFilesDir() + "/" + mPackageId, mImageCount);
+            mMatchPreviewView.setSet(mLearndImageSet);
+
+            // 音声
+            try {
+                String audioPath = getFilesDir() + "/" + mPackageId + "/" + audioData.get("id") + ".mp3";
+                mMediaPlayer = new MediaPlayer();
+                mMediaPlayer.setDataSource(audioPath);
+                mMediaPlayer.prepare();
+                mMediaPlayer.setLooping(false);
+            }catch (IOException e){
+                mMediaPlayer.release();
+                mMediaPlayer = null;
+                Toast.makeText(this, "Failed load audio source", Toast.LENGTH_LONG).show();
+            }
+        } catch (IOException e) { }
     }
 
     @Override

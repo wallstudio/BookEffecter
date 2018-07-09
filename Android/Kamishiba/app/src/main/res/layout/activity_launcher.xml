@@ -200,7 +200,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:elevation="2dp"
-                android:onClick="onClickDownloadOrUpdateButton"
+                android:onClick="onClickDownloadOrUpdateButtonAsync"
                 android:text="ダウンロード"
                 android:textAlignment="center"
                 android:textSize="14sp"

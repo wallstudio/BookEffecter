@@ -28,66 +28,66 @@ public abstract class LibraryTabFragment extends TabFragment {
         private Context mContext;
         private int mResource;
         private LayoutInflater mInflater;
-        public List<Map> yaml;
+        public List<Map> mPackagesData;
         private HashMap<Integer, AsyncTask> mImageLoadHolder = new HashMap<>();
 
-        public PackageGridAdapter(@NonNull Context context, int resource, @NonNull List<Map> yaml) {
-            super(context, resource, yaml);
+        public PackageGridAdapter(@NonNull Context context, int resource, @NonNull List<Map> packagesData) {
+            super(context, resource, packagesData);
 
             mContext = context;
             mResource = resource;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            this.yaml = yaml;
+            mPackagesData = packagesData;
         }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            View view;
+            View newView;
             if (convertView != null) {
-                view = convertView;
-                if(mImageLoadHolder.containsKey(view.hashCode()))
-                    mImageLoadHolder.get(view.hashCode()).cancel(true);
+                newView = convertView;
+                if(mImageLoadHolder.containsKey(newView.hashCode()))
+                    mImageLoadHolder.get(newView.hashCode()).cancel(true);
             } else {
-                view = mInflater.inflate(mResource, null);
+                newView = mInflater.inflate(mResource, null);
             }
 
             // Bind view
-            ImageView thumnail = view.findViewById(R.id.thumbnail);
-            TextView title = view.findViewById(R.id.pack_title);
-            TextView autor = view.findViewById(R.id.pack_autor);
-            TextView detail = view.findViewById(R.id.pack_audio_count);
-            TextView pageCount = view.findViewById(R.id.pac_pcount);
-            TextView audioCount = view.findViewById(R.id.pac_acount);
-            ViewGroup downloadStatus = view.findViewById(R.id.download_status);
+            ImageView thumbnail = newView.findViewById(R.id.thumbnail);
+            TextView title = newView.findViewById(R.id.pack_title);
+            TextView author = newView.findViewById(R.id.pack_autor);
+            TextView detail = newView.findViewById(R.id.pack_audio_count);
+            TextView pageCount = newView.findViewById(R.id.pac_pcount);
+            TextView audioCount = newView.findViewById(R.id.pac_acount);
+            ViewGroup downloadStatus = newView.findViewById(R.id.download_status);
             // Initialize contents
-            Drawable preImage = thumnail.getDrawable();
+            Drawable preImage = thumbnail.getDrawable();
             if(preImage != null && preImage instanceof BitmapDrawable)
                 ((BitmapDrawable) preImage).getBitmap().recycle();
-            thumnail.setImageResource(R.drawable.ic_local_library_black_100dp);
+            thumbnail.setImageResource(R.drawable.ic_local_library_black_100dp);
             title.setText("-");
-            autor.setText("-");
+            author.setText("-");
             detail.setText("-");
             pageCount.setText("-");
             audioCount.setText("-");
             downloadStatus.setVisibility(View.INVISIBLE);
+
+            Map packageData = mPackagesData.get(position);
             // Set contents
-            LoadUtil.PackageSummaryDownloadTask imageTask
-                    = new LoadUtil.PackageSummaryDownloadTask(getContext(), thumnail);
-            imageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                     getContext().getResources().getString(R.string.root_url)
-                             + yaml.get(position).get("id") + "/thumbnail.jpg");
-            title.setText((String) yaml.get(position).get("title"));
-            autor.setText((String) yaml.get(position).get("author"));
-//            mDetail.setText((String)mYaml.get(position).get("page_count"));
-            pageCount.setText(String.valueOf((int)(yaml.get(position).get("page_count"))));
-            audioCount.setText(String.valueOf((int)(yaml.get(position).get("audio_count"))));
+            LoadUtil.ImageDownloadAndShowTask imageTask
+                    = new LoadUtil.ImageDownloadAndShowTask(getContext(), thumbnail,
+                    LoadUtil.REMOTE_DATA_URL + "/" + packageData.get("id") + "/0.jpg");
+            imageTask.execute();
+            title.setText((String) packageData.get("title"));
+            author.setText((String) packageData.get("author"));
+            pageCount.setText(String.valueOf((int)(packageData.get("page_count"))));
+            audioCount.setText(String.valueOf((int)(packageData.get("audio_count"))));
             downloadStatus.setVisibility(
-                    ((boolean)(yaml.get(position).get("download_status"))) ? View.VISIBLE: View.INVISIBLE);
+                    ((boolean)(packageData.get("download_status"))) ? View.VISIBLE: View.INVISIBLE);
             // for canceling override task
-            mImageLoadHolder.put(view.hashCode(), imageTask);
+            mImageLoadHolder.put(newView.hashCode(), imageTask);
 
 
-            return view;
+            return newView;
         }
     }
 
@@ -96,21 +96,23 @@ public abstract class LibraryTabFragment extends TabFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_library_tab, container, false);
+
+        // リストの中身を設定
         mGrid = v.findViewById(R.id.grid);
         setAdapter(mGrid);
-
         mGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PackageGridAdapter adapter = (PackageGridAdapter) parent.getAdapter();
-                String pacId = (String) adapter.yaml.get(position).get("id");
-                startLauncher(pacId, (boolean)adapter.yaml.get(position).get("download_status"));
+                String pacId = (String) adapter.mPackagesData.get(position).get("id");
+                startLauncher(pacId);
             }
         });
 
         return v;
     }
 
+    // 他Activityやバックグラウンドから復帰したら再ロードする
     @Override
     public void onResume() {
         super.onResume();

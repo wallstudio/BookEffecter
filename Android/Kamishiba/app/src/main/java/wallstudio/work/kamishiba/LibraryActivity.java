@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -29,15 +30,17 @@ public class LibraryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_liblary);
 
+        // タブの中身を設置
         LibraryTapAdapter fpa = new LibraryTapAdapter(getSupportFragmentManager());
         ViewPager pager = findViewById(R.id.viewPager);
         pager.setOffscreenPageLimit(fpa.getCount());
         pager.setAdapter(fpa);
 
-        // Welcam Tab
+        // 初期のタブを設定
         pager.setCurrentItem(1, true);
         setTitle(fpa.getTitle(1));
 
+        // タブのインジケーター（？）の設定
         TabLayout tab = findViewById(R.id.tabLayout);
         tab.setupWithViewPager(pager);
         for(int i = 0; i < fpa.getCount(); i++){
@@ -45,45 +48,37 @@ public class LibraryActivity extends AppCompatActivity {
         }
     }
 
+    // アクションバーのメニュー（:）
     private Menu mMenue;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         final MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menue_attion, menu);
-
         mMenue = menu;
-
         return super.onCreateOptionsMenu(menu);
     }
 
+    // メニューの各項目を押したときの動作
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.help:
-                Log.d("MENU", "Help");
+                Toast.makeText(this, "Help", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.config:
-                Log.d("MENU", "Config");
+                Toast.makeText(this, "Config", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.upload:
-                Log.d("MENU", "Upload");
+                Toast.makeText(this, "Upload", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.about:
-                Log.d("MENU", "About");
+                Toast.makeText(this, "About", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.donate:
-                Log.d("MENU", "Donate");
-                String path = getFilesDir() + "/" + TabFragment.LOCAL_PACKAGE_SUMMATY_LIST_PATH;
-                Log.d("DEB", path);
-                try {
-                    Log.d("DEB", LoadUtil.getStringFromPath(path));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                Toast.makeText(this, "Donate", Toast.LENGTH_SHORT).show();
                 break;
             default:
-                Log.d("MENU", "Invalid");
+                Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
         }
         return true;
     }

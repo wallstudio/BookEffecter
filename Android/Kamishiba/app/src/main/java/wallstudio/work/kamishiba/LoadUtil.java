@@ -1,10 +1,12 @@
 package wallstudio.work.kamishiba;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Environment;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
@@ -30,12 +32,16 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class LoadUtil{
+    public static final String BASIC_ACCOUNT_PASS = "uphashi:makichan_kawaii_yatta";
+
+    public static final String REMOTE_API_URL = "https://kamishiba.wallstudio.work/api";
+    public static final String REMOTE_DATA_URL = "https://kamishiba.wallstudio.work/packages";
+    public static final String LOCAL_PACKAGE_FILENAME = "package.yml";
+    public static final String LOCAL_INDEX_FILENAME = "index.yml";
 
     public static final String[] PACKAGE_SUMMARY_ENTRIES = new String[]{
             "id",
@@ -47,10 +53,32 @@ public class LoadUtil{
             "publish_date",
             "genre",
             "sexy",
-            "vaiolence",
+            "violence",
             "grotesque",
             "download_status"
     };
+
+    public static void download(String url, String path) throws IOException {
+        InputStream stream = getStreamFromUrl(url);
+        saveStream(stream, path);
+    }
+
+    public static void removeDirectoryRecursion(String... paths){
+        for(String path: paths) {
+            File file = new File(path);
+            if (file.exists()) {
+                if (file.isDirectory()) {
+                    String[] subFiles = file.list();
+                    for (String f : subFiles)
+                        removeDirectoryRecursion(file.getPath() + "/" + f);
+                } else if (file.isFile()) {
+                    file.delete();
+                    Log.d("DELETE", file.getPath());
+                } else
+                    throw new RuntimeException("Invalid file type");
+            }
+        }
+    }
 
     // InputStream; close() はしない
     public static InputStream getStreamFromPath(String path) throws IOException{
@@ -61,6 +89,11 @@ public class LoadUtil{
     public static InputStream getStreamFromUrl(String url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.setRequestMethod("GET");
+        if(BASIC_ACCOUNT_PASS != null && BASIC_ACCOUNT_PASS.contains(":")){
+            connection.setRequestProperty(
+                    "Authorization", "Basic "
+                    + Base64.encodeToString(BASIC_ACCOUNT_PASS.getBytes(), Base64.NO_WRAP));
+        }
         connection.connect();
         InputStream stream = connection.getInputStream();
         return  stream;
@@ -159,7 +192,7 @@ public class LoadUtil{
         return  result;
     }
 
-    public static String getStringFromUrlWithCashe(Context context, String url){
+    public static String getStringFromUrlWithCache(Context context, String url) throws IOException {
         InputStream stream;
         String sha1 = getSha1Hash(url);
         File file = new File(context.getCacheDir() + "/" + sha1);
@@ -177,8 +210,8 @@ public class LoadUtil{
             if(file.exists()){
                 file.delete();
             }
+            throw e;
         }
-        return "";
     }
 
     public static void saveString(String string, String path) throws IOException {
@@ -202,53 +235,8 @@ public class LoadUtil{
         return map;
     }
 
-    public static void saveSummariesYaml(List<Map> summaries, String path, boolean isAppend) throws IOException {
-        if(summaries == null) return;
-
-        StringBuilder builder = new StringBuilder();
-        if(new File(path).exists()) {
-            if (isAppend) {
-                InputStream stream = getStreamFromPath(path);
-                String preFile = streamToString(stream);
-                stream.close();
-                builder.append(preFile);
-            }
-            new File(path).delete();
-        }
-
-        for(Map s : summaries){
-            builder.append(summaryYamlToString(s));
-        }
-
-        saveString(builder.toString(), path);
-    }
-
     // YAML Util
-    public static String summaryYamlToString(Map summary) throws IOException {
-        if(summary == null) return "";
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("\n-\n");
-        for (String key : PACKAGE_SUMMARY_ENTRIES){
-            builder.append(String.format("    %s: %s\n", key, summary.get(key)));
-        }
-        return builder.toString();
-    }
-
-    public static Map getSummaryYamlInList(List<Map> list, String id){
-        if (list == null)
-            return  null;
-
-        for (Map m : list){
-            String id2 = (String)m.get("id");
-            if(id.equals(id2)){
-                return m;
-            }
-        }
-        return  null;
-    }
-
-    public static void summaryDownloadCheck(List<Map> clouds, List<Map> locals){
+    public static void CheckIndexDownloaded(List<Map> clouds, List<Map> locals){
         if(clouds == null || locals == null)
             return;
 
@@ -262,6 +250,41 @@ public class LoadUtil{
                 }
             }
         }
+    }
+
+    public static void copyPackageRemoteToLocal(Activity context, String packageId) throws IOException {
+        String localIndexPath = context.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
+        String remoteIndexUrl = REMOTE_API_URL;
+
+        List<Map> localIndex = new File(localIndexPath).exists() ?
+                (List<Map>) getYamlFromPath(localIndexPath) : new ArrayList<Map>();
+        List<Map> remoteIndex = (List<Map>) getYamlFromUrl(remoteIndexUrl);
+        Map targetPackage = null;
+        for (Map pac: remoteIndex) {
+            if(packageId.equals(pac.get("id"))){
+                targetPackage = pac;
+                break;
+            }
+        }
+        if(localIndex == null) localIndex = new ArrayList<>();
+        localIndex.add(targetPackage);
+        saveString(new Yaml().dump(localIndex), localIndexPath);
+    }
+
+    public static void removePackage(Activity context, String packageId) throws IOException {
+        String localIndexPath = context.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
+        if(!new File(localIndexPath).exists())
+            saveString("", localIndexPath);
+
+        List<Map> localIndex = new File(localIndexPath).exists() ?
+                (List<Map>) getYamlFromPath(localIndexPath) : new ArrayList<Map>();
+        for (Map pac: localIndex) {
+            if(packageId.equals(pac.get("id"))){
+                localIndex.remove(pac);
+                break;
+            }
+        }
+        saveString(new Yaml().dump(localIndex), localIndexPath);
     }
 
     // Util
@@ -286,50 +309,42 @@ public class LoadUtil{
         return  builder.substring(0, builder.length() - separator.length());
     }
 
-    public static String getLocalPackageSummaryListPath(Context context){
-        return context.getFilesDir() + "/" + TabFragment.LOCAL_PACKAGE_SUMMATY_LIST_PATH;
-    }
-
-    public static String getCloudPackageSummaryListUrl(Context context){
-        return context.getResources().getString(R.string.root_url)
-                + TabFragment.CLOUD_PACKAGE_SUMMARY_LIST_PATH;
-    }
-
-    public static String getPackagePath(Context context, String id){
-        return context.getFilesDir().getPath() + "/" + id + "/";
-    }
-
     // Task
-    public static class PackageSummaryDownloadTask extends AsyncTask<String, Double, Bitmap>{
+    public static class ImageDownloadAndShowTask extends AsyncTask<Void, Double, Void>{
 
         private Context mContext;
-        private ImageView mImage;
+        private ImageView mDestView;
+        private String mUrl;
+        private Bitmap mBitmap;
 
-        public PackageSummaryDownloadTask(Context context, ImageView image){
+        public ImageDownloadAndShowTask(Context context, ImageView destView, String url){
             mContext = context;
-            mImage = image;
+            mDestView = destView;
+            mUrl = url;
         }
 
         @Override
-        protected Bitmap doInBackground(String... param) {
-            String url = param[0];
-            return getBitmapFromUrlWithCache(mContext, url);
+        protected Void doInBackground(Void... _void) {
+            mBitmap = getBitmapFromUrlWithCache(mContext, mUrl);
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Bitmap bitmap){
-            if(null != bitmap){
-                mImage.setImageBitmap(bitmap);
+        protected void onPostExecute(Void _void){
+            if(null != mBitmap){
+                mDestView.setImageBitmap(mBitmap);
             }else {
                 Toast.makeText(mContext, "Thumbnail download error", Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    public static class CloudPackageListDownloadTask extends AsyncTask<String, Double, List<Map>>{
+    public static class CloudPackageListDownloadTask extends AsyncTask<Void, Double, Void>{
 
-        private Context mContext;
+        protected Context mContext;
         private GridView mGridView;
+
+        protected List<Map> mIndex = new ArrayList<>();
 
         public CloudPackageListDownloadTask(Context context, GridView grid){
             super();
@@ -338,26 +353,23 @@ public class LoadUtil{
         }
 
         @Override
-        protected List<Map> doInBackground(String... param) {
-            List<Map> cloucSummaries = null;
+        protected Void doInBackground(Void... _void) {
             try {
-                String cloudUrl = param[0];
-                String localPath = getLocalPackageSummaryListPath(mContext);
-                cloucSummaries = (List<Map>) getYamlFromUrl(cloudUrl);
+                String cloudIndexUrl = REMOTE_API_URL;
+                String localPath = mContext.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
+                mIndex = (List<Map>) getYamlFromUrl(cloudIndexUrl);
                 List<Map> localSummaries = (List<Map>) getYamlFromPath(localPath);
-                summaryDownloadCheck(cloucSummaries, localSummaries);
+                CheckIndexDownloaded(mIndex, localSummaries);
             } catch (IOException e){
             }
-
-            if(cloucSummaries == null) cloucSummaries = new ArrayList<>();
-            return cloucSummaries;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(List<Map> pacs){
+        protected void onPostExecute(Void _void){
             LibraryTabFragment.PackageGridAdapter pga
                     = new LibraryTabFragment.PackageGridAdapter(
-                            mContext, R.layout.fragment_package, pacs);
+                            mContext, R.layout.fragment_package, mIndex);
             mGridView.setAdapter(pga);
         }
     }
@@ -369,210 +381,194 @@ public class LoadUtil{
         }
 
         @Override
-        protected List<Map> doInBackground(String... param) {
-            List<Map> pacs = new ArrayList<>();
+        protected Void doInBackground(Void... _void) {
             try {
-                String path = param[0];
-                pacs = (List<Map>) getYamlFromPath(path);
+                String path = mContext.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
+                mIndex = new File(path).exists() ?
+                        (List<Map>) getYamlFromPath(path) : new ArrayList<Map>();
             } catch (IOException e){
             }
 
-            if(pacs == null) pacs = new ArrayList<>();
-            return pacs;
+            if(mIndex == null) mIndex = new ArrayList<>();
+            for (Map pac : mIndex)
+                pac.put("download_status", true);
+            return null;
         }
     }
 
-    public static class PackageDetailDownloadTask extends AsyncTask<String, Double, PackageDetailDownloadTask.MapBitmapPair>{
-
-        public static class MapBitmapPair{
-            Map map;
-            Bitmap bitmap;
-        }
-
+    public static class PackageDetailDownloadTask extends AsyncTask<Void, Double, Void>{
         private LauncherActivity mContext;
-        private ListView mList;
-        private ImageView mCover;
-        private TextView mTitle;
-        private TextView mAuthor;
-        private TextView mTags;
-        private TextView mDescription;
-        private TextView mPageCount;
-        private List<Map> mAudios;
-
-        public PackageDetailDownloadTask(LauncherActivity context, ListView list, ImageView cover,
-                 TextView title, TextView author, TextView tags, TextView description, TextView pageCount){
-            mContext = context;
-            mList = list;
-            mCover = cover;
-            mTitle = title;
-            mAuthor = author;
-            mTags = tags;
-            mDescription = description;
-            mPageCount = pageCount;
-        }
-
-        @Override
-        protected MapBitmapPair doInBackground(String... strings) {
-            MapBitmapPair result = new MapBitmapPair();
-            result.map = new HashMap();
-            String url = strings[0];
-            String coverUrl = strings[1];
-            String yamlString = null;
-            yamlString = getStringFromUrlWithCashe(mContext, url);
-            Yaml yaml = new Yaml();
-            result.map = yaml.load(yamlString);
-            result.bitmap = getBitmapFromUrlWithCache(mContext, coverUrl);
-            return  result;
-        }
-
-        @Override
-        protected void onPostExecute(MapBitmapPair pac){
-            if(pac.map != null){
-                try {
-                    mContext.yaml = pac.map;
-
-                    mTitle.setText((String) pac.map.get("title"));
-                    mAuthor.setText((String) pac.map.get("author"));
-                    mTags.setText(join((List<String>) pac.map.get("genre"), ", "));
-                    mDescription.setText((String) pac.map.get("description"));
-                    mPageCount.setText(String.valueOf((int) pac.map.get("page_count")));
-                    mAudios = (List<Map>) pac.map.get("audio");
-                }catch (NullPointerException e){ }
-            }
-            if(pac.bitmap != null) mCover.setImageBitmap(pac.bitmap);
-            if(mAudios == null) mAudios = new ArrayList<>();
-            LauncherActivity.AudioAdapter adapter
-                    = new LauncherActivity.AudioAdapter(
-                    mContext, R.layout.fragment_audio, mAudios);
-            mList.setAdapter(adapter);
-        }
-    }
-
-    public static class PackageDataDownloadTask extends AsyncTask<PackageDataDownloadTask.UrlAndCounts, Double, Void>{
-
-        public static class UrlAndCounts{
-            public String url;
-            public int imageCount;
-            public int audioCount;
-
-            public UrlAndCounts(String url, int imageCount, int audioCount) {
-                this.url = url;
-                this.imageCount = imageCount;
-                this.audioCount = audioCount;
-            }
-        }
-
-        public  static List<String> singleTaskEachPackage = new ArrayList<>();
-        private LauncherActivity mContext;
-        private ProgressBar mProgressBar;
-        private ViewGroup mPopup;
-        private TextView mProgressText;
         private String mPackageId;
+        private ListView mAudioListView;
+        private ImageView mCoverView;
+        private TextView mTitleLabelView;
+        private TextView mAuthorLabelView;
+        private TextView mTagLabalView;
+        private TextView mDescriptionLabelView;
+        private TextView mPageCountLabelView;
 
-        public PackageDataDownloadTask(LauncherActivity context, ViewGroup popup,
-                                       ProgressBar progressBar, TextView progressText,
-                                       String id) throws Exception {
-            mPackageId = id;
-            if(singleTaskEachPackage.contains(mPackageId))
-                throw new Exception("Already running task " + mPackageId);
-            else
-                singleTaskEachPackage.add(mPackageId);
+        private Map mPackageData;
+        private Bitmap mCover;
+
+        public PackageDetailDownloadTask(
+                LauncherActivity context, String id, ListView audioListView,
+                ImageView coverVIew, TextView titleLabelView, TextView authorLabelView,
+                TextView tagLabelView, TextView descriptionLabelView, TextView pageCountLabelView){
             mContext = context;
-            mPopup = popup;
-            mProgressBar = progressBar;
-            mProgressText = progressText;
+            mPackageId = id;
+            mAudioListView = audioListView;
+             mCoverView = coverVIew;
+            mTitleLabelView = titleLabelView;
+            mAuthorLabelView = authorLabelView;
+            mTagLabalView = tagLabelView;
+            mDescriptionLabelView = descriptionLabelView;
+            mPageCountLabelView = pageCountLabelView;
+        }
 
+        // まずローカルを見てなければキャッシュ付ダウンロード
+        // IOExceptionが起きたら書き戻しはしない
+        @Override
+        protected Void doInBackground(Void... _void) {
+            String packageUrl = REMOTE_API_URL + "/" + mPackageId;
+            String packagePath = mContext.getFilesDir() + "/" + mPackageId + "/" + LOCAL_PACKAGE_FILENAME;
+            String coverUrl = REMOTE_DATA_URL + "/" + mPackageId + "/" + "0.jpg";
+            String coverPath = mContext.getFilesDir() + "/" + mPackageId + "/" + "0.jpg";
+
+            try {
+                String yaml = "";
+                if (new File(packagePath).exists()) {
+                    yaml = getStringFromPath(packagePath);
+                    mCover = getBitmapFromPath(coverPath);
+                } else {
+                    yaml = getStringFromUrl(packageUrl);
+                    mCover = getBitmapFromUrlWithCache(mContext, coverUrl);
+                }
+                mPackageData = new Yaml().load(yaml);
+            }catch (Exception e){
+                Log.e("ERROR", e.getMessage());
+            }
+
+            return  null;
+        }
+
+        @Override
+        protected void onPostExecute(Void _void){
+            if(mPackageData == null) return;
+
+            List<Map> audios = null;
+            try {
+                mContext.yaml = mPackageData;
+
+                mTitleLabelView.setText((String) mPackageData.get("title"));
+                mAuthorLabelView.setText((String) mPackageData.get("author"));
+                mTagLabalView.setText(join((List<String>) mPackageData.get("genre"), ", "));
+                mDescriptionLabelView.setText((String) mPackageData.get("description"));
+                mPageCountLabelView.setText(String.valueOf((int) mPackageData.get("page_count")));
+                audios = (List<Map>) mPackageData.get("audio");
+            }catch (NullPointerException e){ }
+
+            if(mCover != null) mCoverView.setImageBitmap(mCover);
+            if(audios != null) {
+                LauncherActivity.AudioAdapter adapter
+                        = new LauncherActivity.AudioAdapter(mContext, R.layout.fragment_audio, audios);
+                mAudioListView.setAdapter(adapter);
+            }
+        }
+    }
+
+    public static class PackageDataDownloadTask extends AsyncTask<Void, Double, Void>{
+        private LauncherActivity mContext;
+        private String mPackageId;
+        private ViewGroup mDownloadPopupView;
+        private ProgressBar mProgressGraphView;
+        private TextView mProgressLabelView;
+
+        private  static List<String> singleTaskEachPackage = new ArrayList<>();
+
+        public PackageDataDownloadTask(
+                LauncherActivity context, String packageId,
+               ViewGroup downloadPopupView, ProgressBar progressGraphView, TextView progressLabelView){
+            mContext = context;
+            mPackageId = packageId;
+            if(singleTaskEachPackage.contains(mPackageId)) {
+                cancel(true);
+                Toast.makeText(mContext, "Already running task", Toast.LENGTH_LONG).show();
+            } else {
+                singleTaskEachPackage.add(mPackageId);
+            }
+            mDownloadPopupView = downloadPopupView;
+            mProgressGraphView = progressGraphView;
+            mProgressLabelView = progressLabelView;
         }
 
         @Override
         protected void onPreExecute(){
-            mPopup.setVisibility(View.VISIBLE);
-            mProgressBar.setProgress(0);
+            mDownloadPopupView.setVisibility(View.VISIBLE);
+            mProgressGraphView.setProgress(0);
         }
 
         @Override
-        protected Void doInBackground(UrlAndCounts... urlAndCounts) {
-            String url = urlAndCounts[0].url;
-            int imageCount = urlAndCounts[0].imageCount;
-            int audioCount = urlAndCounts[0].audioCount;
-
-            int totalCount = imageCount + audioCount + 2;
-            int progressCount = 1;
-
-            // Storage prepare
-            String saveDirPath = getPackagePath(mContext, mPackageId);
-            String saveImageDirPath = saveDirPath + "set/";
-            String saveAudioDirPath = saveDirPath + "audio/";
-            File saveDir = new File(saveDirPath);
-            File saveImageDir = new File(saveImageDirPath);
-            File saveAudioDir = new File(saveAudioDirPath);
-            if(!saveDir.exists()) saveDir.mkdirs();
-            if(!saveImageDir.exists()) saveImageDir.mkdirs();
-            if(!saveAudioDir.exists()) saveAudioDir.mkdirs();
-
-            if(isCancelled()) return null;
-            publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
-
+        protected Void doInBackground(Void... _void) {
+            if(isCancelled()) return  null;
             try {
-                // Download YAML
-                InputStream stream = getStreamFromUrl(url + "detail.yml");
-                saveStream(stream, saveDirPath + "detail.yml");
-                stream.close();
-                progressCount++;
+                String url = REMOTE_API_URL + "/" + mPackageId;
+                String yaml = getStringFromUrl(url);
+                Map packageData = new Yaml().load(yaml);
+
+                // DL数を計算
+                int imageCount = (int)packageData.get("page_count");
+                int audioCount = (int)packageData.get("audio_count");
+                int totalCount = imageCount + audioCount + 2;
+                int progressCount = 0;
+
+                // ディレクトリの準備
+                File packagePath = new File(mContext.getFilesDir() + "/" + mPackageId);
+                if(!packagePath.exists()) packagePath.mkdirs();
 
                 if(isCancelled()) return null;
-                publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
+                publishProgress((double)++progressCount/totalCount, (double)progressCount, (double)totalCount);
+
+                // Download YAML
+                download(REMOTE_API_URL + "/" + mPackageId,
+                        mContext.getFilesDir() + "/" + mPackageId + "/" + LOCAL_PACKAGE_FILENAME);
+
+                if(isCancelled()) return null;
+                publishProgress((double)++progressCount/totalCount, (double)progressCount, (double)totalCount);
 
                 // Download image set
                 for (int i = 0; i < imageCount; i++){
-                    String fileNeme =  i + ".jpg";
-                    InputStream imageStream = getStreamFromUrl(url + "set/" + fileNeme);
-                    saveStream(imageStream, saveImageDirPath + fileNeme);
-                    imageStream.close();
-                    progressCount++;
-
+                    String fileName = i + ".jpg";
+                    download(REMOTE_DATA_URL + "/" + mPackageId + "/" + fileName,
+                            mContext.getFilesDir() + "/" + mPackageId + "/" + fileName);
 
                     if(isCancelled()) return null;
-                    publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
+                    publishProgress((double)++progressCount/totalCount, (double)progressCount, (double)totalCount);
                 }
 
                 // Download audios
-                for (int i = 0; i < audioCount; i++){
-                    String fileName = i + ".mp3";
-                    InputStream audioStream = getStreamFromUrl(url + "audio/" + fileName);
-                    saveStream(audioStream, saveAudioDirPath + fileName);
-                    audioStream.close();
-                    progressCount++;
+                for (Map audio : (List<Map>) packageData.get("audio")){
+                    String fileName = audio.get("id") + ".mp3";
+                    download(REMOTE_DATA_URL + "/" + mPackageId + "/" + fileName,
+                            mContext.getFilesDir() + "/" + mPackageId + "/" + fileName);
 
                     if(isCancelled()) return null;
-                    publishProgress((double)progressCount/totalCount, (double)progressCount, (double)totalCount);
+                    publishProgress((double)++progressCount/totalCount, (double)progressCount, (double)totalCount);
                 }
 
-                // Download summary
-                String cloudUrl = getCloudPackageSummaryListUrl(mContext);
-                String localPath = getLocalPackageSummaryListPath(mContext);
-                List<Map> cloudSummaries = (List<Map>) getYamlFromUrl(cloudUrl);
-                Map cloudSummary = getSummaryYamlInList(cloudSummaries, mPackageId);
-                cloudSummary.put("download_status", true);
-                Map localSummary = null;
-                if(new File(localPath).exists()) {
-                    List<Map> localSummaries = (List<Map>) getYamlFromPath(localPath);
-                    localSummary = getSummaryYamlInList(localSummaries, mPackageId);
-                }
-                if(localSummary == null)
-                    saveSummariesYaml(Arrays.asList(cloudSummary), localPath, true);
+                // ローカルのインデックスの保存
+                copyPackageRemoteToLocal(mContext, mPackageId);
+                if(isCancelled()) return null;
+                publishProgress((double)++progressCount/totalCount, (double)progressCount, (double)totalCount);
 
-            } catch (IOException e) {
+                // 0.5s 待たせて終わった感を出す
+                if(isCancelled()) return null;
+                publishProgress((double)1, (double)totalCount, (double)totalCount);
+
+                Thread.sleep(500);
+
+            } catch (Exception e) {
                 cancel(true);
-                return null;
             }
-
-            // 0.5s 待たせて終わった感を出す
-            if(isCancelled()) return null;
-            publishProgress((double)1, (double)totalCount, (double)totalCount);
-
-            try{ Thread.sleep(500); }catch (InterruptedException e){ }
-
             return null;
         }
 
@@ -581,13 +577,15 @@ public class LoadUtil{
             double progress = doubles[0];
             int progressedFileCount = (int)(double)doubles[1];
             int totalFileCount = (int)(double)doubles[2];
-            mProgressBar.setProgress((int)(progress*100));
-            mProgressText.setText(String.format("Download... (%d/%d)", progressedFileCount, totalFileCount));
+            mProgressGraphView.setProgress((int)(progress*100));
+            mProgressLabelView.setText(String.format("Download... (%d/%d)", progressedFileCount, totalFileCount));
         }
 
         @Override
         protected void onPostExecute(Void dummy){
-            mPopup.setVisibility(View.INVISIBLE);
+            if(isCancelled()) return;
+
+            mDownloadPopupView.setVisibility(View.INVISIBLE);
             mContext.setIsDownloaded(true);
             singleTaskEachPackage.remove(mPackageId);
             Toast.makeText(mContext, "Download completed!", Toast.LENGTH_SHORT).show();
@@ -595,14 +593,16 @@ public class LoadUtil{
 
         @Override
         protected void onCancelled(){
-            mPopup.setVisibility(View.INVISIBLE);
+            mDownloadPopupView.setVisibility(View.INVISIBLE);
             mContext.setIsDownloaded(false);
             singleTaskEachPackage.remove(mPackageId);
-            mContext.removeSummary(mPackageId);
-            mContext.removeDirectory(getPackagePath(mContext, mPackageId));
-            String detailPath = mContext.getResources().getString(R.string.root_url) + mPackageId + "/" + LauncherActivity.PACKAGE_DETAIL_PATH;
-            String cachePath = mContext.getCacheDir() + "/" + LoadUtil.getSha1Hash(detailPath);
-            mContext.removeDirectory(cachePath);
+            LoadUtil.removeDirectoryRecursion(
+                    mContext.getFilesDir() + "/" + mPackageId,
+                    mContext.getCacheDir() + "/" + getSha1Hash(REMOTE_API_URL + "/" + mPackageId),
+                    mContext.getCacheDir() + "/" + getSha1Hash(REMOTE_DATA_URL + "/" + mPackageId + "0.jpg"));
+            try {
+                removePackage(mContext, mPackageId);
+            } catch (IOException e) { }
             Toast.makeText(mContext, "Cancelled", Toast.LENGTH_LONG).show();
         }
     }
