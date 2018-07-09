@@ -34,7 +34,9 @@ namespace KamishibaServer.Controllers
                 title = book.Title;
                 author = book.Auther;
                 contact = book.Contact;
-                page_count = Directory.GetFiles("wwwroot" + Path.DirectorySeparatorChar + book.IDName, "*.jpg").Length;
+                page_count = Directory.GetFiles("wwwroot" 
+                    + Path.DirectorySeparatorChar + "packages" 
+                    + Path.DirectorySeparatorChar + book.IDName, "*.jpg").Length;
                 audio_count = context.Audio.Count(a => a.BookID == book.ID);
                 publish_date = book.PublishedDate;
                 genre = book.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList();
@@ -91,7 +93,9 @@ namespace KamishibaServer.Controllers
                 title = book.Title;
                 author = book.Auther;
                 contact = book.Contact;
-                page_count = Directory.GetFiles("wwwroot" + Path.DirectorySeparatorChar + book.IDName, "*.jpg").Length;
+                page_count = Directory.GetFiles("wwwroot" 
+                    + Path.DirectorySeparatorChar + "packages" 
+                    + Path.DirectorySeparatorChar + book.IDName, "*.jpg").Length;
                 audio_count = context.Audio.Count(a => a.BookID == book.ID);
                 publish_date = book.PublishedDate;
                 genre = book.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList();
