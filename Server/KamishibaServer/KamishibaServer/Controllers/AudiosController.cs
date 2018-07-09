@@ -98,13 +98,16 @@ namespace KamishibaServer.Controllers
                     audio.PublishedDate = DateTime.Now.Date;
                 audio.CreatedUpdate = DateTime.Now;
                 audio.LastUpdate = DateTime.Now;
-
-                await TUser.TwitterTokens.Statuses.UpdateWithMediaAsync(
+                try
+                {
+                    await TUser.TwitterTokens.Statuses.UpdateWithMediaAsync(
                             status => $"「かみしば」で同人誌に音声を登録しました！\n\n{audio.Title} ( {book.Title} )\n{Request.Scheme}://{Request.Host}/Books/Details/{book.ID}",
                             media => new FileInfo("wwwroot"
                             + Path.DirectorySeparatorChar + "packages"
                             + Path.DirectorySeparatorChar + book.IDName
                             + Path.DirectorySeparatorChar + "0.jpg"));
+                }
+                catch { }
                 // DBに登録
                 audio = context.Add(audio).Entity;
                 await context.SaveChangesAsync();

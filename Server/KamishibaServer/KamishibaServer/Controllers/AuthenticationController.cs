@@ -61,7 +61,11 @@ namespace KamishibaServer.Controllers
             if (!context.TUser.Select(user => user.ID).Contains(TUser.GetID(User)))
             {
                 var tuser = new TUser(User);
-                await tuser.TwitterTokens.Statuses.UpdateAsync($"「かみしば」を始めました！\n\n {Request.Scheme}://{Request.Host}");
+                try
+                {
+                    await tuser.TwitterTokens.Statuses.UpdateAsync($"「かみしば」を始めました！\n\n {Request.Scheme}://{Request.Host}");
+                }
+                catch { }
                 context.Add(tuser);
                 context.SaveChanges();
             }
