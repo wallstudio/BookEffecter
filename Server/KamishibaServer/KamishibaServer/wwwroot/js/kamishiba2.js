@@ -18,13 +18,14 @@ window.addEventListener("load", () => {
         };
         let file = files[0];
         if (!file) return;
-        if (file.type != "audio/mpeg" && file.type != "audio/wav") {
+        // Firefox, Edgeはmpeg，Chromeはmp3
+        if (file.type != "audio/mpeg" && file.type != "audio/mp3" && file.type != "audio/wav") {
             alert("読み込める音声は MP3 または WAV だけです。もしくはファイルが破損している可能性があります。")
             return;
         }
 
         GlobalAudio["file"] = file;
-        GlobalAudio["extension"] = file.type == "audio/mpeg" ? ".mp3" : ".wav";
+        GlobalAudio["extension"] = (file.type == "audio/mpeg" || file.type == "audio/mp3") ? ".mp3" : ".wav";
 
         $("#audio-drop-zone").css("display", "none");
         $(".first-wave-cell .select-span").css("display", "block");
