@@ -144,7 +144,7 @@ div.about-btn-wrap {
     color: var(--flat-font-color);
 }
 .pac {
-    max-width: 370px;
+    width: 370px;
     height: 200px;
     margin: 10px;
     float: left;
@@ -152,6 +152,12 @@ div.about-btn-wrap {
     margin: 5px;
     border-radius: 2px;
     background-color: var(--flat-background-color);
+}
+@media only screen and (max-device-width: 400px){
+    .pac{
+        width:100%;
+        margin: 5px 0;
+    }
 }
 .book-create-pac {
     float:none;

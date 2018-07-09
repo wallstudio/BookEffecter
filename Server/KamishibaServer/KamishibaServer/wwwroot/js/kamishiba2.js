@@ -286,12 +286,12 @@ window.addEventListener("load", () => {
             if (!meta || !img) {
                 $("html")[0].innerHTML = res;
                 history.pushState("", "", "/Books/Details/" + location.href.match(/.*=([0-9]+)/)[1]);
+            } else {
+                let preMeta = $(".book-meta-content")[0];
+                let preImg = $(".book-images-content .field-validation-error")[0];
+                preMeta.innerHTML = meta.innerHTML;
+                preImg.innerHTML = img.innerHTML;
             }
-
-            let preMeta = $(".book-meta-content")[0];
-            let preImg = $(".book-images-content .field-validation-error")[0];
-            preMeta.innerHTML = meta.innerHTML;
-            preImg.innerHTML = img.innerHTML;
             scrollTo(0, 0);
             }).fail((jqXHR, textStatus, errorThrown) => {
                 console.log("Kamishiba: AJAX ERROR", jqXHR, textStatus, errorThrown);

@@ -36,7 +36,7 @@ namespace KamishibaServer.Controllers
 
             var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
             if (audio == null) return NotFound();
-            if (audio.RegisterID != TUser.ID || TUser.Power > SUPER_EDITABLE) return NotAllowd();
+            if (audio.RegisterID != TUser.ID && TUser.Power > SUPER_EDITABLE) return NotAllowd();
 
             audio.Parent = await context.Book.SingleOrDefaultAsync(b => b.ID == audio.BookID);
             audio.Register = await context.TUser.SingleOrDefaultAsync(u => u.ID == audio.RegisterID);
@@ -200,8 +200,8 @@ namespace KamishibaServer.Controllers
         private async Task<string> SaveAudioAsync(string packId, string id, IFormFile audio)
         {
             var dir = "wwwroot"
-                + Path.DirectorySeparatorChar + packId
-                + Path.DirectorySeparatorChar + "audio";
+                + Path.DirectorySeparatorChar + "packages"
+                + Path.DirectorySeparatorChar + packId;
 
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);

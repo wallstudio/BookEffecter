@@ -20,9 +20,9 @@
                     <a class="btn btn-default" asp-action="Index">戻る</a>
                 </div>
                 <div class="book-detail-thumbnail-wrap">
-                    <img class="book-detail-thumbnail" src="/@Model.IDName/0.jpg" />
+                    <img class="book-detail-thumbnail" src="~/packages/@Model.IDName/0.jpg" />
                     <div class="book-detail-qr">
-                        <img src="/qr.png" />
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?data=@(Model.IDName)&size=320x320&color=333333&bgcolor=ffffff&margin=43" />
                         <p>アプリで読取り！</p>
                     </div>
                 </div>
@@ -185,7 +185,7 @@
                             <li class="create-audio editable-audio">
                                 <a asp-controller="Audios" asp-action="Create" asp-route-bid="@Model.ID">
                                     <div>
-                                        <img src="~/newaudio.png" class="audio-list-icon">
+                                        <img src="~/images/newaudio.png" class="audio-list-icon">
                                         <div class="audio-list-center">
                                             <h4>新しい音声を追加！</h4>
                                         </div>
@@ -201,10 +201,10 @@
                                 <li class="editable-audio">
                                     <a href="/Audios/Details/@(audio.ID)">
                                         <div>
-                                            <img src="/sound.png" class="audio-list-icon">
+                                            <img src="~/images/sound.png" class="audio-list-icon">
                                             @if (audio.RegisterID == Model.RegisterID)
                                             {
-                                                <img src="~/official.png" class="audio-list-official">
+                                                <img src="~/images/official.png" class="audio-list-official">
                                             }
                                             <div class="audio-list-center">
                                                 <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
@@ -218,10 +218,10 @@
                             {
                                 <li>
                                     <div>
-                                        <img src="/sound.png" class="audio-list-icon">
+                                        <img src="~/images/sound.png" class="audio-list-icon">
                                         @if (audio.RegisterID == Model.RegisterID)
                                         {
-                                            <img src="/favicon.ico" class="audio-list-official">
+                                            <img src="~/images/official.png" class="audio-list-official">
                                         }
                                         <div class="audio-list-center">
                                             <h4>@(j++). @Html.DisplayFor(_ => audio.Title)</h4>
@@ -236,7 +236,7 @@
                 <div class="book-detail-imagelist">
                     @for (var i = 0; i < Model.PageCount; i++)
                     {
-                        <img src="/@Model.IDName/@(i).jpg" class="page-prev-image" />
+                        <img src="~/packages/@Model.IDName/@(i).jpg" class="page-prev-image" />
                     }
                 </div>
             </div>

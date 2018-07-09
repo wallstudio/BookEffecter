@@ -16,9 +16,9 @@
                 <a class="btn btn-default" asp-controller="Books" asp-action="Details" asp-route-id="@Model.BookID">戻る</a>
             </div>
             <div class="book-detail-thumbnail-wrap">
-                <img class="book-detail-thumbnail" src="/@Model.Parent.IDName/0.jpg" />
+                <img class="book-detail-thumbnail" src="~/packages/@Model.Parent.IDName/0.jpg" />
                 <div class="book-detail-qr">
-                    <img src="/qr.png" />
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?data=@(Model.Parent.IDName)&size=320x320&color=333333&bgcolor=ffffff&margin=43" />
                     <p>アプリで読取り！</p>
                 </div>
             </div>
@@ -108,7 +108,7 @@
                             <th class="count-column">@(i + 1) / @Model.Parent.PageCount P</th>
                             <td class="img-column">
                                 <div class="page-prev-half">
-                                    <img src="/@Model.Parent.IDName/@(i).jpg"
+                                    <img src="~/packages/@Model.Parent.IDName/@(i).jpg"
                                          class="page-prev-image" />
                                 </div>
                             </td>
@@ -120,7 +120,7 @@
                                         <canvas></canvas>
                                     </div>
                                     <div id="waveform-@i" class="waveform" 
-                                         data="/@(Model.Parent.IDName)/audio/@(Model.ID).mp3;@(Model.TrackTiming)"></div>
+                                         data="/packages/@(Model.Parent.IDName)/@(Model.ID).mp3;@(Model.TrackTiming)"></div>
                                 </td>
                             }
                             else

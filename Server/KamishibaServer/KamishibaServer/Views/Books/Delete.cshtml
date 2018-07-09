@@ -18,7 +18,7 @@
                         <input type="hidden" asp-for="ID" />
                         <input type="submit" value="削除" class="btn btn-default" />
                     </form>
-                    <a class="btn btn-default" asp-action="Index">戻る</a>
+                    <a class="btn btn-default" asp-action="Details" asp-route-id="@Model.ID">戻る</a>
                 </div>
                 <dl class="dl-horizontal">
                     <dt>
@@ -112,7 +112,7 @@
                 @for (var i = 0; i < Model.PageCount; i++)
                 {
                     <div class="page-prev">
-                        <img src="/@Model.IDName/@(i).jpg" class="page-prev-image" />
+                        <img src="~/packages/@Model.IDName/@(i).jpg" class="page-prev-image" />
                     </div>
                 }
             </div>

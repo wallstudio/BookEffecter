@@ -67,7 +67,11 @@ namespace KamishibaServer.Controllers
             TempData["info"] = $"ようこそ {name.Name} 様！ (@{name.ScreenName})";
 
             if (TempData["login_redirect"] != null)
-                return Redirect(TempData["login_redirect"].ToString());
+            {
+                var target = TempData["login_redirect"].ToString();
+                TempData["login_redirect"] = null;
+                return Redirect(target);
+            }
             else
                 return Redirect("/");
         }

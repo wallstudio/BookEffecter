@@ -49,6 +49,7 @@ namespace KamishibaServer.Controllers
         {
             public class Audio
             {
+                public int id { get; set; }
                 public string title { get; set; }
                 public string author { get; set; }
                 public string contact { get; set; }
@@ -58,6 +59,7 @@ namespace KamishibaServer.Controllers
 
                 public Audio(KamishibaServerContext context, Book book, Models.Audio audio)
                 {
+                    id = audio.ID;
                     audio.Register = context.TUser.Single(u => u.ID == audio.RegisterID);
                     title = audio.Title;
                     author = audio.Register.Name;

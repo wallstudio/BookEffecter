@@ -145,7 +145,7 @@ namespace KamishibaServer.Controllers
                 return NeedLogin();
 
             var book = await context.Book.SingleOrDefaultAsync(m => m.ID == id);
-            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
+            if (TUser.ID != book.RegisterID && TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (id == null) return NotFound();
             if (book == null) return NotFound();
 
@@ -153,8 +153,6 @@ namespace KamishibaServer.Controllers
         }
 
         // POST: Books/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, 
@@ -164,7 +162,7 @@ namespace KamishibaServer.Controllers
         {
             if (TUser.Power > ACCESSBLE) return NeedLogin();
 
-            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
+            if (TUser.ID != book.RegisterID && TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (book == null) return NotFound();
             if (id != book.ID) return NotFound();
             
@@ -203,7 +201,7 @@ namespace KamishibaServer.Controllers
                     else
                         throw;
                 }
-                return RedirectToAction(nameof(Index));
+                return Redirect($"/Books/Details/{book.ID}");
             }
             return View(book);
         }
@@ -214,7 +212,7 @@ namespace KamishibaServer.Controllers
             if (TUser.Power > ACCESSBLE) return NeedLogin();
             var book = await context.Book.SingleOrDefaultAsync(m => m.ID == id);
 
-            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
+            if (TUser.ID != book.RegisterID && TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (id == null) return NotFound();
             if (book == null) return NotFound();
 
@@ -229,7 +227,7 @@ namespace KamishibaServer.Controllers
             if (TUser.Power > ACCESSBLE) return NeedLogin();
             var book = await context.Book.SingleOrDefaultAsync(m => m.ID == id);
 
-            if (TUser.ID != book.RegisterID || TUser.Power > OVERRIDEBLE) return NotAllowd();
+            if (TUser.ID != book.RegisterID && TUser.Power > OVERRIDEBLE) return NotAllowd();
             if (book == null) return NotFound();
 
             context.Book.Remove(book);
@@ -249,7 +247,9 @@ namespace KamishibaServer.Controllers
         public const string TMP_EXTENTION = ".tmp";
         private async Task<string> SaveImagesAsync(string id, List<IFormFile> images)
         {
-            var dir = "wwwroot" + Path.DirectorySeparatorChar + id;
+            var dir = "wwwroot" 
+                + Path.DirectorySeparatorChar + "packages" 
+                + Path.DirectorySeparatorChar + id;
 
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
@@ -342,10 +342,27 @@ namespace KamishibaServer.Controllers
                 {
                     var graphic = Graphics.FromImage(dst);
                     graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphic.DrawImage(src, 0, 0, dst.Width, dst.Height);
-                    dst.Save(dirName + JPG_EXTENTION, ImageFormat.Jpeg);
+                    graphic.DrawImage(src, -2, -2, dst.Width + 4, dst.Height + 4);
+
+                    var encoder = GetEncoder(ImageFormat.Jpeg);
+                    var encodeParams = new EncoderParameters(1);
+                    encodeParams.Param[0] = new EncoderParameter(Encoder.Quality, 90L);
+                    dst.Save(dirName + JPG_EXTENTION, encoder, encodeParams);
                 }
             }
+        }
+
+        private ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
         }
     }
 }
