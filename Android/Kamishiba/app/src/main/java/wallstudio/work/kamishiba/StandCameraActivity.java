@@ -80,7 +80,7 @@ public class StandCameraActivity extends Activity {
     private ImageReader mImageBufferForProcessing;
 
     private Bitmap mOriginalBitmap;
-    private LearndImageSet mLearndImageSet;
+    private TrainingDataList mTrainingDataList;
     private int mCurrentPage;
     private MediaPlayer mMediaPlayer;
 
@@ -212,12 +212,12 @@ public class StandCameraActivity extends Activity {
                 Core.transpose(mOriginal, mOriginal);
             }
 
-            // 処理の呼び出し
+            // 画像処理の呼び出し
             mBackgroundView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
             mInputPreviewView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
-            if (mMatchPreviewView.getStatus() == AsyncTask.Status.FINISHED) {
-                // AKAZE抽出は重いので，非同期
-                mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
+            // AKAZE抽出は重いので，非同期
+            boolean isExcused = mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
+            if(isExcused){
                 // 音声
                 mCurrentPage = smooth(mMatchPreviewView.page);
                 action(mCurrentPage);
@@ -233,7 +233,7 @@ public class StandCameraActivity extends Activity {
             mPageLabelView.setText((mCurrentPage >= 0 ? mCurrentPage + 1 : "-")  + "/" + mImageCount);
 
             setDisplayDebugMessage("page", mMatchPreviewView.page + "/" + mImageCount);
-            setDisplayDebugMessage("similar", String.format("%.3f", mMatchPreviewView.similar));
+            setDisplayDebugMessage("similar", String.format("%.3f", mMatchPreviewView.similarity));
         }
 
         private List<Integer> mBufferForSmooth = new ArrayList<>();
@@ -329,8 +329,8 @@ public class StandCameraActivity extends Activity {
                 mTrackTiming[i] = new double[]{trackTimingSQ.get(i * 2).doubleValue(), trackTimingSQ.get(i * 2 + 1).doubleValue()};
 
             // TODO: これ重いから非同期にしたい
-            mLearndImageSet = new LearndImageSet(this, getFilesDir() + "/" + mPackageId, mImageCount);
-            mMatchPreviewView.setSet(mLearndImageSet);
+            mTrainingDataList = new TrainingDataList(getFilesDir() + "/" + mPackageId);
+            mMatchPreviewView.mTrainingDataList = mTrainingDataList;
 
             // 音声
             try {
@@ -379,8 +379,8 @@ public class StandCameraActivity extends Activity {
 
     @Override
     protected void onStop() {
-        if(mLearndImageSet != null)
-            mLearndImageSet.release();
+        if(mTrainingDataList != null)
+            mTrainingDataList.release();
         if(mMediaPlayer != null)
             mMediaPlayer.release();
         super.onStop();

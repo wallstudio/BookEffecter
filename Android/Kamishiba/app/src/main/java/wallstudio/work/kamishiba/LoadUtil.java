@@ -155,7 +155,7 @@ public class LoadUtil{
         return null;
     }
 
-    public static void saveBitmap(Bitmap bitmap, String path, boolean isExternal) throws IOException {
+    public static void saveBitmap(Bitmap bitmap, String path) throws IOException {
         BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
         stream.close();

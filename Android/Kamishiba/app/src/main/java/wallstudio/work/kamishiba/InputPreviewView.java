@@ -27,7 +27,7 @@ public class InputPreviewView extends CVImageView<Void> {
             Point vanising = new Point((int) (vanishingRatio.x * frame.width()), (int) (vanishingRatio.y * frame.height()));
             float[] ptsf = calc4Points(frame, vanishingRatio, pageEdgeY);
             Point[] ptsP = floats2Points(ptsf);
-            Point[] ptsPs = shurinkPoints(ptsP);
+            Point[] ptsPs = shrinkPoints(ptsP);
 
             // Perspective guid
             Imgproc.line(frame, vanising, ptsP[2], BORDER_COLOR, GRID_THICKNESS);
