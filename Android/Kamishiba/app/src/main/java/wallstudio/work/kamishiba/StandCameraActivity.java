@@ -367,12 +367,12 @@ public class StandCameraActivity extends Activity {
     protected void onPause(){
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        if(null != mImageBufferForProcessing)
-            mImageBufferForProcessing.close();
         if(null != mCaptureSession)
             mCaptureSession.close();
         if(null != mCameraDevice)
             mCameraDevice.close();
+        if(null != mImageBufferForProcessing)
+            mImageBufferForProcessing.close();
         super.onPause();
         finish();
     }
