@@ -1,0 +1,50 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="general_prefs">
+
+    <ListPreference
+        android:title="使用するカメラの初期値"
+        android:key="pref_default_cam"
+        android:entries="@array/entry_cam_mode"
+        android:entryValues="@array/entry_values_cam_mode"
+        android:defaultValue="0" />
+
+   <PreferenceCategory
+        android:title="成人向け表現（18歳以上のみ）"
+        android:key="pref_category_adult">
+        <CheckBoxPreference
+            android:title="性的表現を含む作品を表示する"
+            android:key="pref_sexy"
+            android:defaultValue="false"/>
+        <CheckBoxPreference
+            android:title="暴力表現を含む作品を表示する"
+            android:key="pref_violence"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:title="グロテクな表現を含む作品を表示する"
+            android:key="pref_grotesque"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="開発"
+        android:key="pref_category_develop">
+        <CheckBoxPreference
+            android:title="品質向上の為のデータ提供に協力する"
+            android:key="pref_report"
+            android:defaultValue="false"
+            android:summary="個人が特定できない形に加工され利用されます"/>
+        <EditTextPreference
+            android:title="サーバーアドレス"
+            android:capitalize="words"
+            android:defaultValue="https://kamishiba.wallstudio.work/api"
+            android:inputType="textCapWords"
+            android:key="pref_server_address"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:editable="false"
+            android:enabled="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -66,7 +66,8 @@ public class LibraryActivity extends AppCompatActivity {
                 Toast.makeText(this, "Help", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.config:
-                Toast.makeText(this, "Config", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 break;
             case R.id.upload:
                 Toast.makeText(this, "Upload", Toast.LENGTH_SHORT).show();

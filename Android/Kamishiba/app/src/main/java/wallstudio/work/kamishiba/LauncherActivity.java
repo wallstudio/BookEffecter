@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -81,6 +82,19 @@ public class LauncherActivity extends AppCompatActivity {
 
         mIsDownloaded = new File(getFilesDir() + "/" + mPackageId + "/" + LoadUtil.LOCAL_PACKAGE_FILENAME).exists();
         refreshUIStatus();
+
+        // アクションバーの設定
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            // Show the Up button in the action bar.
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     // 上部
