@@ -2,6 +2,7 @@ package wallstudio.work.kamishiba;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -61,26 +62,32 @@ public class LibraryActivity extends AppCompatActivity {
     // メニューの各項目を押したときの動作
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent = null;
         switch (item.getItemId()) {
             case R.id.help:
-                Toast.makeText(this, "Help", Toast.LENGTH_SHORT).show();
+                intent = new Intent(this, WebActivity.class);
+                intent.putExtra("title", "ヘルプ");
+                intent.putExtra("url", "https://github.com/wallstudio/BookEffecter/blob/master/README.md");;
                 break;
             case R.id.config:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                intent = new Intent(this, SettingsActivity.class);
                 break;
             case R.id.upload:
-                Toast.makeText(this, "Upload", Toast.LENGTH_SHORT).show();
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://kamishiba.wallstudio.work/Books"));
                 break;
             case R.id.about:
-                Toast.makeText(this, "About", Toast.LENGTH_SHORT).show();
+                intent = new Intent(this, WebActivity.class);
+                intent.putExtra("title", "このアプリについて");
+                intent.putExtra("url", "https://github.com/wallstudio/BookEffecter/blob/master/README.md");
                 break;
             case R.id.donate:
-                Toast.makeText(this, "Donate", Toast.LENGTH_SHORT).show();
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://wallstudio.hateblo.jp/"));
                 break;
             default:
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show();
         }
+
+        if(intent != null) startActivity(intent);
         return true;
     }
 }

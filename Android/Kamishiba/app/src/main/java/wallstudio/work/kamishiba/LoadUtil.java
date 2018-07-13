@@ -413,12 +413,12 @@ public class LoadUtil{
                 String cloudIndexUrl = REMOTE_API_URL;
                 String localPath = mContext.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
                 mIndex = (List<Map>) getYamlFromUrl(cloudIndexUrl);
-                List<Map> localSummaries = (List<Map>) getYamlFromPath(localPath);
+                List<Map> localSummaries = new File(localPath).exists() ?
+                        (List<Map>) getYamlFromPath(localPath) : new ArrayList<Map>();
                 adultFilter(mIndex, isAllowSexy, isAllowViolence, isAllowGrotesque);
                 searchFilter(mIndex, mSearch);
                 checkIndexDownloaded(mIndex, localSummaries);
-            } catch (IOException e){
-            }
+            } catch (IOException e){ e.printStackTrace(); }
             return null;
         }
 
@@ -443,8 +443,7 @@ public class LoadUtil{
                 String path = mContext.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
                 mIndex = new File(path).exists() ?
                         (List<Map>) getYamlFromPath(path) : new ArrayList<Map>();
-            } catch (IOException e){
-            }
+            } catch (IOException e){ e.printStackTrace(); }
 
             if(mIndex == null) mIndex = new ArrayList<>();
             searchFilter(mIndex, mSearch);
