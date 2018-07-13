@@ -1,5 +1,6 @@
 package wallstudio.work.kamishiba;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -7,14 +8,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,13 +98,37 @@ public abstract class LibraryTabFragment extends TabFragment {
     }
 
     GridView mGrid;
+    View mV;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_library_tab, container, false);
+        mV = inflater.inflate(R.layout.fragment_library_tab, container, false);
 
+        setList();
+        mV.findViewById(R.id.search_enter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { setList(); }
+        });
+        ((EditText)mV.findViewById(R.id.search_text)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId == EditorInfo.IME_ACTION_NEXT) {
+                    // ソフトキーボードを隠す
+                    ((InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
+                            .hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    setList();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        return mV;
+    }
+
+    private void setList(){
         // リストの中身を設定
-        mGrid = v.findViewById(R.id.grid);
+        mGrid = mV.findViewById(R.id.grid);
         setAdapter(mGrid);
         mGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -108,8 +138,6 @@ public abstract class LibraryTabFragment extends TabFragment {
                 startLauncher(pacId);
             }
         });
-
-        return v;
     }
 
     // 他Activityやバックグラウンドから復帰したら再ロードする
@@ -120,4 +148,9 @@ public abstract class LibraryTabFragment extends TabFragment {
     }
 
     protected abstract void setAdapter(GridView gridView);
+
+    protected String getSearchText(){
+        EditText searchTextView = mV.findViewById(R.id.search_text);
+        return searchTextView.getText().toString().trim();
+    }
 }

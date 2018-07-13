@@ -13,7 +13,7 @@ public class CloudLibraryTabFragment extends LibraryTabFragment {
     protected void setAdapter(GridView gridView) {
         // アクセスできないと固まってしまうので…
         LoadUtil.CloudPackageListDownloadTask task
-                = new LoadUtil.CloudPackageListDownloadTask(getContext(), gridView);
+                = new LoadUtil.CloudPackageListDownloadTask(getContext(), gridView, getSearchText());
         task.execute();
     }
 }

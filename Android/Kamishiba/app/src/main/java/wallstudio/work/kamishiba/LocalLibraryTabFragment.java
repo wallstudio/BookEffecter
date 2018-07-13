@@ -14,7 +14,7 @@ public class LocalLibraryTabFragment extends LibraryTabFragment{
     protected void setAdapter(GridView gridView) {
         // アクセスできないと固まってしまうので…
         LoadUtil.LocalPackageListLoadTask task
-                = new LoadUtil.LocalPackageListLoadTask(getContext(), gridView);
+                = new LoadUtil.LocalPackageListLoadTask(getContext(), gridView, getSearchText());
         task.execute();
     }
 }

@@ -2,9 +2,12 @@ package wallstudio.work.kamishiba;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -236,7 +239,7 @@ public class LoadUtil{
     }
 
     // YAML Util
-    public static void CheckIndexDownloaded(List<Map> clouds, List<Map> locals){
+    public static void checkIndexDownloaded(List<Map> clouds, List<Map> locals){
         if(clouds == null || locals == null)
             return;
 
@@ -250,6 +253,34 @@ public class LoadUtil{
                 }
             }
         }
+    }
+
+    public static void adultFilter(List<Map> index, boolean isAllowSexy, boolean isAllowViolence, boolean isAllowGrotesque) {
+        List<Map> trash = new ArrayList<>();
+        for (Map pac : index){
+            if(!isAllowSexy && (boolean)pac.get("sexy")
+                    ||!isAllowViolence && (boolean)pac.get("violence")
+                    ||!isAllowGrotesque && (boolean)pac.get("grotesque")){
+                trash.add(pac);
+            }
+        }
+        index.removeAll(trash);
+    }
+
+    public static void searchFilter(List<Map> index, String search){
+        if(search == null || search.trim().equals("")) return;
+
+        List<Map> trash = new ArrayList<>();
+        for (Map pac : index){
+            if(!(((String)pac.get("id")).contains(search)
+                    || ((String)pac.get("title")).contains(search)
+                    || ((String)pac.get("author")).contains(search)
+                    || ((String)pac.get("contact")).contains(search)
+                    || TextUtils.join(" ", (List<String>)pac.get("genre")).contains(search))){
+                trash.add(pac);
+            }
+        }
+        index.removeAll(trash);
     }
 
     public static void copyPackageRemoteToLocal(Activity context, String packageId) throws IOException {
@@ -343,13 +374,24 @@ public class LoadUtil{
 
         protected Context mContext;
         private GridView mGridView;
+        protected String mSearch;
+
+        private boolean isAllowSexy;
+        private boolean isAllowViolence;
+        private boolean isAllowGrotesque;
 
         protected List<Map> mIndex = new ArrayList<>();
 
-        public CloudPackageListDownloadTask(Context context, GridView grid){
+        public CloudPackageListDownloadTask(Context context, GridView grid, String search){
             super();
             mContext = context;
             mGridView = grid;
+            mSearch = search;
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            isAllowSexy = sharedPreferences.getBoolean("pref_sexy", false);
+            isAllowViolence = sharedPreferences.getBoolean("pref_violence", false);
+            isAllowGrotesque = sharedPreferences.getBoolean("pref_grotesque",false);
         }
 
         @Override
@@ -359,7 +401,9 @@ public class LoadUtil{
                 String localPath = mContext.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
                 mIndex = (List<Map>) getYamlFromUrl(cloudIndexUrl);
                 List<Map> localSummaries = (List<Map>) getYamlFromPath(localPath);
-                CheckIndexDownloaded(mIndex, localSummaries);
+                adultFilter(mIndex, isAllowSexy, isAllowViolence, isAllowGrotesque);
+                searchFilter(mIndex, mSearch);
+                checkIndexDownloaded(mIndex, localSummaries);
             } catch (IOException e){
             }
             return null;
@@ -376,8 +420,8 @@ public class LoadUtil{
 
     public static class LocalPackageListLoadTask extends CloudPackageListDownloadTask{
 
-        public LocalPackageListLoadTask(Context context, GridView grid) {
-            super(context, grid);
+        public LocalPackageListLoadTask(Context context, GridView grid, String search) {
+            super(context, grid, search);
         }
 
         @Override
@@ -390,6 +434,7 @@ public class LoadUtil{
             }
 
             if(mIndex == null) mIndex = new ArrayList<>();
+            searchFilter(mIndex, mSearch);
             for (Map pac : mIndex)
                 pac.put("download_status", true);
             return null;
