@@ -2,7 +2,9 @@ package wallstudio.work.kamishiba;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +23,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.opencv.core.Mat;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -89,6 +92,17 @@ public class LauncherActivity extends AppCompatActivity {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        try {
+            String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+            if (!new File(packageConfigPath).exists()) {
+                LoadUtil.preferPackageConfigPath(packageConfigPath);
+            }
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            int common = Integer.parseInt(sharedPreferences.getString("pref_default_cam", "0"));
+            mCameraSwitch.setChecked(
+                    LoadUtil.getPackageConfigValue(packageConfigPath, "camera", String.valueOf(common)).equals("0"));
+        }catch (Exception e){}
     }
 
     @Override
@@ -195,6 +209,11 @@ public class LauncherActivity extends AppCompatActivity {
         setIsDownloaded(false);
         Toast.makeText(this, "Deleted " + mPackageId, Toast.LENGTH_SHORT).show();
         Log.d("Launcher", "DELETE " + mPackageId);
+    }
+
+    public void onClickCameraSwitch(View view){
+        String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+        LoadUtil.savePackageConfigValue(packageConfigPath, "camera", ((Switch)view).isChecked() ? "0": "1");
     }
 
     public static class AudioAdapter extends ArrayAdapter<Map> {

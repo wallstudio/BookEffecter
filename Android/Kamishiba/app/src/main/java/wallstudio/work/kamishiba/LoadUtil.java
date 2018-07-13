@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.opencv.core.Mat;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedInputStream;
@@ -35,6 +36,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +47,7 @@ public class LoadUtil{
     public static final String REMOTE_DATA_URL = "https://kamishiba.wallstudio.work/packages";
     public static final String LOCAL_PACKAGE_FILENAME = "package.yml";
     public static final String LOCAL_INDEX_FILENAME = "index.yml";
+    public static final String PACKAGE_CONFIG_FILENAME = "conf.yml";
 
     public static final String[] PACKAGE_SUMMARY_ENTRIES = new String[]{
             "id",
@@ -316,6 +319,39 @@ public class LoadUtil{
             }
         }
         saveString(new Yaml().dump(localIndex), localIndexPath);
+    }
+
+    public static void preferPackageConfigPath(String path) throws IOException {
+        Map<String, String> map = new HashMap<>();
+        map.put("camera", "-1");
+        map.put("vanishing,", "-1");
+        map.put("edge", "-1");
+        String yaml = new Yaml().dump(map);
+        saveString(yaml, path);
+    }
+
+    public static String getPackageConfigValue(String path, String key, String def){
+        try {
+            Map<String, String> map = (Map<String, String>) getYamlFromPath(path);
+            String value = map.get(key);
+            if(Integer.parseInt(value) < 0) return def;
+            else return value;
+        }catch (Exception e){
+            e.printStackTrace();
+            return def;
+        }
+    }
+
+    public static boolean savePackageConfigValue(String path, String key, String value){
+        try {
+            Map<String, String> map = (Map<String, String>) getYamlFromPath(path);
+            map.put(key, value);
+            saveString(new Yaml().dump(map), path);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // Util
