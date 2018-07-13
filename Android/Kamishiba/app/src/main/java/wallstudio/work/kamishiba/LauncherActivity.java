@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -96,8 +97,11 @@ public class LauncherActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        final String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+        final String packageDir = getFilesDir() + "/" + mPackageId;
+        final String packageConfigPath = packageDir + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
         try {
+            if (!new File(packageDir).exists())
+                new File(packageDir).mkdirs();
             if (!new File(packageConfigPath).exists()) {
                 LoadUtil.preferPackageConfigPath(packageConfigPath);
             }
@@ -105,7 +109,7 @@ public class LauncherActivity extends AppCompatActivity {
             int common = Integer.parseInt(sharedPreferences.getString("pref_default_cam", "0"));
             int pack = (int)((Map)LoadUtil.getYamlFromPath(packageConfigPath)).get("camera");
             mCameraSwitch.setChecked( pack < 0 ? common == 0 : pack == 0);
-        }catch (Exception e){}
+        }catch (Exception e){ e.printStackTrace(); }
 
         // 保存
         mCameraSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -115,9 +119,7 @@ public class LauncherActivity extends AppCompatActivity {
                     Map data = (Map)LoadUtil.getYamlFromPath(packageConfigPath);
                     data.put("camera", mCameraSwitch.isChecked() ? "0": "1");
                     LoadUtil.saveString(new Yaml().dump(data), packageConfigPath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                } catch (IOException e) { e.printStackTrace(); }
             }
         });
     }
