@@ -11,6 +11,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import org.opencv.core.Point;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class PerspectiveController extends FrameLayout {
 
@@ -58,6 +64,16 @@ public class PerspectiveController extends FrameLayout {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
             if(!mIsCursorPositionInitialized) {
+
+                String path = getContext().getFilesDir()
+                        + "/" + ((StandCameraActivity)getContext()).getmPackageId()
+                        + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+                try {
+                    List<Double> pack = (List<Double>) ((Map)LoadUtil.getYamlFromPath(path)).get("vanishing");
+                    vanishingRatio.x = pack.get(0) < 0 ? vanishingRatio.x : pack.get(0);
+                    vanishingRatio.y = pack.get(1) < 0 ? vanishingRatio.x : pack.get(1);
+                } catch (IOException e) { e.printStackTrace(); }
+
                 left = (int) (mInputPreviewWrapper.getWidth() * vanishingRatio.x - mVanishingCursorArea.getLeft()) - mVanishingCursor.getWidth() / 2;
                 top = (int) (mInputPreviewWrapper.getHeight() * vanishingRatio.y - mVanishingCursorArea.getTop()) - mVanishingCursor.getHeight() / 2;
                 mVanishingCursor.layout(left, top, left + mVanishingCursor.getWidth(), top + mVanishingCursor.getHeight());
@@ -69,6 +85,15 @@ public class PerspectiveController extends FrameLayout {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
             if(!mIsCursorPositionInitialized) {
+
+                String path = getContext().getFilesDir()
+                        + "/" + ((StandCameraActivity)getContext()).getmPackageId()
+                        + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+                try {
+                    double pack = (double) ((Map)LoadUtil.getYamlFromPath(path)).get("edge");
+                    pageEdgeY = pack < 0 ? pageEdgeY : pack;
+                } catch (IOException e) { e.printStackTrace(); }
+
                 top = (int) (mInputPreviewWrapper.getHeight() * pageEdgeY - mPageYCursorArea.getTop()) - mPageYCursor.getHeight() / 2;
                 mPageYCursor.layout(mPageYCursor.getLeft(), top, mPageYCursor.getRight(), top + mPageYCursor.getHeight());
             }
@@ -120,6 +145,7 @@ public class PerspectiveController extends FrameLayout {
             }
             mPreX = globalX;
             mPreY = globalY;
+            saveVanishingAndEdge();
             return true;
         }
     };
@@ -162,8 +188,22 @@ public class PerspectiveController extends FrameLayout {
                 }
             }
             mPreY = globalY;
+            saveVanishingAndEdge();
             return true;
         }
     };
+
+    // 保存
+    private void saveVanishingAndEdge(){
+        String path = getContext().getFilesDir()
+                + "/" + ((StandCameraActivity)getContext()).getmPackageId()
+                + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+        try {
+            Map map = (Map) LoadUtil.getYamlFromPath(path);
+            map.put("vanishing", Arrays.asList(vanishingRatio.x ,vanishingRatio.y));
+            map.put("edge", pageEdgeY);
+            LoadUtil.saveString(new Yaml().dump(map), path);
+        } catch (IOException e) { e.printStackTrace(); }
+    }
 
 }

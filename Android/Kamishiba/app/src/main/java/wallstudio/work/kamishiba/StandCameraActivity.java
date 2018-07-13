@@ -53,6 +53,7 @@ public class StandCameraActivity extends Activity {
 
 
     private String mPackageId;
+    public String getmPackageId(){ return mPackageId; }
     private int mImageCount;
     private int mAudioPosition;
     private double[][] mTrackTiming;

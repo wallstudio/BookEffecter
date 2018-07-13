@@ -36,6 +36,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -322,36 +323,12 @@ public class LoadUtil{
     }
 
     public static void preferPackageConfigPath(String path) throws IOException {
-        Map<String, String> map = new HashMap<>();
-        map.put("camera", "-1");
-        map.put("vanishing,", "-1");
-        map.put("edge", "-1");
+        Map<String, Object> map = new HashMap<>();
+        map.put("camera", -1);
+        map.put("vanishing", Arrays.asList(-1d, -1d));
+        map.put("edge", -1d);
         String yaml = new Yaml().dump(map);
         saveString(yaml, path);
-    }
-
-    public static String getPackageConfigValue(String path, String key, String def){
-        try {
-            Map<String, String> map = (Map<String, String>) getYamlFromPath(path);
-            String value = map.get(key);
-            if(Integer.parseInt(value) < 0) return def;
-            else return value;
-        }catch (Exception e){
-            e.printStackTrace();
-            return def;
-        }
-    }
-
-    public static boolean savePackageConfigValue(String path, String key, String value){
-        try {
-            Map<String, String> map = (Map<String, String>) getYamlFromPath(path);
-            map.put(key, value);
-            saveString(new Yaml().dump(map), path);
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
     }
 
     // Util

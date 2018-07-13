@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -83,7 +84,9 @@ public class LauncherActivity extends AppCompatActivity {
         bindViews();
         setInfoToViewsAsync();
 
-        mIsDownloaded = new File(getFilesDir() + "/" + mPackageId + "/" + LoadUtil.LOCAL_PACKAGE_FILENAME).exists();
+        mIsDownloaded = new File(getFilesDir()
+                + "/" + mPackageId
+                + "/" + LoadUtil.LOCAL_PACKAGE_FILENAME).exists();
         refreshUIStatus();
 
         // アクションバーの設定
@@ -93,16 +96,30 @@ public class LauncherActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        final String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
         try {
-            String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
             if (!new File(packageConfigPath).exists()) {
                 LoadUtil.preferPackageConfigPath(packageConfigPath);
             }
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             int common = Integer.parseInt(sharedPreferences.getString("pref_default_cam", "0"));
-            mCameraSwitch.setChecked(
-                    LoadUtil.getPackageConfigValue(packageConfigPath, "camera", String.valueOf(common)).equals("0"));
+            int pack = (int)((Map)LoadUtil.getYamlFromPath(packageConfigPath)).get("camera");
+            mCameraSwitch.setChecked( pack < 0 ? common == 0 : pack == 0);
         }catch (Exception e){}
+
+        // 保存
+        mCameraSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                try {
+                    Map data = (Map)LoadUtil.getYamlFromPath(packageConfigPath);
+                    data.put("camera", mCameraSwitch.isChecked() ? "0": "1");
+                    LoadUtil.saveString(new Yaml().dump(data), packageConfigPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
@@ -209,11 +226,6 @@ public class LauncherActivity extends AppCompatActivity {
         setIsDownloaded(false);
         Toast.makeText(this, "Deleted " + mPackageId, Toast.LENGTH_SHORT).show();
         Log.d("Launcher", "DELETE " + mPackageId);
-    }
-
-    public void onClickCameraSwitch(View view){
-        String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
-        LoadUtil.savePackageConfigValue(packageConfigPath, "camera", ((Switch)view).isChecked() ? "0": "1");
     }
 
     public static class AudioAdapter extends ArrayAdapter<Map> {
