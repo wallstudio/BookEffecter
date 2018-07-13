@@ -228,6 +228,15 @@ public class LauncherActivity extends AppCompatActivity {
         Log.d("Launcher", "DELETE " + mPackageId);
     }
 
+    public void onClickCameraSwitch(View view){
+        try {
+            String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+            Map<String, String> pack = (Map<String, String>)LoadUtil.getYamlFromPath(packageConfigPath);
+            pack.put("camera", ((Switch)view).isChecked() ? "0": "1");
+            LoadUtil.saveString(new Yaml().dump(pack), packageConfigPath);
+        }catch (Exception e){}
+    }
+
     public static class AudioAdapter extends ArrayAdapter<Map> {
 
         private Context mContext;
