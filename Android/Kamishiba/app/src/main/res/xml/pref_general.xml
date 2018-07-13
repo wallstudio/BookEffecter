@@ -47,4 +47,8 @@
             android:enabled="false" />
     </PreferenceCategory>
 
+    <wallstudio.work.kamishiba.ClearPreference
+        android:title="設定の初期化"
+        android:key="pref_clear" />
+
 </PreferenceScreen>
