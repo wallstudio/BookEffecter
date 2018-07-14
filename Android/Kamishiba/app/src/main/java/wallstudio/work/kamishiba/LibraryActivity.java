@@ -70,7 +70,7 @@ public class LibraryActivity extends AppCompatActivity {
             case R.id.help:
                 intent = new Intent(this, WebActivity.class);
                 intent.putExtra("title", "ヘルプ");
-                intent.putExtra("url", "https://github.com/wallstudio/BookEffecter/blob/master/README.md");;
+                intent.putExtra("url", "https://wallstudio.github.io/BookEffecter/help");;
                 break;
             case R.id.config:
                 intent = new Intent(this, SettingsActivity.class);
@@ -81,7 +81,7 @@ public class LibraryActivity extends AppCompatActivity {
             case R.id.about:
                 intent = new Intent(this, WebActivity.class);
                 intent.putExtra("title", "このアプリについて");
-                intent.putExtra("url", "https://github.com/wallstudio/BookEffecter/blob/master/README.md");
+                intent.putExtra("url", "https://wallstudio.github.io/BookEffecter/about");
                 break;
             case R.id.donate:
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://wallstudio.hateblo.jp/"));
