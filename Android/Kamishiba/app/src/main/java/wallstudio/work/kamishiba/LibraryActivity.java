@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,6 +41,8 @@ public class LibraryActivity extends AppCompatActivity {
         // 初期のタブを設定
         pager.setCurrentItem(1, true);
         setTitle(fpa.getTitle(1));
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.kamishiba_main_icon);
 
         // タブのインジケーター（？）の設定
         TabLayout tab = findViewById(R.id.tabLayout);
