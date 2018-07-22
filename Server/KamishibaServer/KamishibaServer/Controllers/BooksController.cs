@@ -33,6 +33,16 @@ namespace KamishibaServer.Controllers
             return View(books);
         }
 
+        // GET: Books/Id/yukawallstudio.kedama
+        public async Task<IActionResult> Id(string id)
+        {
+            if (id == null) return NotFound();
+            var book = await context.Book.SingleOrDefaultAsync(m => m.IDName == id);
+            if (book == null) return NotFound();
+            
+            return RedirectToAction(nameof(Details), new {id = book.ID});
+        }
+
         // GET: Books/Details/5
         public async Task<IActionResult> Details(int? id)
         {

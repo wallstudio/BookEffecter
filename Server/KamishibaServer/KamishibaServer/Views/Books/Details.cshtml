@@ -22,7 +22,9 @@
                 <div class="book-detail-thumbnail-wrap">
                     <img class="book-detail-thumbnail" src="~/packages/@Model.IDName/0.jpg" />
                     <div class="book-detail-qr">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?data=@(Model.IDName)&size=320x320&color=333333&bgcolor=ffffff&margin=43" />
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?data=@(
+                            $"{ViewBag.Request.Scheme}://{ViewBag.Request.Host}/Books/id/{Model.IDName}"
+                        )&size=320x320&color=333333&bgcolor=ffffff&margin=43" />
                         <p>アプリで読取り！</p>
                     </div>
                 </div>

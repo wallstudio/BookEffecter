@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
@@ -15,6 +16,8 @@ import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class QRScanerFragment extends TabFragment {
@@ -36,8 +39,15 @@ public class QRScanerFragment extends TabFragment {
             @Override
             public void barcodeResult(BarcodeResult barcodeResult) {
                 if(!decoded) {
+                    // https://kamishiba.wallstudio.work/Books/id/kamishiba_ws.aaaaaa の形式で来る
                     String input = barcodeResult.getText().trim();
-                    startLauncher(input);
+                    Matcher matcher = Pattern.compile("( *[a-zA-Z0-9_-~]+\\.[a-zA-Z0-9_-~]+ *)$").matcher(input);
+
+                    if(matcher.groupCount() < 1) {
+                        Toast.makeText(getContext(), "このQRコードは対応していません。", Toast.LENGTH_SHORT);
+                        return;
+                    }
+                    startLauncher(matcher.group(1));
                     decoded = true;
                 }
             }

@@ -50,23 +50,27 @@ namespace KamishibaServer.Controllers
         public override ViewResult View()
         {
             ViewBag.TUser = TUser;
+            ViewBag.Request = Request;
             return base.View();
         }
         [NonAction]
         public override ViewResult View(string viewName, object model)
         {
+            ViewBag.Request = Request;
             ViewBag.TUser = TUser;
             return base.View(viewName, model);
         }
         [NonAction]
         public override ViewResult View(object model)
         {
+            ViewBag.Request = Request;
             ViewBag.TUser = TUser;
             return base.View(model);
         }
         [NonAction]
         public override ViewResult View(string viewName)
         {
+            ViewBag.Request = Request;
             ViewBag.TUser = TUser;
             return base.View(viewName);
         }
