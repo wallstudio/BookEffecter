@@ -269,7 +269,7 @@ namespace KamishibaServer.Controllers
             for (var i = 0; i < images.Count(); i++)
             {
                 var image = images[i];
-                var dirName = dir + Path.DirectorySeparatorChar + i;
+                var dirName = dir + Path.DirectorySeparatorChar + i.ToString("D3");
                 if (System.IO.File.Exists(dirName + JPG_EXTENTION))
                     return "重複があります。トップページからやり直してください。";
 
@@ -347,15 +347,28 @@ namespace KamishibaServer.Controllers
                     dstW = (int)(IMAGE_SIZE / (double)src.Height * src.Width);
                 }
 
-                using(var dst = new Bitmap(dstW, dstH, PixelFormat.Format24bppRgb))
+                // Full size
+                using (var dst = new Bitmap(dstW, dstH, PixelFormat.Format24bppRgb))
+                using (var graphic = Graphics.FromImage(dst))
                 {
-                    var graphic = Graphics.FromImage(dst);
                     graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     graphic.DrawImage(src, -2, -2, dst.Width + 4, dst.Height + 4);
 
                     var encoder = GetEncoder(ImageFormat.Jpeg);
                     var encodeParams = new EncoderParameters(1);
                     encodeParams.Param[0] = new EncoderParameter(Encoder.Quality, 90L);
+                    dst.Save(dirName + JPG_EXTENTION, encoder, encodeParams);
+                }
+                // Thumbnail size
+                using (var dst = new Bitmap(dstW / 6, dstH / 6, PixelFormat.Format24bppRgb))
+                using (var graphic = Graphics.FromImage(dst))
+                {
+                    graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphic.DrawImage(src, -2, -2, dst.Width + 4, dst.Height + 4);
+
+                    var encoder = GetEncoder(ImageFormat.Jpeg);
+                    var encodeParams = new EncoderParameters(1);
+                    encodeParams.Param[0] = new EncoderParameter(Encoder.Quality, 50L);
                     dst.Save(dirName + JPG_EXTENTION, encoder, encodeParams);
                 }
             }

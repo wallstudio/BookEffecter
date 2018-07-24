@@ -594,9 +594,13 @@ public class LoadUtil{
 
                 // Download image set
                 for (int i = 0; i < imageCount; i++){
-                    String fileName = i + ".jpg";
+                    String fileName = String.format("%03d", i) + ".jpg";
                     download(REMOTE_DATA_URL + "/" + mPackageId + "/" + fileName,
                             mContext.getFilesDir() + "/" + mPackageId + "/" + fileName);
+
+                    String minFileName = String.format("%03d", i) + ".min.jpg";
+                    download(REMOTE_DATA_URL + "/" + mPackageId + "/" + minFileName,
+                            mContext.getFilesDir() + "/" + mPackageId + "/" + minFileName);
 
                     if(isCancelled()) return null;
                     publishProgress((double)++progressCount/totalCount, (double)progressCount, (double)totalCount);

@@ -37,7 +37,7 @@ public class TrainingDataList extends ArrayList<FeaturedImage> {
         File[] files = new File(dir).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.matches("[^\\.]*\\.jpg");
+                return name.matches("[0-9]{3}\\.jpg");
             }
         });
 
