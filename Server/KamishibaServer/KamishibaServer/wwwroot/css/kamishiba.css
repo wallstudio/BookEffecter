@@ -71,6 +71,41 @@ body{
         color: white;
 }
 
+/* App DL */
+.app-dl-list > a{
+    display:block;
+}
+.app-dl-list > a > p {
+    width: 100%;
+    max-width: 200px;
+    padding: 20px;
+    margin: 20px;
+    height: 100px;
+    color: snow;
+    border-radius: 5px;
+}
+.app-dl-list > a {
+    text-decoration: none;
+}
+#app-ios {
+    background-color: #8d8d8d;
+}
+#app-ios:hover{
+    background-color: #5f5f5f;
+}
+#app-android {
+    background-color: #40bb4e;
+}
+#app-android:hover {
+    background-color: #279233;
+}
+#app-android-wild {
+    background-color: #d45050;
+}
+#app-android-wild:hover {
+    background-color: #b74343;
+}
+
 /* About */
 .about > div {
     width: 100%;
