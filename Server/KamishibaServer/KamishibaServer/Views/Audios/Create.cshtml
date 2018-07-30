@@ -54,7 +54,7 @@
                                     <th>@(i + 1) / @Model.Parent.PageCount P</th>
                                     <td class="img-column">
                                         <div class="page-prev-half">
-                                            <img src="~/packages/@Model.Parent.IDName/@(i).jpg"
+                                            <img src="~/packages/@Model.Parent.IDName/@(i.ToString("D3")).min.jpg"
                                                  class="page-prev-image" />
                                         </div>
                                     </td>

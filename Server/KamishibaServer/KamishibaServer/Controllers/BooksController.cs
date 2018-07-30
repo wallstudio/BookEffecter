@@ -379,7 +379,7 @@ namespace KamishibaServer.Controllers
                     var encoder = GetEncoder(ImageFormat.Jpeg);
                     var encodeParams = new EncoderParameters(1);
                     encodeParams.Param[0] = new EncoderParameter(Encoder.Quality, 50L);
-                    dst.Save(dirName + JPG_EXTENTION, encoder, encodeParams);
+                    dst.Save(dirName + ".min" +JPG_EXTENTION, encoder, encodeParams);
                 }
             }
         }
