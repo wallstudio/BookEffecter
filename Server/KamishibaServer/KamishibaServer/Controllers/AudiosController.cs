@@ -25,6 +25,7 @@ namespace KamishibaServer.Controllers
         // GET: Audios
         public async Task<IActionResult> Index()
         {
+            if (TUser.Power > SUPER_EDITABLE) return Redirect("/Books");
             return View(await context.Audio.ToListAsync());
         }
 
@@ -176,7 +177,7 @@ namespace KamishibaServer.Controllers
             if (id == null) return NotFound();
             var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
             // 本人（＋管理者）以外は弾く
-            if (TUser.Power > SUPER_EDITABLE && TUser.ID != audio.RegisterID) NotAllowd();
+            if (TUser.Power > SUPER_EDITABLE && TUser.ID != audio.RegisterID) return NotAllowd();
             if (audio == null) return NotFound();
 
             audio.Parent = await context.Book.SingleOrDefaultAsync(b => b.ID == audio.BookID);
@@ -193,10 +194,11 @@ namespace KamishibaServer.Controllers
 
             var audio = await context.Audio.SingleOrDefaultAsync(m => m.ID == id);
             // 本人（＋管理者）以外は弾く
-            if (TUser.Power > SUPER_EDITABLE && TUser.ID != audio.RegisterID) NotAllowd();
+            if (TUser.Power > SUPER_EDITABLE && TUser.ID != audio.RegisterID) return NotAllowd();
+            var parentId = audio.BookID;
             context.Audio.Remove(audio);
             await context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Redirect($"/Books/Details/{parentId}");
         }
 
         private bool AudioExists(int id)
