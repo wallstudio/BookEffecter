@@ -175,13 +175,16 @@ window.addEventListener("load", () => {
     });
 
     // Send Button
-    $(".book-conform .btn").on("click", e => {
+    let send = e => {
 
         if (!$("#is-agreed")[0].checked) {
             alert("同意するにチェックを入れてください。");
             return;
         }
 
+        $(".book-conform .btn").prop("disabled", true);
+        $(".book-conform .btn").off("click", send);
+        $(".book-conform .btn")[0].innerHTML = "送信中";
         let alt = $("#alt-image-upload");
         let isOpenedAlt = alt.css("display") != "none";
 
@@ -208,15 +211,17 @@ window.addEventListener("load", () => {
                 let img = $(res).find(".book-images-content .field-validation-error")[0];
 
                 if (!meta || !img) {
-                    $("html")[0].innerHTML = res;
-                    history.pushState("", "", "/Books/Details/" + location.href.match(/.*\/([0-9]+)/)[1]);
+                    location.href = $(res).find("#query-string").attr("data");
                 } else {
                     let preMeta = $(".book-meta-content")[0];
                     let preImg = $(".book-images-content .field-validation-error")[0];
                     preMeta.innerHTML = meta.innerHTML;
                     preImg.innerHTML = img.innerHTML;
+                    scrollTo(0, 0);
+                    $(".book-conform .btn").prop("disabled", false);
+                    $(".book-conform .btn").on("click", send);
+                    $(".book-conform .btn")[0].innerHTML = "登録";
                 }
-                scrollTo(0, 0);
             }).fail((jqXHR, textStatus, errorThrown) => {
                 console.log('Kamishiba: AJAX ERROR', jqXHR, textStatus, errorThrown);
                 $("html")[0].innerHTML = jqXHR.responseText;
@@ -224,7 +229,8 @@ window.addEventListener("load", () => {
         } else {
             $("#book-upload-from")[0].submit();
         }
-    });
+    };
+    $(".book-conform .btn").on("click", send);
 
     console.log("Kamishiba: Drop zone was initialized.");
 });

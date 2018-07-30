@@ -21,6 +21,7 @@
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
+            <span data="@(ViewBag.Request.Scheme + "://" +ViewBag.Request.Host + ViewBag.Request.Path + ViewBag.Request.QueryString)" id="query-string"></span>
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
