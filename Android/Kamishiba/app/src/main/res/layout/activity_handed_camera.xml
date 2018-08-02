@@ -159,6 +159,7 @@
             android:layout_marginStart="8dp"
             android:alpha="0.9"
             android:orientation="horizontal"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/frameLayout2"
             app:layout_constraintStart_toStartOf="@+id/frameLayout2">
 
@@ -237,8 +238,8 @@
 
         <wallstudio.work.kamishiba.MatchPreviewView
             android:id="@+id/matchPreviewView"
-            android:layout_width="129dp"
-            android:layout_height="147dp"
+            android:layout_width="288dp"
+            android:layout_height="299dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"

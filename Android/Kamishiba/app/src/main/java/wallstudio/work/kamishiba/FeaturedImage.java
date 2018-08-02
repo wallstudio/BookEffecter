@@ -13,10 +13,18 @@ import org.opencv.features2d.AKAZE;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
+import io.github.jdiemke.triangulation.Triangle2D;
 
 public class FeaturedImage extends Mat{
 
     private static AKAZE sAkaze;
+    public Set<Triangulator.Edge> mesh;
+    public List<Triangle2D> mesh2;
+    public List<KeyPoint> keyPoints2;
+
     {
         if(sAkaze == null) sAkaze = AKAZE.create();
     }

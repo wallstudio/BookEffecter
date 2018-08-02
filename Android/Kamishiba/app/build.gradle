@@ -62,4 +62,5 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:gridlayout-v7:27.1.1'
     implementation 'com.journeyapps:zxing-android-embedded:3.5.0'
+    implementation files('libs/DelaunayTriangulator-1.0.3.jar')
 }
