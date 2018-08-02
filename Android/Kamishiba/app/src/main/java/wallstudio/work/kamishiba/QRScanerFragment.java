@@ -43,8 +43,8 @@ public class QRScanerFragment extends TabFragment {
                     String input = barcodeResult.getText().trim();
                     Matcher matcher = Pattern.compile("( *[a-zA-Z0-9_-~]+\\.[a-zA-Z0-9_-~]+ *)$").matcher(input);
 
-                    if(matcher.groupCount() < 1) {
-                        Toast.makeText(getContext(), "このQRコードは対応していません。", Toast.LENGTH_SHORT);
+                    if(!matcher.find() || matcher.groupCount() < 1) {
+                        Toast.makeText(getContext(), "このQRコードは対応していません。", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     startLauncher(matcher.group(1));
