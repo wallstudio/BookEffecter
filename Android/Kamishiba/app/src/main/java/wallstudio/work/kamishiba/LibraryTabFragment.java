@@ -81,7 +81,7 @@ public abstract class LibraryTabFragment extends TabFragment {
             // Set contents
             LoadUtil.ImageDownloadAndShowTask imageTask
                     = new LoadUtil.ImageDownloadAndShowTask(getContext(), thumbnail,
-                    LoadUtil.REMOTE_DATA_URL + "/" + packageData.get("id") + "/0.jpg");
+                    LoadUtil.REMOTE_DATA_URL + "/" + packageData.get("id") + "/000.jpg");
             imageTask.execute();
             title.setText((String) packageData.get("title"));
             author.setText((String) packageData.get("author"));

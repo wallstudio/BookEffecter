@@ -95,7 +95,7 @@ namespace KamishibaServer.Controllers
                 contact = book.Contact;
                 page_count = Directory.GetFiles("wwwroot" 
                     + Path.DirectorySeparatorChar + "packages" 
-                    + Path.DirectorySeparatorChar + book.IDName, "*.jpg").Length;
+                    + Path.DirectorySeparatorChar + book.IDName, "???.jpg").Length;
                 audio_count = context.Audio.Count(a => a.BookID == book.ID);
                 publish_date = book.PublishedDate;
                 genre = book.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList();

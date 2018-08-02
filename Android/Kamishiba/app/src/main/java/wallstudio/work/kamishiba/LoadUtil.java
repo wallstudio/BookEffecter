@@ -313,13 +313,15 @@ public class LoadUtil{
 
         List<Map> localIndex = new File(localIndexPath).exists() ?
                 (List<Map>) getYamlFromPath(localIndexPath) : new ArrayList<Map>();
-        for (Map pac: localIndex) {
-            if(packageId.equals(pac.get("id"))){
-                localIndex.remove(pac);
-                break;
+        if(localIndex != null) {
+            for (Map pac : localIndex) {
+                if (packageId.equals(pac.get("id"))) {
+                    localIndex.remove(pac);
+                    break;
+                }
             }
+            saveString(new Yaml().dump(localIndex), localIndexPath);
         }
-        saveString(new Yaml().dump(localIndex), localIndexPath);
     }
 
     public static void preferPackageConfigPath(String path) throws IOException {
@@ -488,8 +490,8 @@ public class LoadUtil{
         protected Void doInBackground(Void... _void) {
             String packageUrl = REMOTE_API_URL + "/" + mPackageId;
             String packagePath = mContext.getFilesDir() + "/" + mPackageId + "/" + LOCAL_PACKAGE_FILENAME;
-            String coverUrl = REMOTE_DATA_URL + "/" + mPackageId + "/" + "0.jpg";
-            String coverPath = mContext.getFilesDir() + "/" + mPackageId + "/" + "0.jpg";
+            String coverUrl = REMOTE_DATA_URL + "/" + mPackageId + "/" + "000.jpg";
+            String coverPath = mContext.getFilesDir() + "/" + mPackageId + "/" + "000.jpg";
 
             try {
                 String yaml = "";

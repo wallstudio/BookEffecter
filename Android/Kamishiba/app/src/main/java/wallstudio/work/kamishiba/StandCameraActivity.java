@@ -219,16 +219,20 @@ public class StandCameraActivity extends Activity {
             // AKAZE抽出は重いので，非同期
             boolean isExcused = mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
             if(isExcused){
-                // 音声
-                mCurrentPage = smooth(mMatchPreviewView.page);
-                action(mCurrentPage);
-                // 音声止める
-                if (mMediaPlayer.isPlaying()){
-                    int end = (int) (mTrackTiming[mCurrentPage][1] * 1000);
-                    int now = mMediaPlayer.getCurrentPosition();
-                    if(end < now){
-                        mMediaPlayer.pause();
+                try {
+                    // 音声
+                    mCurrentPage = smooth(mMatchPreviewView.page);
+                    action(mCurrentPage);
+                    // 音声止める
+                    if (mMediaPlayer.isPlaying()) {
+                        int end = (int) (mTrackTiming[mCurrentPage][1] * 1000);
+                        int now = mMediaPlayer.getCurrentPosition();
+                        if (end < now) {
+                            mMediaPlayer.pause();
+                        }
                     }
+                }catch (Exception e){
+                    Toast.makeText(StandCameraActivity.this, "音声の再生エラー", Toast.LENGTH_SHORT).show();
                 }
             }
             mPageLabelView.setText((mCurrentPage >= 0 ? mCurrentPage + 1 : "-")  + "/" + mImageCount);
@@ -322,7 +326,7 @@ public class StandCameraActivity extends Activity {
             mImageCount = (int)packageData.get("page_count");
             mTitleView.setText((String) packageData.get("title"));
             mAuthorView.setText((String)packageData.get("author"));
-            mCoverView.setImageBitmap(LoadUtil.getBitmapFromPath(getFilesDir() + "/" + mPackageId + "/0.jpg"));
+            mCoverView.setImageBitmap(LoadUtil.getBitmapFromPath(getFilesDir() + "/" + mPackageId + "/000.jpg"));
             Map audioData = ((List<Map>)packageData.get("audio")).get(mAudioPosition);
             List<Number> trackTimingSQ = (List<Number>) audioData.get("track_timing");
             mTrackTiming = new double[trackTimingSQ.size() / 2][];
