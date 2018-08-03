@@ -221,7 +221,7 @@ public class LauncherActivity extends AppCompatActivity {
         LoadUtil.removeDirectoryRecursion(
                 getFilesDir() + "/" + mPackageId,
                 getCacheDir() + "/" + LoadUtil.getSha1Hash(LoadUtil.REMOTE_API_URL + "/" + mPackageId),
-                getCacheDir() + "/" + LoadUtil.getSha1Hash(LoadUtil.REMOTE_DATA_URL + "/" + mPackageId + "0.jpg"));
+                getCacheDir() + "/" + LoadUtil.getSha1Hash(LoadUtil.REMOTE_DATA_URL + "/" + mPackageId + "000.jpg"));
         try {
             LoadUtil.removePackage(this, mPackageId);
         } catch (IOException e) { }

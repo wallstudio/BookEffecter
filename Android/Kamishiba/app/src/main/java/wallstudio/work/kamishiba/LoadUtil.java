@@ -662,7 +662,7 @@ public class LoadUtil{
             LoadUtil.removeDirectoryRecursion(
                     mContext.getFilesDir() + "/" + mPackageId,
                     mContext.getCacheDir() + "/" + getSha1Hash(REMOTE_API_URL + "/" + mPackageId),
-                    mContext.getCacheDir() + "/" + getSha1Hash(REMOTE_DATA_URL + "/" + mPackageId + "0.jpg"));
+                    mContext.getCacheDir() + "/" + getSha1Hash(REMOTE_DATA_URL + "/" + mPackageId + "000.jpg"));
             try {
                 removePackage(mContext, mPackageId);
             } catch (IOException e) { }

@@ -106,7 +106,7 @@ namespace KamishibaServer.Controllers
                             media => new FileInfo("wwwroot"
                             + Path.DirectorySeparatorChar + "packages"
                             + Path.DirectorySeparatorChar + audio.Parent.IDName
-                            + Path.DirectorySeparatorChar + "0.jpg"));
+                            + Path.DirectorySeparatorChar + "000.jpg"));
                 }
                 catch { }
                 // DBに登録

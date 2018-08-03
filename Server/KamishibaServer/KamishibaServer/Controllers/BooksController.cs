@@ -138,9 +138,11 @@ namespace KamishibaServer.Controllers
                                 media => new FileInfo("wwwroot"
                                 + Path.DirectorySeparatorChar + "packages"
                                 + Path.DirectorySeparatorChar + book.IDName
-                                + Path.DirectorySeparatorChar + "0.jpg"));
+                                + Path.DirectorySeparatorChar + "000.jpg"));
                         }
-                        catch { }
+                        catch(Exception e) {
+                            Console.Error.WriteLine(e.StackTrace);
+                        }
                         // DBに登録
                         context.Add(book);
                         if (book.Description == null) book.Description = "";
