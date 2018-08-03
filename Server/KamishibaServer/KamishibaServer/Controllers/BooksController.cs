@@ -134,7 +134,7 @@ namespace KamishibaServer.Controllers
                         try
                         {
                             await TUser.TwitterTokens.Statuses.UpdateWithMediaAsync(
-                                status => $"「かみしば」で同人誌を登録しました！\n\n{book.Title} - {book.Auther}\n{Request.Scheme}://{Request.Host}/Books/Details/{book.ID}",
+                                status => $"「かみしば」で同人誌を登録しました！\n\n{book.Title} - {book.Auther}\n{Request.Scheme}://{Request.Host}/Books/Id/{book.IDName}",
                                 media => new FileInfo("wwwroot"
                                 + Path.DirectorySeparatorChar + "packages"
                                 + Path.DirectorySeparatorChar + book.IDName
