@@ -1,0 +1,399 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CEB6EDD8211ABD8F005B0ADF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB6EDD7211ABD8F005B0ADF /* AppDelegate.swift */; };
+		CEB6EDDA211ABD8F005B0ADF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB6EDD9211ABD8F005B0ADF /* ViewController.swift */; };
+		CEB6EDDD211ABD8F005B0ADF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDDB211ABD8F005B0ADF /* Main.storyboard */; };
+		CEB6EDDF211ABD92005B0ADF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDDE211ABD92005B0ADF /* Assets.xcassets */; };
+		CEB6EDE2211ABD92005B0ADF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDE0211ABD92005B0ADF /* LaunchScreen.storyboard */; };
+		CEB6EDEA211AC35C005B0ADF /* AvCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB6EDE9211AC35C005B0ADF /* AvCapture.swift */; };
+		CEB6EDEF211AC42C005B0ADF /* OpenCv.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEB6EDEE211AC42C005B0ADF /* OpenCv.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4979CDDA16CCB000B391F424 /* Pods-Kamishiba.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kamishiba.release.xcconfig"; path = "Pods/Target Support Files/Pods-Kamishiba/Pods-Kamishiba.release.xcconfig"; sourceTree = "<group>"; };
+		78199D552CCEEB0C9CF53559 /* Pods-Kamishiba.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kamishiba.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Kamishiba/Pods-Kamishiba.debug.xcconfig"; sourceTree = "<group>"; };
+		CEB6EDD4211ABD8F005B0ADF /* Kamishiba.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kamishiba.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEB6EDD7211ABD8F005B0ADF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		CEB6EDD9211ABD8F005B0ADF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		CEB6EDDC211ABD8F005B0ADF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		CEB6EDDE211ABD92005B0ADF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CEB6EDE1211ABD92005B0ADF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		CEB6EDE3211ABD92005B0ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CEB6EDE9211AC35C005B0ADF /* AvCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvCapture.swift; sourceTree = "<group>"; };
+		CEB6EDEE211AC42C005B0ADF /* OpenCv.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OpenCv.mm; sourceTree = "<group>"; };
+		CEB6EDF0211AC487005B0ADF /* Kamishiba-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Kamishiba-Bridging-Header.h"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CEB6EDD1211ABD8F005B0ADF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		40EEC699A130EBF7E284CD81 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				78199D552CCEEB0C9CF53559 /* Pods-Kamishiba.debug.xcconfig */,
+				4979CDDA16CCB000B391F424 /* Pods-Kamishiba.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		6C2B53CEF8579E9554DD7A25 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CEB6EDCB211ABD8F005B0ADF = {
+			isa = PBXGroup;
+			children = (
+				CEB6EDD6211ABD8F005B0ADF /* Kamishiba */,
+				CEB6EDD5211ABD8F005B0ADF /* Products */,
+				40EEC699A130EBF7E284CD81 /* Pods */,
+				6C2B53CEF8579E9554DD7A25 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		CEB6EDD5211ABD8F005B0ADF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CEB6EDD4211ABD8F005B0ADF /* Kamishiba.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CEB6EDD6211ABD8F005B0ADF /* Kamishiba */ = {
+			isa = PBXGroup;
+			children = (
+				CEB6EDF0211AC487005B0ADF /* Kamishiba-Bridging-Header.h */,
+				CEB6EDD7211ABD8F005B0ADF /* AppDelegate.swift */,
+				CEB6EDD9211ABD8F005B0ADF /* ViewController.swift */,
+				CEB6EDDB211ABD8F005B0ADF /* Main.storyboard */,
+				CEB6EDDE211ABD92005B0ADF /* Assets.xcassets */,
+				CEB6EDE0211ABD92005B0ADF /* LaunchScreen.storyboard */,
+				CEB6EDE3211ABD92005B0ADF /* Info.plist */,
+				CEB6EDE9211AC35C005B0ADF /* AvCapture.swift */,
+				CEB6EDEE211AC42C005B0ADF /* OpenCv.mm */,
+			);
+			path = Kamishiba;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CEB6EDD3211ABD8F005B0ADF /* Kamishiba */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEB6EDE6211ABD92005B0ADF /* Build configuration list for PBXNativeTarget "Kamishiba" */;
+			buildPhases = (
+				607D83C82BDBB1CC929E958C /* [CP] Check Pods Manifest.lock */,
+				CEB6EDD0211ABD8F005B0ADF /* Sources */,
+				CEB6EDD1211ABD8F005B0ADF /* Frameworks */,
+				CEB6EDD2211ABD8F005B0ADF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Kamishiba;
+			productName = Kamishiba;
+			productReference = CEB6EDD4211ABD8F005B0ADF /* Kamishiba.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CEB6EDCC211ABD8F005B0ADF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0940;
+				LastUpgradeCheck = 0940;
+				ORGANIZATIONNAME = WallStudio;
+				TargetAttributes = {
+					CEB6EDD3211ABD8F005B0ADF = {
+						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 0940;
+					};
+				};
+			};
+			buildConfigurationList = CEB6EDCF211ABD8F005B0ADF /* Build configuration list for PBXProject "Kamishiba" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CEB6EDCB211ABD8F005B0ADF;
+			productRefGroup = CEB6EDD5211ABD8F005B0ADF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CEB6EDD3211ABD8F005B0ADF /* Kamishiba */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CEB6EDD2211ABD8F005B0ADF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEB6EDE2211ABD92005B0ADF /* LaunchScreen.storyboard in Resources */,
+				CEB6EDDF211ABD92005B0ADF /* Assets.xcassets in Resources */,
+				CEB6EDDD211ABD8F005B0ADF /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		607D83C82BDBB1CC929E958C /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Kamishiba-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CEB6EDD0211ABD8F005B0ADF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEB6EDDA211ABD8F005B0ADF /* ViewController.swift in Sources */,
+				CEB6EDEA211AC35C005B0ADF /* AvCapture.swift in Sources */,
+				CEB6EDEF211AC42C005B0ADF /* OpenCv.mm in Sources */,
+				CEB6EDD8211ABD8F005B0ADF /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		CEB6EDDB211ABD8F005B0ADF /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB6EDDC211ABD8F005B0ADF /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		CEB6EDE0211ABD92005B0ADF /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB6EDE1211ABD92005B0ADF /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		CEB6EDE4211ABD92005B0ADF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CEB6EDE5211ABD92005B0ADF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CEB6EDE7211ABD92005B0ADF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 78199D552CCEEB0C9CF53559 /* Pods-Kamishiba.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9J5VSP45K4;
+				INFOPLIST_FILE = Kamishiba/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = Work.WallStudio.Kamishiba;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Kamishiba/Kamishiba-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CEB6EDE8211ABD92005B0ADF /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4979CDDA16CCB000B391F424 /* Pods-Kamishiba.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9J5VSP45K4;
+				INFOPLIST_FILE = Kamishiba/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = Work.WallStudio.Kamishiba;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Kamishiba/Kamishiba-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CEB6EDCF211ABD8F005B0ADF /* Build configuration list for PBXProject "Kamishiba" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEB6EDE4211ABD92005B0ADF /* Debug */,
+				CEB6EDE5211ABD92005B0ADF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEB6EDE6211ABD92005B0ADF /* Build configuration list for PBXNativeTarget "Kamishiba" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEB6EDE7211ABD92005B0ADF /* Debug */,
+				CEB6EDE8211ABD92005B0ADF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CEB6EDCC211ABD8F005B0ADF /* Project object */;
+}
