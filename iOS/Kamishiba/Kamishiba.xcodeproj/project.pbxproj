@@ -12,8 +12,10 @@
 		CEB6EDDD211ABD8F005B0ADF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDDB211ABD8F005B0ADF /* Main.storyboard */; };
 		CEB6EDDF211ABD92005B0ADF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDDE211ABD92005B0ADF /* Assets.xcassets */; };
 		CEB6EDE2211ABD92005B0ADF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDE0211ABD92005B0ADF /* LaunchScreen.storyboard */; };
-		CEB6EDEA211AC35C005B0ADF /* AvCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB6EDE9211AC35C005B0ADF /* AvCapture.swift */; };
 		CEB6EDEF211AC42C005B0ADF /* OpenCv.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEB6EDEE211AC42C005B0ADF /* OpenCv.mm */; };
+		CEB6EDF2211AE18C005B0ADF /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDF1211AE18B005B0ADF /* back.png */; };
+		CEB6EDF4211AE1FF005B0ADF /* 000.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CEB6EDF3211AE1FE005B0ADF /* 000.jpg */; };
+		CEB6EDFB211AF799005B0ADF /* AvCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB6EDFA211AF799005B0ADF /* AvCapture.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,9 +28,11 @@
 		CEB6EDDE211ABD92005B0ADF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CEB6EDE1211ABD92005B0ADF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CEB6EDE3211ABD92005B0ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		CEB6EDE9211AC35C005B0ADF /* AvCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvCapture.swift; sourceTree = "<group>"; };
 		CEB6EDEE211AC42C005B0ADF /* OpenCv.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OpenCv.mm; sourceTree = "<group>"; };
 		CEB6EDF0211AC487005B0ADF /* Kamishiba-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Kamishiba-Bridging-Header.h"; sourceTree = "<group>"; };
+		CEB6EDF1211AE18B005B0ADF /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = back.png; sourceTree = "<group>"; };
+		CEB6EDF3211AE1FE005B0ADF /* 000.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 000.jpg; sourceTree = "<group>"; };
+		CEB6EDFA211AF799005B0ADF /* AvCapture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AvCapture.swift; path = Kamishiba/AvCapture.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,17 +83,27 @@
 		CEB6EDD6211ABD8F005B0ADF /* Kamishiba */ = {
 			isa = PBXGroup;
 			children = (
+				CEB6EDF5211AE5AD005B0ADF /* Resource */,
+				CEB6EDDE211ABD92005B0ADF /* Assets.xcassets */,
+				CEB6EDE3211ABD92005B0ADF /* Info.plist */,
+				CEB6EDE0211ABD92005B0ADF /* LaunchScreen.storyboard */,
 				CEB6EDF0211AC487005B0ADF /* Kamishiba-Bridging-Header.h */,
+				CEB6EDEE211AC42C005B0ADF /* OpenCv.mm */,
 				CEB6EDD7211ABD8F005B0ADF /* AppDelegate.swift */,
+				CEB6EDFA211AF799005B0ADF /* AvCapture.swift */,
 				CEB6EDD9211ABD8F005B0ADF /* ViewController.swift */,
 				CEB6EDDB211ABD8F005B0ADF /* Main.storyboard */,
-				CEB6EDDE211ABD92005B0ADF /* Assets.xcassets */,
-				CEB6EDE0211ABD92005B0ADF /* LaunchScreen.storyboard */,
-				CEB6EDE3211ABD92005B0ADF /* Info.plist */,
-				CEB6EDE9211AC35C005B0ADF /* AvCapture.swift */,
-				CEB6EDEE211AC42C005B0ADF /* OpenCv.mm */,
 			);
 			path = Kamishiba;
+			sourceTree = "<group>";
+		};
+		CEB6EDF5211AE5AD005B0ADF /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				CEB6EDF3211AE1FE005B0ADF /* 000.jpg */,
+				CEB6EDF1211AE18B005B0ADF /* back.png */,
+			);
+			path = Resource;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -152,6 +166,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEB6EDF4211AE1FF005B0ADF /* 000.jpg in Resources */,
+				CEB6EDF2211AE18C005B0ADF /* back.png in Resources */,
 				CEB6EDE2211ABD92005B0ADF /* LaunchScreen.storyboard in Resources */,
 				CEB6EDDF211ABD92005B0ADF /* Assets.xcassets in Resources */,
 				CEB6EDDD211ABD8F005B0ADF /* Main.storyboard in Resources */,
@@ -187,7 +203,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CEB6EDDA211ABD8F005B0ADF /* ViewController.swift in Sources */,
-				CEB6EDEA211AC35C005B0ADF /* AvCapture.swift in Sources */,
+				CEB6EDFB211AF799005B0ADF /* AvCapture.swift in Sources */,
 				CEB6EDEF211AC42C005B0ADF /* OpenCv.mm in Sources */,
 				CEB6EDD8211ABD8F005B0ADF /* AppDelegate.swift in Sources */,
 			);

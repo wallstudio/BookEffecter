@@ -6,11 +6,17 @@
 //  Copyright © 2018年 WallStudio. All rights reserved.
 //
 
+import Foundation
 import UIKit
 
 class ViewController: UIViewController, AVCaptureDelegate {
     
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var matchPreviewView: UIImageView!
+    
+    @IBOutlet weak var titleLabel: UIOutlineLabel!
+    @IBOutlet weak var pageLabel: UIOutlineLabel!
+    @IBOutlet weak var autherLabel: UIOutlineLabel!
     
     let avCapture = AVCapture()
     let openCv = OpenCv()
@@ -22,7 +28,8 @@ class ViewController: UIViewController, AVCaptureDelegate {
     }
     
     func capture(image: UIImage) {
-        imageView.image = openCv.filter(image)
+        imageView.image = image
+        matchPreviewView.image = openCv.filter(image)
     }
 
     override func didReceiveMemoryWarning() {
@@ -32,4 +39,24 @@ class ViewController: UIViewController, AVCaptureDelegate {
 
 
 }
-
+// ref. http://ofsilvers.hateblo.jp/entry/uilabel-with-stroke
+class UIOutlineLabel: UILabel {
+    @IBInspectable var strokeSize: CGFloat = 100
+    @IBInspectable var strokeColor: UIColor = UIColor.white
+    
+    override func drawText(in rect: CGRect) {
+        // stroke
+        let cr = UIGraphicsGetCurrentContext()
+        let textColor = self.textColor
+        
+        cr!.setLineWidth(self.strokeSize)
+        cr!.setLineJoin(.round)
+        cr!.setTextDrawingMode(.stroke)
+        self.textColor = self.strokeColor
+        super.drawText(in: rect)
+        
+        cr!.setTextDrawingMode(.fill)
+        self.textColor = textColor
+        super.drawText(in: rect)
+    }
+}
