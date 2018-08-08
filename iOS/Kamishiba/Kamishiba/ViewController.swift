@@ -25,11 +25,14 @@ class ViewController: UIViewController, AVCaptureDelegate {
         super.viewDidLoad()
         avCapture.delegate = self
         // Do any additional setup after loading the view, typically from a nib.
+        
     }
     
     func capture(image: UIImage) {
         imageView.image = image
-        matchPreviewView.image = openCv.filter(image)
+        let featureds = NSMutableArray(capacity: 0)
+        let filted = openCv.filter(image)
+        matchPreviewView.image = filted
     }
 
     override func didReceiveMemoryWarning() {

@@ -21,14 +21,54 @@
 #import <UIKit/UIKit.h>
 #import "Kamishiba-Bridging-Header.h"
 
+using namespace std;
+using namespace cv;
+
+class FeaturedImage{
+    Ptr<AKAZE> akaze;
+    Mat mat;
+public:
+    Ptr<vector<cv::KeyPoint>> keyPoints;
+    Ptr<Mat> descriptors;
+    FeaturedImage(const cv::Mat& image){
+        akaze = cv::AKAZE::create();
+        mat = image;
+        cvtColor(mat, mat, CV_BGR2GRAY);
+        // サイズが大きいとなぜかUIImageが全て描画されなくなってしまう
+        resize(mat, mat, cv::Size(200, 100));
+        keyPoints = new vector<KeyPoint>();
+        descriptors = new Mat();
+        akaze->detectAndCompute(mat, noArray(), *keyPoints, *descriptors);
+        drawKeypoints(mat, *keyPoints, mat);
+    }
+    FeaturedImage(const NSString& path){
+        
+    }
+    ~FeaturedImage(){
+        mat.release();
+        keyPoints.release();
+        descriptors.release();
+        akaze.release();
+    }
+    cv::Mat getMat(){
+        return mat;
+    }
+};
+
 @implementation OpenCv : NSObject
 
 - (id) init {
     return self;
 }
 
--(UIImage *)Filter:(UIImage *)image {
-    
+-(FeaturedImage *)enFeatured:(UIImage *)image {
+    cv::Mat mat;
+    UIImageToMat(image, mat);
+    FeaturedImage *fi = new FeaturedImage(mat);
+    return fi;
+}
+
+-(UIImage *)Filter:(UIImage *)image{
     // 方向を修正
     UIGraphicsBeginImageContext(image.size);
     [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
@@ -38,9 +78,9 @@
     //UIImageをcv::Matに変換
     cv::Mat mat;
     UIImageToMat(image, mat);
-    cv::cvtColor(mat,mat,CV_BGR2GRAY);
+    FeaturedImage fi(mat);
     
-    return MatToUIImage(mat);
+    return MatToUIImage(fi.getMat());
 }
 
 @end
