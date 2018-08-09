@@ -329,6 +329,7 @@ public class LoadUtil{
         map.put("camera", -1);
         map.put("vanishing", Arrays.asList(-1d, -1d));
         map.put("edge", -1d);
+        map.put("hash", "");
         String yaml = new Yaml().dump(map);
         saveString(yaml, path);
     }
@@ -494,7 +495,23 @@ public class LoadUtil{
             String coverPath = mContext.getFilesDir() + "/" + mPackageId + "/" + "000.jpg";
 
             try {
-                String yaml = "";
+                String yaml = getStringFromUrl(packageUrl);
+                String newHash = getSha1Hash(yaml);
+                // 更新確認
+                final String packageDir = mContext.getFilesDir() + "/" + mPackageId;
+                final String packageConfigPath = packageDir + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+                try {
+                    if (!new File(packageDir).exists())
+                        new File(packageDir).mkdirs();
+                    if (!new File(packageConfigPath).exists()) {
+                        LoadUtil.preferPackageConfigPath(packageConfigPath);
+                    }
+                    String oldHash = (String)((Map)LoadUtil.getYamlFromPath(packageConfigPath)).get("hash");
+                    if(!oldHash.equals(newHash)){
+                        mContext.setIsUpdateable(true);
+                    }
+                }catch (Exception e){ e.printStackTrace(); }
+                // 画像
                 if (new File(packagePath).exists()) {
                     yaml = getStringFromPath(packagePath);
                     mCover = getBitmapFromPath(coverPath);
@@ -570,6 +587,8 @@ public class LoadUtil{
         protected Void doInBackground(Void... _void) {
             if(isCancelled()) return  null;
             try {
+                mContext.setIsUpdateable(false);
+
                 String url = REMOTE_API_URL + "/" + mPackageId;
                 String yaml = getStringFromUrl(url);
                 Map packageData = new Yaml().load(yaml);
@@ -586,6 +605,18 @@ public class LoadUtil{
 
                 if(isCancelled()) return null;
                 publishProgress((double)++progressCount/totalCount, (double)progressCount, (double)totalCount);
+
+                // 更新確認用
+                String hash = getSha1Hash(yaml);
+                String confPath = packagePath + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
+                try {
+                    if (!new File(confPath).exists()) {
+                        preferPackageConfigPath(confPath);
+                    }
+                    Map data = (Map)LoadUtil.getYamlFromPath(confPath);
+                    data.put("hash", hash);
+                    LoadUtil.saveString(new Yaml().dump(data), confPath);
+                }catch (IOException e){ e.printStackTrace(); }
 
                 // Download YAML
                 download(REMOTE_API_URL + "/" + mPackageId,

@@ -97,6 +97,7 @@ public class LauncherActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        // カメラモードスイッチ復元
         final String packageDir = getFilesDir() + "/" + mPackageId;
         final String packageConfigPath = packageDir + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
         try {
@@ -111,7 +112,7 @@ public class LauncherActivity extends AppCompatActivity {
             mCameraSwitch.setChecked( pack < 0 ? common == 0 : pack == 0);
         }catch (Exception e){ e.printStackTrace(); }
 
-        // 保存
+        // カメラモードスイッチ保存
         mCameraSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -201,6 +202,11 @@ public class LauncherActivity extends AppCompatActivity {
 
     private static Map<String, LoadUtil.PackageDataDownloadTask> mTasks = new HashMap<>();
     public void onClickDownloadOrUpdateButtonAsync(View view){
+        if(mIsDownloaded && mIsUpdateable) {
+            onClickRemoveButton(null);
+            setInfoToViewsAsync();
+        }
+
         LoadUtil.PackageDataDownloadTask task = new LoadUtil.PackageDataDownloadTask(
                 this, mPackageId,
                         mDownloadPopupView, mProgressGraphView, mProgressLabelView);
