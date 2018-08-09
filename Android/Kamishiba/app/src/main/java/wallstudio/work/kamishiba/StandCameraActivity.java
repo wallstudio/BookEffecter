@@ -39,6 +39,7 @@ import org.opencv.core.Mat;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class StandCameraActivity extends Activity {
     public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(800, 480);
     // public static final Point DIAL_INPUT_IMAGE_SIZE = new Point(1280, 720);
     public static final Bitmap.Config BUFFER_BITMAP_FORMAT = Bitmap.Config.ARGB_8888;
-    private static final int SMOOTH_BUFFER_SIZE = 5;
+    private static final int SMOOTH_BUFFER_SIZE = 4;
 
 
     private String mPackageId;
@@ -219,75 +220,70 @@ public class StandCameraActivity extends Activity {
             // AKAZE抽出は重いので，非同期
             boolean isExcused = mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
             if(isExcused){
+                // 音声
                 try {
-                    // 音声
+                    // チラつきの平滑化
                     mCurrentPage = smooth(mMatchPreviewView.page);
-                    action(mCurrentPage);
+                    // 再生
+                    playCatch(mCurrentPage);
                     // 音声止める
-                    if (mMediaPlayer.isPlaying()) {
-                        int end = (int) (mTrackTiming[mCurrentPage][1] * 1000);
-                        int now = mMediaPlayer.getCurrentPosition();
-                        if (end < now) {
-                            mMediaPlayer.pause();
-                        }
-                    }
+                    stopCatch();
                 }catch (Exception e){
-                    Toast.makeText(StandCameraActivity.this, "音声の再生エラー", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(StandCameraActivity.this, "音声の再生エラー " + mCurrentPage, Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
                 }
             }
             mPageLabelView.setText((mCurrentPage >= 0 ? mCurrentPage + 1 : "-")  + "/" + mImageCount);
-
-            setDisplayDebugMessage("page", mMatchPreviewView.page + "/" + mImageCount);
-            setDisplayDebugMessage("similar", String.format("%.3f", mMatchPreviewView.similarity));
         }
 
         private List<Integer> mBufferForSmooth = new ArrayList<>();
 
         private int smooth(int value) {
+            // リングバッファ
             mBufferForSmooth.add(value);
             while (mBufferForSmooth.size() > SMOOTH_BUFFER_SIZE)
                 mBufferForSmooth.remove(0);
-            int ret;
+            int ret = -1;
             if (mBufferForSmooth.size() == SMOOTH_BUFFER_SIZE) {
 
-                int pre = mBufferForSmooth.get(0);
-                boolean isSame = true;
-                for (Integer i : mBufferForSmooth) {
-                    if (pre != i) {
-                        isSame = false;
+                // 3個以上のを吐き出す
+                for(int i = 0; i < mTrackTiming.length; i++) {
+                    int count = 0;
+                    for(Integer page: mBufferForSmooth){
+                        if(i == page) count++;
+                    }
+                    if(count >= 3){
+                        ret = i;
                         break;
                     }
                 }
-
-                ret = isSame ? pre : -1;
-            } else {
-                ret = -1;
             }
             Log.d("SmoothPage", String.format("smooth=%d (%s), ", ret, mBufferForSmooth.toString()));
             setDisplayDebugMessage("SmoothPage", String.format("smooth=%d (%s), ", ret, mBufferForSmooth.toString()));
+            setDisplayDebugMessage("Similarity", String.format("[%.2f, %.2f]", mMatchPreviewView.similarity[0],  mMatchPreviewView.similarity[1]));
             return ret;
         }
 
         private int mPreCount = -1;
-
-        private void action(int count) {
-            setDisplayDebugMessage("Action", String.format("NoCHANGE %d", mPreCount));
-            if (mPreCount != count) {
-                Log.d("Action", String.format("CHANGE %d -> %d", mPreCount, count));
-                setDisplayDebugMessage("Action", String.format("CHANGE %d -> %d", mPreCount, count));
-                if (mMediaPlayer.isPlaying()) {
-                    mMediaPlayer.pause();
-                }
-                if (count >= 0) {
-                    if (count < mTrackTiming.length) {
-                        mMediaPlayer.seekTo((int) (mTrackTiming[count][0] * 1000));
-                        mMediaPlayer.start();
-                    } else {
-                        Log.e("Action", "Out of range " + count + ">" + mTrackTiming.length);
-                    }
-                }
+        private void playCatch(int count) {
+            if (mPreCount != count && 0 <= count && count < mTrackTiming.length) {
+                // 再生中のを止める
+                if (mMediaPlayer.isPlaying()) mMediaPlayer.pause();
+                // シークして再生
+                mMediaPlayer.seekTo((int) (mTrackTiming[count][0] * 1000));
+                mMediaPlayer.start();
             }
             mPreCount = count;
+        }
+
+        private void stopCatch(){
+            if (mMediaPlayer.isPlaying() && mCurrentPage >= 0) {
+                int end = (int) (mTrackTiming[mCurrentPage][1] * 1000);
+                int now = mMediaPlayer.getCurrentPosition();
+                if (end < now) {
+                    mMediaPlayer.pause();
+                }
+            }
         }
     };
 

@@ -32,7 +32,7 @@ public class MatchPreviewView extends CVImageView<Void> {
     public TrainingDataList mTrainingDataList;
 
     public int page;
-    public double similarity;
+    public double[] similarity = new double[]{0, 0};
 
     public MatchPreviewView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -73,6 +73,9 @@ public class MatchPreviewView extends CVImageView<Void> {
 
         FeaturedImage input = new FeaturedImage(frame);
         page = mTrainingDataList.indexOf(input);
+        if(mTrainingDataList.getSimilarity(input)[0] > 200
+                || mTrainingDataList.getSimilarity(input)[1] > 30)
+            page = -1;
         mTrainingDataList.drawMatches(input, frame, page);
         similarity = mTrainingDataList.getSimilarity(input);
         input.release();

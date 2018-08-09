@@ -1,13 +1,13 @@
 package wallstudio.work.kamishiba;
 
+import android.util.Log;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.DMatch;
-import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfDMatch;
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.features2d.BFMatcher;
 import org.opencv.features2d.Features2d;
@@ -21,12 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
-
-import io.github.jdiemke.triangulation.DelaunayTriangulator;
-import io.github.jdiemke.triangulation.NotEnoughPointsException;
-import io.github.jdiemke.triangulation.Triangle2D;
-import io.github.jdiemke.triangulation.Vector2D;
 
 public class TrainingDataList extends ArrayList<FeaturedImage> {
 
@@ -39,6 +33,7 @@ public class TrainingDataList extends ArrayList<FeaturedImage> {
     }
 
     private List<Double> mScores;
+    private double mSecondScore;
     private List<List<DMatch>> mMatchesList;
 
     public TrainingDataList(String dir) throws IOException {
@@ -96,83 +91,50 @@ public class TrainingDataList extends ArrayList<FeaturedImage> {
                 }
             }
 
+            double min = Collections.min(mScores);
+            int like = mScores.indexOf(min);
             // メッシュ法でダブルチェック
-            List<KeyPoint> referenceKeyPoints = input.keyPoints.toList();
-
-            input.keyPoints2 = new ArrayList<>();
-            for (DMatch dMatch : mMatchesList.get(mScores.indexOf(Collections.min(mScores)))) {
-                KeyPoint keyPoint = referenceKeyPoints.get(dMatch.queryIdx);
-                input.keyPoints2.add(keyPoint);
-            }
-//            {
-//                List<Triangulator.Vector2> referencePoints = new ArrayList<>();
-//                for (DMatch dMatch : mMatchesList.get(mScores.indexOf(Collections.min(mScores)))) {
-//                    KeyPoint keyPoint = referenceKeyPoints.get(dMatch.queryIdx);
-//                    referencePoints.add(new Triangulator.Vector2(keyPoint.pt.x, keyPoint.pt.y));
-//                }
-//                if (referencePoints.size() > 0) {
-//                    input.mesh = Triangulator.createMesh(referencePoints);
-//                }
-//            }
-
-            Vector<Vector2D> referencePoints = new Vector<>();
-            for (KeyPoint keyPoint: input.keyPoints2) {
-                referencePoints.add(new Vector2D(keyPoint.pt.x, keyPoint.pt.y));
-            }
-            if (referencePoints.size() > 0) {
-                try {
-                    DelaunayTriangulator delaunayTriangulator = new DelaunayTriangulator(referencePoints);
-                    delaunayTriangulator.triangulate();
-                    List<Triangle2D> triangleSoup = delaunayTriangulator.getTriangles();
-                    input.mesh2 = triangleSoup;
-                } catch (NotEnoughPointsException e) {
-                }
-            }
-
+            input.detectEdges(mMatchesList.get(like));
+            get(like).reEdge(input.edges, mMatchesList.get(like));
+            mSecondScore = get(like).checkWarp();
         }
         double min = Collections.min(mScores);
         return mScores.indexOf(min);
     }
 
-    public double getSimilarity(FeaturedImage input){
+    public double[] getSimilarity(FeaturedImage input){
         indexOf(input);
-        return Collections.min(mScores);
+        return new double[]{Collections.min(mScores), mSecondScore};
     }
 
     public void drawMatches(FeaturedImage input, Mat dest, int index){
         indexOf(input);
 
         // メッシュの描画
-        if(input.keyPoints2 != null && input.mesh2 != null) {
-
-            for(KeyPoint keyPoint: input.keyPoints2){
-                Imgproc.circle(input, keyPoint.pt, 5, MESH_COLOR, 1);
+        if(input != null && input.edges != null) {
+            // 辺
+            for(FeaturedImage.Edge edge: input.edges){
+                Imgproc.line(input, edge.p0,  edge.p1, MESH_COLOR, 2);
             }
-
-//            KeyPoint[] keyPoints = input.keyPoints.toArray();
-//            for (Triangulator.Edge edge : input.mesh) {
-//                Imgproc.line(input, keyPoints[edge.p1].pt, keyPoints[edge.p2].pt, MESH_COLOR, 1);
-//            }
-
-            for(Triangle2D triangle: input.mesh2){
-                Imgproc.line(input, new Point(triangle.a.x, triangle.a.y),  new Point(triangle.b.x, triangle.b.y), MESH_COLOR, 2);
-                Imgproc.line(input, new Point(triangle.b.x, triangle.b.y),  new Point(triangle.c.x, triangle.c.y), MESH_COLOR, 2);
-                Imgproc.line(input, new Point(triangle.b.x, triangle.b.y),  new Point(triangle.a.x, triangle.a.y), MESH_COLOR, 2);
-            }
-
         }
 
-        // マッチの描画
-        if(mMatchesList.get(index) != null && mMatchesList.get(index).size() > 0){
+        if(index >= 0 && mMatchesList.get(index) != null && mMatchesList.get(index).size() > 0 && input.edges != null){
+            // 再構築メッシュの描画
+            Mat trainImage = get(index).clone();
+            for(FeaturedImage.Edge edge: get(index).edges){
+                Imgproc.line(trainImage, edge.p0,  edge.p1, MESH_COLOR, 2);
+            }
+            // マッチの描画
             MatOfDMatch matchMat = new MatOfDMatch();
             matchMat.fromList(mMatchesList.get(index));
             MatOfByte mask = new MatOfByte(Mat.ones(matchMat.size(), CvType.CV_8U));
             Features2d.drawMatches(
-                    input, input.keyPoints, get(index), get(index).keyPoints, matchMat,
+                    input, input.keyPoints, trainImage, get(index).keyPoints, matchMat,
                     dest, RANDOM_COLOR, RANDOM_COLOR, mask,
                     Features2d.NOT_DRAW_SINGLE_POINTS);
             matchMat.release();
             mask.release();
+            trainImage.release();
         }else {
             input.copyTo(dest);
         }
