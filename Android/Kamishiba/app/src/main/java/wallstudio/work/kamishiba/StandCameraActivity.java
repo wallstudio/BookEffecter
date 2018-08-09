@@ -3,6 +3,7 @@ package wallstudio.work.kamishiba;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
@@ -20,6 +21,7 @@ import android.media.ImageReader;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Surface;
@@ -325,9 +327,7 @@ public class StandCameraActivity extends Activity {
             mCoverView.setImageBitmap(LoadUtil.getBitmapFromPath(getFilesDir() + "/" + mPackageId + "/000.jpg"));
             Map audioData = ((List<Map>)packageData.get("audio")).get(mAudioPosition);
             List<Number> trackTimingSQ = (List<Number>) audioData.get("track_timing");
-            mTrackTiming = new double[trackTimingSQ.size() / 2][];
-            for(int i = 0; i < trackTimingSQ.size() / 2; i++)
-                mTrackTiming[i] = new double[]{trackTimingSQ.get(i * 2).doubleValue(), trackTimingSQ.get(i * 2 + 1).doubleValue()};
+            mTrackTiming = perseTiming(trackTimingSQ);
 
             // TODO: これ重いから非同期にしたい
             mTrainingDataList = new TrainingDataList(getFilesDir() + "/" + mPackageId);
@@ -346,6 +346,24 @@ public class StandCameraActivity extends Activity {
                 Toast.makeText(this, "Failed load audio source", Toast.LENGTH_LONG).show();
             }
         } catch (IOException e) { }
+    }
+
+    protected double[][] perseTiming(List<Number> trackTimingSQ){
+        double[][] trackTiming = new double[trackTimingSQ.size() / 2][];
+        for (int i = 0; i < trackTimingSQ.size() / 2; i++)
+            trackTiming[i] = new double[]{trackTimingSQ.get(i * 2).doubleValue(), trackTimingSQ.get(i * 2 + 1).doubleValue()};
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isJoin = sharedPreferences.getBoolean("join2page", false);
+        if(isJoin) {
+            for(int i = 0; i < trackTiming.length/2; i++){
+                double[] even = trackTiming[i*2];
+                double[] odd = trackTiming[i*2 + 1];
+                even[1] = odd[1];
+                odd[0] = even[0];
+            }
+        }
+        return trackTiming;
     }
 
     @Override
