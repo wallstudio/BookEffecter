@@ -107,7 +107,7 @@ public class LauncherActivity extends AppCompatActivity {
             }
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             int common = Integer.parseInt(sharedPreferences.getString("pref_default_cam", "0"));
-            int pack = (int)((Map)LoadUtil.getYamlFromPath(packageConfigPath)).get("camera");
+            int pack = Integer.parseInt((String)((Map)LoadUtil.getYamlFromPath(packageConfigPath)).get("camera"));
             mCameraSwitch.setChecked( pack < 0 ? common == 0 : pack == 0);
         }catch (Exception e){ e.printStackTrace(); }
 
@@ -117,7 +117,7 @@ public class LauncherActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 try {
                     Map data = (Map)LoadUtil.getYamlFromPath(packageConfigPath);
-                    data.put("camera", mCameraSwitch.isChecked() ? "0": "1");
+                    data.put("camera", isChecked ? "0": "1");
                     LoadUtil.saveString(new Yaml().dump(data), packageConfigPath);
                 } catch (IOException e) { e.printStackTrace(); }
             }
@@ -228,15 +228,6 @@ public class LauncherActivity extends AppCompatActivity {
         setIsDownloaded(false);
         Toast.makeText(this, "Deleted " + mPackageId, Toast.LENGTH_SHORT).show();
         Log.d("Launcher", "DELETE " + mPackageId);
-    }
-
-    public void onClickCameraSwitch(View view){
-        try {
-            String packageConfigPath = getFilesDir() + "/" + mPackageId + "/" + LoadUtil.PACKAGE_CONFIG_FILENAME;
-            Map<String, String> pack = (Map<String, String>)LoadUtil.getYamlFromPath(packageConfigPath);
-            pack.put("camera", ((Switch)view).isChecked() ? "0": "1");
-            LoadUtil.saveString(new Yaml().dump(pack), packageConfigPath);
-        }catch (Exception e){}
     }
 
     public static class AudioAdapter extends ArrayAdapter<Map> {
