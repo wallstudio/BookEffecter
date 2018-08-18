@@ -1,10 +1,16 @@
 package wallstudio.work.kamishiba;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +38,21 @@ public class LibraryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_liblary);
 
+        if(Build.VERSION.SDK_INT >= 23) {
+            // ランタイムパーミッション(Android 6以上)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                // パーミッションのリクエストを表示
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA}, 1);
+                return;
+            }
+        }
+
+        // Manifestパーミッションのみ
+        permittedCreate();
+    }
+
+    private void permittedCreate(){
         // タブの中身を設置
         LibraryTapAdapter fpa = new LibraryTapAdapter(getSupportFragmentManager());
         ViewPager pager = findViewById(R.id.viewPager);
@@ -50,6 +71,17 @@ public class LibraryActivity extends AppCompatActivity {
         for(int i = 0; i < fpa.getCount(); i++){
             tab.getTabAt(i).setIcon(TAB_ICONS[i]);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            Toast.makeText(this,"このアプリではカメラが必須です", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        permittedCreate();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     // アクションバーのメニュー（:）

@@ -421,15 +421,17 @@ public class StandCameraActivity extends Activity {
     @SuppressLint("MissingPermission")
     private void openCamera() throws CameraAccessException {
         mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        if( mCameraManager.getCameraIdList().length > 0) {
+        if(mCameraManager != null && mCameraManager.getCameraIdList().length > 0) {
             mCameraID = mCameraManager.getCameraIdList()[mCameraSide];
             StreamConfigurationMap map = mCameraManager.getCameraCharacteristics(mCameraID).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-            mSupportPreviewSize = map.getOutputSizes(SurfaceTexture.class);
-            // Detaile config (buffers and displays)
-            mCameraManager.openCamera(mCameraID, mDeviceSettingCallback, null);
-        }else{
-            Toast.makeText(this, "Cannot recognaize camera", Toast.LENGTH_SHORT).show();
+            if (map != null) {
+                mSupportPreviewSize = map.getOutputSizes(SurfaceTexture.class);
+                // Detaile config (buffers and displays)
+                mCameraManager.openCamera(mCameraID, mDeviceSettingCallback, null);
+                return;
+            }
         }
+        Toast.makeText(this, "Cannot recognaize camera", Toast.LENGTH_SHORT).show();
     }
 
     private void loadOpenCVManagerApp(){
