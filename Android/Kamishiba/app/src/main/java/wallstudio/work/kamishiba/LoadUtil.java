@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -114,6 +115,14 @@ public class LoadUtil{
         while (0 < (count = bufferedInputStream.read(bytes))){
             stream.write(bytes, 0, count);
         }
+        stream.close();
+    }
+
+    // Array
+
+    public static void saveArray(byte[] array, String path)throws IOException{
+        BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
+        stream.write(array);
         stream.close();
     }
 

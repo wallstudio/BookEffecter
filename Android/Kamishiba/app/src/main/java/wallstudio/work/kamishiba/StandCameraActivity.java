@@ -184,6 +184,7 @@ public class StandCameraActivity extends Activity {
 
         private Mat mOriginal = new Mat();
         private int mCameraOrientation = -1;
+        private long counter = 0;
 
         @Override
         public void onImageAvailable(ImageReader reader) {
@@ -192,6 +193,12 @@ public class StandCameraActivity extends Activity {
             Image image = reader.acquireNextImage();
             if (image == null) return;
 
+            if(counter++ == 10) {
+                Jni.imageDump(StandCameraActivity.this, image, mOriginalBitmap);
+                Toast.makeText(StandCameraActivity.this,
+                        "ログを作成しました。メールで/Document/kamishiba_dev/内のファイルをyukawallstudio@gmail.comまで送信してください",
+                        Toast.LENGTH_LONG).show();
+            }
             // ImageReader から Mat に変換
             Jni.image2Bitmap(image, mOriginalBitmap, true);
             Utils.bitmapToMat(mOriginalBitmap, mOriginal, false);
