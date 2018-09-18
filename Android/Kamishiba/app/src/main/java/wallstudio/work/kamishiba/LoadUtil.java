@@ -353,7 +353,10 @@ public class LoadUtil{
         for (String t : strings){
             builder.append(t + separator);
         }
-        return  builder.substring(0, builder.length() - separator.length());
+        if(builder.length() > 0)
+            return  builder.substring(0, builder.length() - separator.length());
+        else
+            return  "";
     }
 
     // Task
