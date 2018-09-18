@@ -18,6 +18,10 @@ Twitter: https://twitter.com/kamishiba_ws
 * SnakeYAML
     > Licensed under APL 2.0.   
     > https://raw.githubusercontent.com/asomov/snakeyaml/master/LICENSE.txt
+    
+* delaunay-triangulator
+    > Licensed under MIT License.  
+    > https://github.com/jdiemke/delaunay-triangulator/raw/master/LICENSE
 
 * dotnet core, asp, mvc
     > Licensed under MIT License.  
