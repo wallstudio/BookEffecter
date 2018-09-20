@@ -2,6 +2,7 @@ package wallstudio.work.kamishiba;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -194,10 +195,14 @@ public class StandCameraActivity extends Activity {
             if (image == null) return;
 
             if(counter++ == 10) {
-                Jni.imageDump(StandCameraActivity.this, image, mOriginalBitmap);
-                Toast.makeText(StandCameraActivity.this,
-                        "ログを作成しました。メールで/Document/kamishiba_dev/内のファイルをyukawallstudio@gmail.comまで送信してください",
-                        Toast.LENGTH_LONG).show();
+                String dir = Jni.imageDump(StandCameraActivity.this, image, mOriginalBitmap);
+                if(!dir.equals("")){
+                    new AlertDialog.Builder(StandCameraActivity.this)
+                            .setTitle("ダンプが生成")
+                            .setMessage("ログを作成しました。メールで " + dir + " 内のファイルをyukawallstudio@gmail.comまで送信してください")
+                            .setPositiveButton("OK", null)
+                            .show();
+                }
             }
             // ImageReader から Mat に変換
             Jni.image2Bitmap(image, mOriginalBitmap, true);

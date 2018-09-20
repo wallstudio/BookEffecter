@@ -1,5 +1,6 @@
 package wallstudio.work.kamishiba;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.Image;
@@ -37,7 +38,7 @@ public class Jni {
             src.close();
     }
 
-    public static void imageDump(Context context, Image src, Bitmap dest) {
+    public static String imageDump(Context context, Image src, Bitmap dest) {
         StringBuilder headerBuilder = new StringBuilder();
         headerBuilder.append("ImageDump\n\n");
         headerBuilder.append("BMP_W=" + dest.getWidth() + "\n");
@@ -54,7 +55,7 @@ public class Jni {
         try {
             if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
                 Toast.makeText(context, "内臓ストレージがありません", Toast.LENGTH_LONG).show();
-                return;
+                return "";
             }
 
             String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath() + "/kamishiba_dev/";
@@ -68,8 +69,15 @@ public class Jni {
                 src.getPlanes()[i].getBuffer().get(byteArrayY);
                 LoadUtil.saveArray(byteArrayY, dir + "image_dump_" + i + "_" + timeStamp + ".plane");
             }
+
+            return dir;
         } catch (IOException e) {
-            Toast.makeText(context, "ダンプが生成できません " + e.getCause(), Toast.LENGTH_LONG).show();
+            new AlertDialog.Builder(context)
+                    .setTitle("ダンプが生成できません")
+                    .setMessage(e.getCause() + "\n" + e.getMessage() +"\n" +e.toString())
+                    .setPositiveButton("OK", null)
+                    .show();
+            return "";
         }
     }
 }
