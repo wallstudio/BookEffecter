@@ -2,6 +2,7 @@ package wallstudio.work.kamishiba;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -40,10 +41,13 @@ public class LibraryActivity extends AppCompatActivity {
 
         if(Build.VERSION.SDK_INT >= 23) {
             // ランタイムパーミッション(Android 6以上)
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 // パーミッションのリクエストを表示
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.CAMERA}, 1);
+                        new String[]{
+                        Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return;
             }
         }
