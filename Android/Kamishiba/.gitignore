@@ -63,3 +63,6 @@ fastlane/readme.md
 .DS_Store
 import-summary.txt
 .settings/
+
+.classpath
+.project
