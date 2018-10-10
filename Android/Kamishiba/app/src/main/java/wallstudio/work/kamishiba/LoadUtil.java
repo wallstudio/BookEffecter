@@ -287,6 +287,15 @@ public class LoadUtil{
         index.removeAll(trash);
     }
 
+    public static void spcialFilter(List<Map> index){
+        List<Map> trash = new ArrayList<>();
+        for (Map pac : index){
+            if(((String)pac.get("author")).equals("exam"))
+                trash.add(pac);
+        }
+        index.removeAll(trash);
+    }
+
     public static void copyPackageRemoteToLocal(Activity context, String packageId) throws IOException {
         String localIndexPath = context.getFilesDir() + "/" + LOCAL_INDEX_FILENAME;
         String remoteIndexUrl = REMOTE_API_URL;
@@ -423,6 +432,7 @@ public class LoadUtil{
                         (List<Map>) getYamlFromPath(localPath) : new ArrayList<Map>();
                 adultFilter(mIndex, isAllowSexy, isAllowViolence, isAllowGrotesque);
                 searchFilter(mIndex, mSearch);
+                spcialFilter(mIndex);
                 checkIndexDownloaded(mIndex, localSummaries);
             } catch (IOException e){ e.printStackTrace(); }
             return null;
