@@ -1,9 +1,11 @@
 #include <jni.h>
 #include <string>
 #include <android/bitmap.h>
+#include <android/log.h>
 
 inline void  ThrowJavaException(JNIEnv *env, std::string message);
-inline uint32_t Yuv2Rgb(const uint8_t y, const uint8_t u);
+inline uint32_t Yuv2Rgb(const float y, const float u, const float v);
+inline uint32_t Y2Rgb(const float y);
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -29,13 +31,21 @@ Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
         uint8_t *planeY = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferY));
         uint8_t *planeU = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferU));
         uint8_t *planeV = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferV));
+        // ref. https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888
         if (!((imagePixelStrideY == 1 || imagePixelStrideY == 2 || imagePixelStrideY == 4) &&
             (imagePixelStrideU == 1 || imagePixelStrideU == 2 || imagePixelStrideU == 4) &&
-            (imagePixelStrideV == 1 || imagePixelStrideV == 2 || imagePixelStrideV == 4))) {
+            (imagePixelStrideV == 1 || imagePixelStrideV == 2 || imagePixelStrideV == 4) &&
+            imagePixelStrideU == imagePixelStrideV)) {
             ThrowJavaException(env, "Pixel strides need 1,2,4. (now " +
                                     std::to_string(imagePixelStrideY) + "-" +
                                     std::to_string(imagePixelStrideU) + "-" +
                                     std::to_string(imagePixelStrideV) + ")");
+            return;
+        }
+        if (imageRowStrideU != imageRowStrideV){
+            ThrowJavaException(env, "Row stride U,V need same (now " +
+                    std::to_string(imageRowStrideU) + "-" +
+                    std::to_string(imageRowStrideV) + ")");
             return;
         }
 
@@ -58,22 +68,24 @@ Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
         uint32_t *destArray = reinterpret_cast<uint32_t *>(bitmapRawPtr);
 
         // 走査
-
-        for (int i = 0; i < bitmapWidth * bitmapHeight; ++i) {
-            float y = planeY[i];
-            int i_uv = (i / bitmapWidth) / 2 * (bitmapWidth / 2) + (i % bitmapWidth) / 2;
-            float u = planeU[i_uv];
-            float v = planeV[i_uv];
-
-
-            destArray[i] = Yuv2Rgb(y, u, v);
+        int i = 0, j = 0;
+        for (int c = 0; c < bufferYLength; c++) {
+            i = c % imageRowStrideY;
+            j = c / imageRowStrideY;
+            int idxY = i + j * imageRowStrideY;
+            int idxU = (i / 2 * imagePixelStrideU) + (j / 2) * imageRowStrideU;
+            int idxV = (i / 2 * imagePixelStrideV) + (j / 2) * imageRowStrideU;
+            float y = idxY < bufferYLength ? planeY[idxY] : 0;
+            float u = idxU < bufferULength ? planeU[idxU] : 0;
+            float v = idxV < bufferVLength ? planeV[idxV] : 0;
+            if(i < bitmapStride / sizeof(uint32_t) && j < bitmapHeight)
+                destArray[i + j * bitmapStride / sizeof(uint32_t)] = Yuv2Rgb(y, u, v);
         }
         AndroidBitmap_unlockPixels(env, destBitmap);
 
     }catch (std::exception e){
         ThrowJavaException(env, std::string(e.what()));
     }
-
 }
 
 inline uint32_t Yuv2Rgb(const float y, const float u, const float v){
@@ -89,6 +101,11 @@ inline uint32_t Yuv2Rgb(const float y, const float u, const float v){
     else if (b > 255) b = 255;
 
     return ((uint32_t) 0xFFU << 24) + ((uint32_t) b << 16) + ((uint32_t) g << 8) + (uint32_t) r;
+}
+
+inline uint32_t Y2Rgb(const float y){
+    uint8_t g = (uint8_t) y;
+    return ((uint32_t) 0xFFU << 24) + ((uint32_t) g << 16) + ((uint32_t) g << 8) + (uint32_t) g;
 }
 
 inline void  ThrowJavaException(JNIEnv *env, std::string message){
