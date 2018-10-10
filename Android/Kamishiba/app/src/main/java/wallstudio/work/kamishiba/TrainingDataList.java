@@ -67,8 +67,9 @@ public class TrainingDataList extends ArrayList<FeaturedImage> {
 
             // 局所特徴で最尤画像を検索
             for (FeaturedImage trainImage : this) {
-                if (input.keyPoints.rows() > 0 && input.descriptors.rows() > 0
-                        && trainImage.keyPoints.rows() > 0 && trainImage.descriptors.rows() > 0) {
+                if (input.keyPoints.rows() >= USE_MATCH_COUNT && input.descriptors.rows() >= USE_MATCH_COUNT
+                        && trainImage.keyPoints.rows() >= USE_MATCH_COUNT && trainImage.descriptors.rows() >= USE_MATCH_COUNT) {
+
                     MatOfDMatch matchesMat = new MatOfDMatch();
                     sBFMatcher.match(input.descriptors, trainImage.descriptors, matchesMat);
                     List<DMatch> matches = matchesMat.toList();
