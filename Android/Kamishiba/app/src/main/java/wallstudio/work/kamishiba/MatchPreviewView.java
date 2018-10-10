@@ -52,33 +52,40 @@ public class MatchPreviewView extends CVImageView<Void> {
     protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY, boolean isPerspective) {
         if(frame == null || frame.width() == 0 || frame.height() == 0) return null;
 
-        if(isPerspective) {
-            float[] pts1 = calc4Points(frame, vanishingRatio, pageEdgeY);
-            float[] pts2 = new float[]{0, 0, mCorrectedImageWidth, 0, 0, mCorrectedImageHeight, mCorrectedImageWidth, mCorrectedImageHeight};
-            Mat pts1m = new Mat(4, 2, CvType.CV_32F);
-            Mat pts2m = new Mat(4, 2, CvType.CV_32F);
-            pts1m.put(0, 0, pts1);
-            pts2m.put(0, 0, pts2);
-            Mat persMatrix = Imgproc.getPerspectiveTransform(pts1m, pts2m);
-            Imgproc.warpPerspective(frame, frame, persMatrix, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
-            Core.flip(frame, frame, 0);
-            persMatrix.release();
-        }else{
-            Rect trimArea = new Rect(
-                    (int)(frame.width() * TRIM_RATIO), (int)(frame.height() * TRIM_RATIO),
-                    (int)(frame.width() - frame.width() * TRIM_RATIO), (int)(frame.height() - frame.height() * TRIM_RATIO));
-            Mat trim = new Mat(frame, trimArea);
-            Imgproc.resize(trim, frame, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
+        try {
+
+            if (isPerspective) {
+                float[] pts1 = calc4Points(frame, vanishingRatio, pageEdgeY);
+                float[] pts2 = new float[]{0, 0, mCorrectedImageWidth, 0, 0, mCorrectedImageHeight, mCorrectedImageWidth, mCorrectedImageHeight};
+                Mat pts1m = new Mat(4, 2, CvType.CV_32F);
+                Mat pts2m = new Mat(4, 2, CvType.CV_32F);
+                pts1m.put(0, 0, pts1);
+                pts2m.put(0, 0, pts2);
+                Mat persMatrix = Imgproc.getPerspectiveTransform(pts1m, pts2m);
+                Imgproc.warpPerspective(frame, frame, persMatrix, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
+                Core.flip(frame, frame, 0);
+                persMatrix.release();
+            } else {
+                Rect trimArea = new Rect(
+                        (int) (frame.width() * TRIM_RATIO), (int) (frame.height() * TRIM_RATIO),
+                        (int) (frame.width() - frame.width() * TRIM_RATIO), (int) (frame.height() - frame.height() * TRIM_RATIO));
+                Mat trim = new Mat(frame, trimArea);
+                Imgproc.resize(trim, frame, new Size(mCorrectedImageWidth, mCorrectedImageHeight));
+            }
+
+            FeaturedImage input = new FeaturedImage(frame);
+            page = mTrainingDataList.indexOf(input);
+            if (mTrainingDataList.getSimilarity(input)[0] > 200
+                    || mTrainingDataList.getSimilarity(input)[1] > 30)
+                page = -1;
+            mTrainingDataList.drawMatches(input, frame, page);
+            similarity = mTrainingDataList.getSimilarity(input);
+            input.release();
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
-        FeaturedImage input = new FeaturedImage(frame);
-        page = mTrainingDataList.indexOf(input);
-        if(mTrainingDataList.getSimilarity(input)[0] > 200
-                || mTrainingDataList.getSimilarity(input)[1] > 30)
-            page = -1;
-        mTrainingDataList.drawMatches(input, frame, page);
-        similarity = mTrainingDataList.getSimilarity(input);
-        input.release();
         return null;
     }
 }

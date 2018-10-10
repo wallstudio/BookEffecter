@@ -35,7 +35,6 @@ public class Jni {
             s_planeULength = planeU.getBuffer().limit();
             s_planeVLength = planeV.getBuffer().limit();
         }
-        Log.d("YUV2RGB", getImage2BitmapInfo(src, dest));
 
         // Create original bitmap
         yuvByteArrayToBmp(
@@ -63,7 +62,7 @@ public class Jni {
             s_planeVLength = planeV.getBuffer().limit();
         }
         return 
-        String.format("PL:%d,%d,%d;\nSD:%d,%d;\nSS:%d,%d;\nPC:%d;\nRS:%d,%d,%d;\nPS%d,%d,%d;",
+        String.format("PL: %d, %d, %d\nSD: %d, %d\nSS: %d, %d\nPC: %d\nRS: %d, %d, %d\nPS: %d, %d, %d",
                 s_planeYLength, s_planeULength, s_planeVLength,
                 dest.getWidth(), dest.getHeight(),
                 src.getWidth(), src.getHeight(),

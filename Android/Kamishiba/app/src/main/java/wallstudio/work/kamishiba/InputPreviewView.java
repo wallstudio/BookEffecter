@@ -23,32 +23,38 @@ public class InputPreviewView extends CVImageView<Void> {
 
     @Override
     protected Void process(Mat frame, Point vanishingRatio, double pageEdgeY, boolean isPerspective) {
-        if(isPerspective) {
-            Point vanising = new Point((int) (vanishingRatio.x * frame.width()), (int) (vanishingRatio.y * frame.height()));
-            float[] ptsf = calc4Points(frame, vanishingRatio, pageEdgeY);
-            Point[] ptsP = floats2Points(ptsf);
-            Point[] ptsPs = shrinkPoints(ptsP);
+        try{
 
-            // Perspective guid
-            Imgproc.line(frame, vanising, ptsP[2], BORDER_COLOR, GRID_THICKNESS);
-            Imgproc.line(frame, vanising, ptsP[3], BORDER_COLOR, GRID_THICKNESS);
-            Imgproc.line(frame, ptsP[0], ptsP[1], BORDER_COLOR, GRID_THICKNESS);
-            // Vertical grid
-            for (int i = 0; i < GRID_DIVISIONS + 1; i++) {
-                Point start = new Point(ptsPs[0].x + (ptsPs[1].x - ptsPs[0].x) / GRID_DIVISIONS * i, ptsPs[0].y + (ptsPs[1].y - ptsPs[0].y) / GRID_DIVISIONS * i);
-                Point end = new Point(ptsPs[2].x + (ptsPs[3].x - ptsPs[2].x) / GRID_DIVISIONS * i, ptsPs[2].y + (ptsPs[3].y - ptsPs[2].y) / GRID_DIVISIONS * i);
-                Imgproc.line(frame, start, end, GRID_COLOR, GRID_THICKNESS_SUB);
+            if(isPerspective) {
+                Point vanising = new Point((int) (vanishingRatio.x * frame.width()), (int) (vanishingRatio.y * frame.height()));
+                float[] ptsf = calc4Points(frame, vanishingRatio, pageEdgeY);
+                Point[] ptsP = floats2Points(ptsf);
+                Point[] ptsPs = shrinkPoints(ptsP);
+
+                // Perspective guid
+                Imgproc.line(frame, vanising, ptsP[2], BORDER_COLOR, GRID_THICKNESS);
+                Imgproc.line(frame, vanising, ptsP[3], BORDER_COLOR, GRID_THICKNESS);
+                Imgproc.line(frame, ptsP[0], ptsP[1], BORDER_COLOR, GRID_THICKNESS);
+                // Vertical grid
+                for (int i = 0; i < GRID_DIVISIONS + 1; i++) {
+                    Point start = new Point(ptsPs[0].x + (ptsPs[1].x - ptsPs[0].x) / GRID_DIVISIONS * i, ptsPs[0].y + (ptsPs[1].y - ptsPs[0].y) / GRID_DIVISIONS * i);
+                    Point end = new Point(ptsPs[2].x + (ptsPs[3].x - ptsPs[2].x) / GRID_DIVISIONS * i, ptsPs[2].y + (ptsPs[3].y - ptsPs[2].y) / GRID_DIVISIONS * i);
+                    Imgproc.line(frame, start, end, GRID_COLOR, GRID_THICKNESS_SUB);
+                }
+                // Horizontal grid
+                for (int i = 0; i < GRID_DIVISIONS + 1; i++) {
+                    Point start = new Point(ptsPs[0].x + (ptsPs[2].x - ptsPs[0].x) / GRID_DIVISIONS * i, ptsPs[0].y + (ptsPs[2].y - ptsPs[0].y) / GRID_DIVISIONS * i);
+                    Point end = new Point(ptsPs[1].x + (ptsPs[3].x - ptsPs[1].x) / GRID_DIVISIONS * i, ptsPs[1].y + (ptsPs[3].y - ptsPs[1].y) / GRID_DIVISIONS * i);
+                    Imgproc.line(frame, start, end, GRID_COLOR, GRID_THICKNESS_SUB);
+                }
+            }else{
+                Imgproc.rectangle(frame,
+                        new Point(frame.width() * TRIM_RATIO, frame.height() * TRIM_RATIO),
+                        new Point(frame.width() - frame.width() * TRIM_RATIO, frame.height() - frame.height() * TRIM_RATIO), GRID_COLOR, GRID_THICKNESS);
             }
-            // Horizontal grid
-            for (int i = 0; i < GRID_DIVISIONS + 1; i++) {
-                Point start = new Point(ptsPs[0].x + (ptsPs[2].x - ptsPs[0].x) / GRID_DIVISIONS * i, ptsPs[0].y + (ptsPs[2].y - ptsPs[0].y) / GRID_DIVISIONS * i);
-                Point end = new Point(ptsPs[1].x + (ptsPs[3].x - ptsPs[1].x) / GRID_DIVISIONS * i, ptsPs[1].y + (ptsPs[3].y - ptsPs[1].y) / GRID_DIVISIONS * i);
-                Imgproc.line(frame, start, end, GRID_COLOR, GRID_THICKNESS_SUB);
-            }
-        }else{
-            Imgproc.rectangle(frame,
-                    new Point(frame.width() * TRIM_RATIO, frame.height() * TRIM_RATIO),
-                    new Point(frame.width() - frame.width() * TRIM_RATIO, frame.height() - frame.height() * TRIM_RATIO), GRID_COLOR, GRID_THICKNESS);
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
         return null;

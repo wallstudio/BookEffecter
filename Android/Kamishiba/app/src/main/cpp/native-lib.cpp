@@ -22,8 +22,7 @@ Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
     try {
 
         if (imagePlanesCount != 3) {
-            ThrowJavaException(env, "Plane count need 3. (now " + std::to_string(imagePlanesCount) +
-                                    ")");
+            ThrowJavaException(env, "Plane count need 3. (now " + std::to_string(imagePlanesCount) + ")");
             return;
         }
         // 入力Planeの準備

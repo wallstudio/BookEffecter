@@ -2,7 +2,9 @@ package wallstudio.work.kamishiba;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -19,7 +21,6 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -41,7 +42,6 @@ import org.opencv.core.Mat;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,6 +180,7 @@ public class StandCameraActivity extends Activity {
 
     // メインループ
     protected boolean mIsLandscape = true;
+    private boolean mIsOccurrenceException = false;
     private ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
 
         private Mat mOriginal = new Mat();
@@ -187,55 +188,76 @@ public class StandCameraActivity extends Activity {
 
         @Override
         public void onImageAvailable(ImageReader reader) {
-            if (isFinishing()) return;
 
             Image image = reader.acquireNextImage();
             if (image == null) return;
 
-            // ImageReader から Mat に変換
-            Jni.image2Bitmap(image, mOriginalBitmap, true);
-            Utils.bitmapToMat(mOriginalBitmap, mOriginal, false);
-
-            // 画像の向きを補正
-            int displayOrientation = getDisplayOrientation();
-            if (mCameraOrientation == -1)
-                mCameraOrientation = getCameraOrientation();
-            if (mIsLandscape) {
-                // 内面カメラなので D = -C なら向きが一致する
-                if (Math.abs(360 - mCameraOrientation) != displayOrientation) {
-                    Core.flip(mOriginal, mOriginal, 0);
-                } else {
-                    Core.flip(mOriginal, mOriginal, 1);
-                }
-            } else {
-                if (mCameraOrientation == 90){
-                    Core.flip(mOriginal, mOriginal, 0);
-                } else {
-                    Core.flip(mOriginal, mOriginal, 1);
-                }
-                Core.transpose(mOriginal, mOriginal);
+            if (isFinishing() || mIsOccurrenceException) {
+                image.close();
+                return;
             }
 
-            // 画像処理の呼び出し
-            mBackgroundView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
-            mInputPreviewView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
-            // AKAZE抽出は重いので，非同期
-            boolean isExcused = mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
-            if(isExcused){
-                // 音声
-                try {
-                    // チラつきの平滑化
-                    mCurrentPage = smooth(mMatchPreviewView.page);
-                    // 再生
-                    playCatch(mCurrentPage);
-                    // 音声止める
-                    stopCatch();
-                }catch (Exception e){
-                    Toast.makeText(StandCameraActivity.this, "音声の再生エラー " + mCurrentPage, Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
+            try {
+                // ImageReader から Mat に変換
+                Jni.image2Bitmap(image, mOriginalBitmap, true);
+                Utils.bitmapToMat(mOriginalBitmap, mOriginal, false);
+
+                // 画像の向きを補正
+                int displayOrientation = getDisplayOrientation();
+                if (mCameraOrientation == -1)
+                    mCameraOrientation = getCameraOrientation();
+                if (mIsLandscape) {
+                    // 内面カメラなので D = -C なら向きが一致する
+                    if (Math.abs(360 - mCameraOrientation) != displayOrientation) {
+                        Core.flip(mOriginal, mOriginal, 0);
+                    } else {
+                        Core.flip(mOriginal, mOriginal, 1);
+                    }
+                } else {
+                    if (mCameraOrientation == 90) {
+                        Core.flip(mOriginal, mOriginal, 0);
+                    } else {
+                        Core.flip(mOriginal, mOriginal, 1);
+                    }
+                    Core.transpose(mOriginal, mOriginal);
                 }
+
+                // 画像処理の呼び出し
+                mBackgroundView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
+                mInputPreviewView.convert(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
+                // AKAZE抽出は重いので，非同期
+                boolean isExcused = mMatchPreviewView.convertAsync(mOriginal, mController.vanishingRatio, mController.pageEdgeY, mIsLandscape);
+                if (isExcused) {
+                    // 音声
+                    try {
+                        // チラつきの平滑化
+                        mCurrentPage = smooth(mMatchPreviewView.page);
+                        // 再生
+                        playCatch(mCurrentPage);
+                        // 音声止める
+                        stopCatch();
+                    } catch (Exception e) {
+                        Toast.makeText(StandCameraActivity.this, "音声の再生エラー " + mCurrentPage, Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                }
+                mPageLabelView.setText((mCurrentPage >= 0 ? mCurrentPage + 1 : "-") + "/" + mImageCount);
+            
+            }catch (Exception e){
+                new AlertDialog.Builder(StandCameraActivity.this)
+                        .setTitle("カメラの映像が読み取れません")
+                        .setMessage(e.getCause() + "\n" + e.getMessage() +"\n" +e.toString() +
+                                "\n\n" + Jni.getImage2BitmapInfo(image, mOriginalBitmap) +
+                                "\n\n この表示のスクリーンショットを @kamishiba_ws まで送ってください")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                onPause();
+                            }
+                        })
+                        .show();
+                mIsOccurrenceException = true;
             }
-            mPageLabelView.setText((mCurrentPage >= 0 ? mCurrentPage + 1 : "-")  + "/" + mImageCount);
         }
 
         private List<Integer> mBufferForSmooth = new ArrayList<>();
