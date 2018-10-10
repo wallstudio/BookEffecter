@@ -2,13 +2,7 @@
 #include <string>
 #include <android/bitmap.h>
 
-enum Depth{ UNKNOWN, U8BIT, U16BIT, U32BIT };
-Depth DepthY = UNKNOWN;
-Depth DepthU = UNKNOWN;
-Depth DepthV = UNKNOWN;
-
 inline void  ThrowJavaException(JNIEnv *env, std::string message);
-inline Depth CheckDepth(uint8_t *plane, const int length, const int pixelStride);
 inline uint32_t Yuv2Rgb(const uint8_t y, const uint8_t u);
 
 extern "C"
@@ -43,11 +37,6 @@ Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
                                     std::to_string(imagePixelStrideU) + "-" +
                                     std::to_string(imagePixelStrideV) + ")");
             return;
-        }
-        if (DepthY == UNKNOWN || DepthU == UNKNOWN || DepthV == UNKNOWN) {
-            DepthY = CheckDepth(planeY, bufferYLength, imagePixelStrideY);
-            DepthU = CheckDepth(planeU, bufferULength, imagePixelStrideU);
-            DepthV = CheckDepth(planeV, bufferVLength, imagePixelStrideV);
         }
 
         // 出力先の準備
@@ -84,38 +73,6 @@ Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
     }catch (std::exception e){
         ThrowJavaException(env, std::string(e.what()));
     }
-
-}
-
-inline Depth CheckDepth(uint8_t *plane, const int length, const int pixelStride){
-
-    if(pixelStride == 1)
-        return  U8BIT;
-
-    long max = 0xFF;
-
-    if(pixelStride == 2){
-        uint16_t *plane2 = (uint16_t *)plane;
-        for(int i = 0; i < length / pixelStride; i++){
-            if(plane2[i] > max)
-                max = plane2[i];
-        }
-    }
-
-    if(pixelStride == 4){
-        uint32_t *plane4 = (uint32_t *)plane;
-        for(int i = 0; i < length / pixelStride; i++){
-            if(plane4[i] > max)
-                max = plane4[i];
-        }
-    }
-
-    if(max > 0xFFFF)
-        return  U32BIT;
-    else if(max > 0xFF)
-        return  U16BIT;
-    else
-        return  U8BIT;
 
 }
 
