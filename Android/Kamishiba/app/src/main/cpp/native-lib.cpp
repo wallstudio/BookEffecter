@@ -2,50 +2,139 @@
 #include <string>
 #include <android/bitmap.h>
 
-extern "C" JNIEXPORT jstring
-JNICALL
-Java_wallstudio_work_kamishiba_Jni_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
-}
+enum Depth{ UNKNOWN, U8BIT, U16BIT, U32BIT };
+Depth DepthY = UNKNOWN;
+Depth DepthU = UNKNOWN;
+Depth DepthV = UNKNOWN;
+
+inline void  ThrowJavaException(JNIEnv *env, std::string message);
+inline Depth CheckDepth(uint8_t *plane, const int length, const int pixelStride);
+inline uint32_t Yuv2Rgb(const uint8_t y, const uint8_t u);
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
-                                                     jobject yBuffer,
-                                                     jobject uBuffer,
-                                                     jobject vBuffer,
-                                                     jint width, jint height,
-                                                     jobject bitmap) {
+                                                     jobject bufferY, jobject bufferU, jobject  bufferV,
+                                                     jint bufferYLength, jint bufferULength, jint bufferVLength,
+                                                     jobject destBitmap,
+                                                     jint bitmapWidth, jint bitmapHeight,
+                                                     jint imageWidth, jint  imageHeight,
+                                                     jint imagePlanesCount,
+                                                     jint imageRowStrideY, jint imageRowStrideU, jint imageRowStrideV,
+                                                     jint imagePixelStrideY, jint imagePixelStrideU, jint imagePixelStrideV) {
 
-    uint8_t  *ySrc = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(yBuffer));
-    uint8_t  *uSrc = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(uBuffer));
-    uint8_t  *vSrc = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(vBuffer));
-    void *bitmapPtr;
-    AndroidBitmap_lockPixels(env, bitmap, &bitmapPtr);
-    uint32_t *bitmapRow = reinterpret_cast<uint32_t *>(bitmapPtr);
-    for (int i = 0; i < width * height; ++i) {
-        float y = ySrc[i];
-        int i_uv = (i / width) / 2 * (width / 2) + (i % width) / 2;
-        float u = uSrc[i_uv];
-        float v = vSrc[i_uv];
+    try {
 
-        double r = y + (1.4065 * (u - 128));
-        double g = y - (0.3455 * (u - 128)) - (0.7169 * (v - 128));
-        double b = y + (1.7790 * (v - 128));
+        if (imagePlanesCount != 3) {
+            ThrowJavaException(env, "Plane count need 3. (now " + std::to_string(imagePlanesCount) +
+                                    ")");
+            return;
+        }
 
-        if (r < 0) r = 0;
-        else if (r > 255) r = 255;
-        if (g < 0) g = 0;
-        else if (g > 255) g = 255;
-        if (b < 0) b = 0;
-        else if (b > 255) b = 255;
+        // 入力Planeの準備
+        uint8_t *planeY = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferY));
+        uint8_t *planeU = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferU));
+        uint8_t *planeV = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferV));
+        if (!((imagePixelStrideY == 1 || imagePixelStrideY == 2 || imagePixelStrideY == 4) &&
+            (imagePixelStrideU == 1 || imagePixelStrideU == 2 || imagePixelStrideU == 4) &&
+            (imagePixelStrideV == 1 || imagePixelStrideV == 2 || imagePixelStrideV == 4))) {
+            ThrowJavaException(env, "Pixel strides need 1,2,4. (now " +
+                                    std::to_string(imagePixelStrideY) + "-" +
+                                    std::to_string(imagePixelStrideU) + "-" +
+                                    std::to_string(imagePixelStrideV) + ")");
+            return;
+        }
+        if (DepthY == UNKNOWN || DepthU == UNKNOWN || DepthV == UNKNOWN) {
+            DepthY = CheckDepth(planeY, bufferYLength, imagePixelStrideY);
+            DepthU = CheckDepth(planeU, bufferULength, imagePixelStrideU);
+            DepthV = CheckDepth(planeV, bufferVLength, imagePixelStrideV);
+        }
 
-        uint32_t pixel = ((uint32_t)0xFFU << 24) + ((uint32_t)b << 16) + ((uint32_t)g << 8) + (uint32_t)r;
-        bitmapRow[i] = pixel;
+        // 出力先の準備
+        AndroidBitmapInfo info;
+        if (AndroidBitmap_getInfo(env, destBitmap, &info) < 0) {
+            ThrowJavaException(env, std::string("Failed AndroidBitmap_getInfo()"));
+            return;
+        }
+        if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+            ThrowJavaException(env, "Bitmap format need RGBA. (now " + std::to_string(info.format) + ")");
+            return;
+        }
+        int bitmapStride = info.stride;
+        void *bitmapRawPtr;
+        if (AndroidBitmap_lockPixels(env, destBitmap, &bitmapRawPtr) < 0) {
+            ThrowJavaException(env, std::string("Failed AndroidBitmap_lockPixels()"));
+            return;
+        }
+        uint32_t *destArray = reinterpret_cast<uint32_t *>(bitmapRawPtr);
+
+        // 走査
+
+        for (int i = 0; i < bitmapWidth * bitmapHeight; ++i) {
+            float y = planeY[i];
+            int i_uv = (i / bitmapWidth) / 2 * (bitmapWidth / 2) + (i % bitmapWidth) / 2;
+            float u = planeU[i_uv];
+            float v = planeV[i_uv];
+
+
+            destArray[i] = Yuv2Rgb(y, u, v);
+        }
+        AndroidBitmap_unlockPixels(env, destBitmap);
+
+    }catch (std::exception e){
+        ThrowJavaException(env, std::string(e.what()));
     }
-    AndroidBitmap_unlockPixels(env, bitmap);
 
+}
+
+inline Depth CheckDepth(uint8_t *plane, const int length, const int pixelStride){
+
+    if(pixelStride == 1)
+        return  U8BIT;
+
+    long max = 0xFF;
+
+    if(pixelStride == 2){
+        uint16_t *plane2 = (uint16_t *)plane;
+        for(int i = 0; i < length / pixelStride; i++){
+            if(plane2[i] > max)
+                max = plane2[i];
+        }
+    }
+
+    if(pixelStride == 4){
+        uint32_t *plane4 = (uint32_t *)plane;
+        for(int i = 0; i < length / pixelStride; i++){
+            if(plane4[i] > max)
+                max = plane4[i];
+        }
+    }
+
+    if(max > 0xFFFF)
+        return  U32BIT;
+    else if(max > 0xFF)
+        return  U16BIT;
+    else
+        return  U8BIT;
+
+}
+
+inline uint32_t Yuv2Rgb(const float y, const float u, const float v){
+    double r = y + (1.4065 * (u - 128));
+    double g = y - (0.3455 * (u - 128)) - (0.7169 * (v - 128));
+    double b = y + (1.7790 * (v - 128));
+
+    if (r < 0) r = 0;
+    else if (r > 255) r = 255;
+    if (g < 0) g = 0;
+    else if (g > 255) g = 255;
+    if (b < 0) b = 0;
+    else if (b > 255) b = 255;
+
+    return ((uint32_t) 0xFFU << 24) + ((uint32_t) b << 16) + ((uint32_t) g << 8) + (uint32_t) r;
+}
+
+inline void  ThrowJavaException(JNIEnv *env, std::string message){
+    jclass  exception = env->FindClass("java/lang/RuntimeException");
+    env->ThrowNew(exception, message.c_str());
 }

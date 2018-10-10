@@ -13,18 +13,40 @@ public class Jni {
 
     public static native String stringFromJNI();
 
-    public static native void yuvByteArrayToBmp(ByteBuffer yBuffer, ByteBuffer uBuffer, ByteBuffer vBuffer, int width, int height, Bitmap bitmap);
+    public static native void yuvByteArrayToBmp(ByteBuffer bufferY, ByteBuffer bufferU, ByteBuffer  bufferV,
+                                                int bufferYLength, int bufferULength, int bufferVLength,
+                                                Bitmap destBitmap,
+                                                int bitmapWidth, int bitmapHeight,
+                                                int imageWidth, int  imageHeight,
+                                                int imagePlanesCount,
+                                                int imageRowStrideY, int imageRowStrideU, int imageRowStrideV,
+                                                int imagePixelStrideY, int imagePixelStrideU, int imagePixelStrideV);
 
+    static int s_planeYLength = -1;
+    static int s_planeULength = -1;
+    static int s_planeVLength = -1;
     public static void image2Bitmap(Image src, Bitmap dest, boolean isImageRelease){
         // YUV -> ARGB
-        Image.Plane Y_plane = src.getPlanes()[0];
-        int Y_rowStride = Y_plane.getRowStride();
-        Image.Plane U_plane = src.getPlanes()[2];
-        Image.Plane V_plane = src.getPlanes()[1];
-        int imageHeight = src.getHeight();
+        Image.Plane planeY = src.getPlanes()[0];
+        Image.Plane planeU = src.getPlanes()[2];
+        Image.Plane planeV = src.getPlanes()[1];
+
+        if(s_planeYLength < 0 || s_planeULength < 0 || s_planeVLength < 0){
+            s_planeYLength = planeY.getBuffer().limit();
+            s_planeULength = planeU.getBuffer().limit();
+            s_planeVLength = planeV.getBuffer().limit();
+        }
 
         // Create original bitmap
-        yuvByteArrayToBmp(Y_plane.getBuffer(), U_plane.getBuffer(), V_plane.getBuffer(), dest.getWidth(), dest.getHeight(), dest);
+        yuvByteArrayToBmp(
+                planeY.getBuffer(), planeU.getBuffer(), planeV.getBuffer(),
+                s_planeYLength, s_planeULength, s_planeVLength,
+                dest,
+                dest.getWidth(), dest.getHeight(),
+                src.getWidth(), src.getHeight(),
+                src.getPlanes().length,
+                planeY.getRowStride(), planeU.getRowStride(), planeV.getRowStride(),
+                planeY.getPixelStride(), planeU.getPixelStride(), planeV.getPixelStride());
 
         if(isImageRelease)
             src.close();
