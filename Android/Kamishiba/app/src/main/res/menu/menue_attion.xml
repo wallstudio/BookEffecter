@@ -8,9 +8,6 @@
         android:id="@+id/help"
         android:title="ヘルプ" />
     <item
-        android:id="@+id/upload"
-        android:title="アップロード" />
-    <item
         android:id="@+id/config"
         android:title="設定" />
     <item

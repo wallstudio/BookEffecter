@@ -62,7 +62,7 @@ public class LauncherActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             try {
                 boolean isFront = mCameraSwitch.isChecked();
-                Intent intent = new Intent(getApplication(), isFront ? StandCameraActivity.class : HandedCameraActivity.class);
+                Intent intent = new Intent(getApplication(), HandedCameraActivity.class);
                 intent.putExtra("package", mPackageId);
                 intent.putExtra("audio", position);
 

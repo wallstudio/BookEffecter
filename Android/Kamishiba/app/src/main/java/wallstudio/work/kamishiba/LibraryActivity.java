@@ -110,9 +110,6 @@ public class LibraryActivity extends AppCompatActivity {
             case R.id.config:
                 intent = new Intent(this, SettingsActivity.class);
                 break;
-            case R.id.upload:
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://kamishiba.wallstudio.work/Books"));
-                break;
             case R.id.about:
                 intent = new Intent(this, WebActivity.class);
                 intent.putExtra("title", "このアプリについて");

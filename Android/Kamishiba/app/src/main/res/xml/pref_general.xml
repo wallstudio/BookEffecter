@@ -2,18 +2,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="general_prefs">
 
-    <ListPreference
-        android:title="使用するカメラの初期値"
-        android:key="pref_default_cam"
-        android:entries="@array/entry_cam_mode"
-        android:entryValues="@array/entry_values_cam_mode"
-        android:defaultValue="0" />
-
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="join2page"
-        android:summary="カメラは片ページしか認識できない為、2ページ分の音声をまとめて再生します"
-        android:title="2P連続で再生(スタンドモード)" />
     <PreferenceCategory
         android:title="成人向け表現（18歳以上のみ）"
         android:key="pref_category_adult">
