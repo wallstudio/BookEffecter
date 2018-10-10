@@ -27,8 +27,8 @@ public class Jni {
     public static void image2Bitmap(Image src, Bitmap dest, boolean isImageRelease){
         // YUV -> ARGB
         Image.Plane planeY = src.getPlanes()[0];
-        Image.Plane planeU = src.getPlanes()[2];
-        Image.Plane planeV = src.getPlanes()[1];
+        Image.Plane planeU = src.getPlanes()[1];
+        Image.Plane planeV = src.getPlanes()[2];
 
         if(s_planeYLength < 0 || s_planeULength < 0 || s_planeVLength < 0){
             s_planeYLength = planeY.getBuffer().limit();

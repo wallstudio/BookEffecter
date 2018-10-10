@@ -26,7 +26,6 @@ Java_wallstudio_work_kamishiba_Jni_yuvByteArrayToBmp(JNIEnv *env, jclass type,
                                     ")");
             return;
         }
-
         // 入力Planeの準備
         uint8_t *planeY = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferY));
         uint8_t *planeU = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(bufferU));
@@ -100,7 +99,7 @@ inline uint32_t Yuv2Rgb(const float y, const float u, const float v){
     if (b < 0) b = 0;
     else if (b > 255) b = 255;
 
-    return ((uint32_t) 0xFFU << 24) + ((uint32_t) b << 16) + ((uint32_t) g << 8) + (uint32_t) r;
+    return ((uint32_t) 0xFFU << 24) + ((uint32_t) r << 16) + ((uint32_t) g << 8) + (uint32_t) b;
 }
 
 inline uint32_t Y2Rgb(const float y){
