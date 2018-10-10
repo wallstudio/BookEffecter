@@ -12,8 +12,6 @@ public class Jni {
         System.loadLibrary("native-lib");
     }
 
-    public static native String stringFromJNI();
-
     public static native void yuvByteArrayToBmp(ByteBuffer bufferY, ByteBuffer bufferU, ByteBuffer  bufferV,
                                                 int bufferYLength, int bufferULength, int bufferVLength,
                                                 Bitmap destBitmap,
