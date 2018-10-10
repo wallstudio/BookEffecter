@@ -9,6 +9,7 @@ import android.widget.Toast;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.Time;
@@ -119,6 +120,54 @@ public class Jni {
                     .setMessage(e.getCause() + "\n" + e.getMessage() +"\n" +e.toString())
                     .setPositiveButton("OK", null)
                     .show();
+            return "";
+        }
+    }
+
+    public static String checkDecode(){
+        try {
+            String dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath() + "/kamishiba_dev/dump/";
+
+            if(!new File(dir + "y8.plane").exists())
+                return "";
+
+            File y = new File(dir + "y8.plane");
+            byte[] yy = new byte[(int)y.length()];
+            FileInputStream yyy = new FileInputStream(dir + "y8.plane");
+            yyy.read(yy); yyy.close();
+            ByteBuffer yyyy = ByteBuffer.allocateDirect((int)y.length());
+            yyyy.put(yy);
+
+            File u = new File(dir + "u8.plane");
+            byte[] uu = new byte[(int)u.length()];
+            FileInputStream uuu = new FileInputStream(dir + "u8.plane");
+            uuu.read(uu); uuu.close();
+            ByteBuffer uuuu = ByteBuffer.allocateDirect((int)u.length());
+            uuuu.put(uu);
+
+            File v = new File(dir + "v8.plane");
+            byte[] vv = new byte[(int)v.length()];
+            FileInputStream vvv = new FileInputStream(dir + "v8.plane");
+            vvv.read(vv); vvv.close();
+            ByteBuffer vvvv = ByteBuffer.allocateDirect((int)v.length());
+            vvvv.put(vv);
+
+            Bitmap dest = Bitmap.createBitmap(864, 480, StandCameraActivity.BUFFER_BITMAP_FORMAT);
+            Jni.yuvByteArrayToBmp(
+                    yyyy, uuuu, vvvv,
+                    yy.length, uu.length, vv.length,
+                    dest,
+                    dest.getWidth(), dest.getHeight(),
+                    864, 480,
+                    3,
+                    896, 896, 896,
+                    1, 2, 2);
+
+            LoadUtil.saveBitmap(dest, dir + "../shan.png");
+            return  dir + "../shan.png";
+
+        }catch (Exception e){
+            e.printStackTrace();
             return "";
         }
     }

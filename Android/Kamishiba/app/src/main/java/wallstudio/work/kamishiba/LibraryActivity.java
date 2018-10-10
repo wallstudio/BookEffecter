@@ -39,6 +39,8 @@ public class LibraryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_liblary);
 
+        Jni.checkDecode();
+
         if(Build.VERSION.SDK_INT >= 23) {
             // ランタイムパーミッション(Android 6以上)
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
