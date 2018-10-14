@@ -1,3 +1,7 @@
+from django.http import HttpResponse, HttpResponse, Http404
 from django.shortcuts import render
+from . import pgdetct
 
-# Create your views here.
+def index(request):
+    return HttpResponse("Maki")
+    
