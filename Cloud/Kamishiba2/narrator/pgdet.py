@@ -13,7 +13,7 @@ PACKAGES = {} # package_name: TrainingDataList
 # 定数
 X = 0
 Y = 1
-BLUE = (255,0,0)
+BLUE = (255, 0, 0)
 PROCESSING_SIZE = (480, 640)
 USE_KEYPOINTS_COUNT = 10
 NEED_KEYPOINTS_COUNT = USE_KEYPOINTS_COUNT
@@ -21,6 +21,15 @@ NEED_KEYPOINTS_COUNT = USE_KEYPOINTS_COUNT
 # 共通オブジェクト
 AKAZE = cv2.AKAZE_create()
 BF_MATCHER = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+class NotEnoughKeypointsError(Exception):
+    pass
+
+class FailedImageDecodeError(Exception):
+    pass
+
+class FailedDelaunyError(Exception):
+    pass
 
 class Edge():
     """((x, y), (x,y))"""
@@ -70,35 +79,44 @@ class Edge():
 class FeaturedImage():
     """特徴情報と画像ndarray"""
     def __init__(self, path_or_image):
-        if isinstance(path_or_image, str):
-            self.image = cv2.imread(path_or_image)
-        elif isinstance(path_or_image, np.ndarray):
-            self.image = path_or_image
-        
+        try:
+            if isinstance(path_or_image, str):
+                self.image = cv2.imread(path_or_image)
+            elif isinstance(path_or_image, np.ndarray):
+                self.image = path_or_image
+        except Exception as ex:
+            raise FailedImageDecodeError('画像の読み込みエラー\n' + str(sys.exc_info()))
+        # サイズの正規化
         h, w, _ = self.image.shape
         if h > w:
             self.image = cv2.resize(self.image, PROCESSING_SIZE, interpolation=cv2.INTER_CUBIC)
         else:
             self.image = cv2.resize(self.image, tuple(reversed(PROCESSING_SIZE)), interpolation=cv2.INTER_CUBIC)
+        # AKAZE
         self.keypoints, self.descriptors = AKAZE.detectAndCompute(self.image, None)
+        if len(self.keypoints) < NEED_KEYPOINTS_COUNT or len(self.descriptors) < NEED_KEYPOINTS_COUNT:
+            raise NotEnoughKeypointsError('Keypointが不足 kp:{0}, dc: {1}, need:{2}'.format(len(self.keypoints), len(self.descriptors), NEED_KEYPOINTS_COUNT))
         self.keypoints_mat = self._convert_keypoint_to_mat(self.keypoints)
         self.edges = set()
 
     def create_delauny_edges(self, filter_matches:[cv2.DMatch]=None):
-        if filter_matches != None:
-            filter_index = sorted([m.queryIdx for m in filter_matches])
-            use_keypoints = [kp for i, kp in zip(range(len(self.keypoints)), self.keypoints_mat) if i in filter_index]
-            index_triangles = Delaunay(use_keypoints).simplices
-            for index in index_triangles:
-                self.edges.add(Edge(filter_index[index[0]], filter_index[index[1]]))
-                self.edges.add(Edge(filter_index[index[1]], filter_index[index[2]]))
-                self.edges.add(Edge(filter_index[index[2]], filter_index[index[0]]))
-        else:
-            index_triangles = Delaunay(self.keypoints_mat).simplices
-            for index in index_triangles:
-                self.edges.add(Edge(index[0], index[1]))
-                self.edges.add(Edge(index[1], index[2]))
-                self.edges.add(Edge(index[2], index[0]))
+        try:
+            if filter_matches != None:
+                filter_index = sorted([m.queryIdx for m in filter_matches])
+                use_keypoints = [kp for i, kp in zip(range(len(self.keypoints)), self.keypoints_mat) if i in filter_index]
+                index_triangles = Delaunay(use_keypoints).simplices
+                for index in index_triangles:
+                    self.edges.add(Edge(filter_index[index[0]], filter_index[index[1]]))
+                    self.edges.add(Edge(filter_index[index[1]], filter_index[index[2]]))
+                    self.edges.add(Edge(filter_index[index[2]], filter_index[index[0]]))
+            else:
+                index_triangles = Delaunay(self.keypoints_mat).simplices
+                for index in index_triangles:
+                    self.edges.add(Edge(index[0], index[1]))
+                    self.edges.add(Edge(index[1], index[2]))
+                    self.edges.add(Edge(index[2], index[0]))
+        except Exception as ex:
+            raise FailedDelaunyError('デロニー処理内のエラー\n' + str(sys.exc_info()))
 
     def recontruct_edges(self, base_featued_image, matches:[cv2.DMatch]):
         for base_edge in base_featued_image.edges:
@@ -149,6 +167,9 @@ class TrainingDataList(list):
             _, extention = os.path.splitext(file)
             if extention in ['.jpg', '.jpeg', '.png'] and not 'min' in file:
                 self.append(FeaturedImage(os.path.join(dir_path, file)))
+        
+        if len(self):
+            raise IOError('データベースがありません\n' + sys.exc_info)
 
     def find(self, input_image) -> (int, [cv2.DMatch], [float]):
         if isinstance(input_image, str):
