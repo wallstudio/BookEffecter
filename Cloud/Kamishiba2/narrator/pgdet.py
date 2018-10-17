@@ -6,6 +6,7 @@ import random
 import os 
 import datetime
 from scipy.spatial import Delaunay
+import traceback
 
 # グローバル
 PACKAGES = {} # package_name: TrainingDataList
@@ -85,7 +86,7 @@ class FeaturedImage():
             elif isinstance(path_or_image, np.ndarray):
                 self.image = path_or_image
         except Exception as ex:
-            raise FailedImageDecodeError('画像の読み込みエラー\n' + str(sys.exc_info()))
+            raise FailedImageDecodeError('画像の読み込みエラー\n' + traceback.format_exc())
         # サイズの正規化
         h, w, _ = self.image.shape
         if h > w:
@@ -116,7 +117,7 @@ class FeaturedImage():
                     self.edges.add(Edge(index[1], index[2]))
                     self.edges.add(Edge(index[2], index[0]))
         except Exception as ex:
-            raise FailedDelaunyError('デロニー処理内のエラー\n' + str(sys.exc_info()))
+            raise FailedDelaunyError('デロニー処理内のエラー\n' + traceback.format_exc())
 
     def recontruct_edges(self, base_featued_image, matches:[cv2.DMatch]):
         for base_edge in base_featued_image.edges:
@@ -168,8 +169,8 @@ class TrainingDataList(list):
             if extention in ['.jpg', '.jpeg', '.png'] and not 'min' in file:
                 self.append(FeaturedImage(os.path.join(dir_path, file)))
         
-        if len(self):
-            raise IOError('データベースがありません\n' + sys.exc_info)
+        if len(self) <= 0:
+            raise IOError('データベースがありません\n' + traceback.format_exc())
 
     def find(self, input_image) -> (int, [cv2.DMatch], [float]):
         if isinstance(input_image, str):
