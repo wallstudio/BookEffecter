@@ -4,6 +4,14 @@
     // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+        {
+            "name": "Page Detector (pgdetct)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/narrator/pgdetct.py",
+            "console": "integratedTerminal"
+        },
         {
             "name": "Python: Current File (Integrated Terminal)",
             "type": "python",
