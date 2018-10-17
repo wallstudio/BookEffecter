@@ -13,9 +13,16 @@ from datetime import datetime
 
 PACKAGES_DIR = r'C:\Users\huser\Desktop\yukamaki'
 
+def succes_log(*messages):
+    with open('succes.log', mode='a', encoding='utf-8') as log:
+        log.write(datetime.now().strftime('%Y/%m/%d %H:%M:%S') + '\n')
+        for message in messages:
+            log.write(str(message) + '\n')
+    print(message)
+
 def error_log(*messages):
     with open('error.log', mode='a', encoding='utf-8') as log:
-        log.write(datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
+        log.write(datetime.now().strftime('%Y/%m/%d %H:%M:%S') + '\n')
         for message in messages:
             log.write(str(message) + '\n')
     print(message)
@@ -25,17 +32,20 @@ def get_hash() -> str:
     value = value[0:4]
     return value
 
+# XHRで呼ばれるAPI
+# Ex. /narrator/api (POST:package,image)
 @csrf_exempt
-def index(request):
+def api(request):
+    request_hash = get_hash()
+
     try:
         # Ex. 'kamishiba_ws.yukamaki'
         package_name = request.POST['package']
         # 送られてきた画像（カメラ）
         image = np.array(Image.open(request.FILES['image'])) 
     except:
-        problem_hash = get_hash()
-        message = "パラメータ/画像が読み込めません " + problem_hash
-        error_log(problem_hash, message, traceback.format_exc())
+        message = 'パラメータ/画像が読み込めません ' + request_hash
+        error_log(request_hash, message, traceback.format_exc())
         return HttpResponseBadRequest(message)
 
     try:
@@ -44,9 +54,9 @@ def index(request):
             pgdet.PACKAGES[package_name] = pgdet.TrainingDataList(package_dir)
         package = pgdet.PACKAGES[package_name]
     except:
-        problem_hash = get_hash()
-        message = "データベースがありません/読み込めません " + problem_hash
-        error_log(problem_hash, message, traceback.format_exc())
+        request_hash = get_hash()
+        message = 'データベースがありません/読み込めません "{0}" '.format(package_name) + request_hash
+        error_log(request_hash, message, traceback.format_exc())
         raise Http404(message)
 
     try:
@@ -55,9 +65,9 @@ def index(request):
         featured_image.create_delauny_edges(matches)
         package[idx].recontruct_edges(featured_image, matches)
     except:
-        problem_hash = get_hash()
-        message = "検索結果がありません/検索ができません " + problem_hash
-        error_log(problem_hash, message, traceback.format_exc())
+        request_hash = get_hash()
+        message = '検索結果がありません/検索ができません ' + request_hash
+        error_log(request_hash, message, traceback.format_exc())
         raise Http404(message)
 
     # デバッグ用に表示
@@ -71,4 +81,6 @@ def index(request):
     #cv2.waitKey(0)
     #cv2.destroyAllWindows()
 
-    return JsonResponse({'index': idx, 'socre': score[idx], 'cross': package[idx].get_cross()})
+    retval = {'id': request_hash, 'index': idx, 'socre': score[idx], 'cross': package[idx].get_cross()}
+    succes_log(request_hash, str(retval))
+    return JsonResponse(retval)
