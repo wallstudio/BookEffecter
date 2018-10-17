@@ -7,6 +7,9 @@ import os
 import datetime
 from scipy.spatial import Delaunay
 
+# グローバル
+PACKAGES = {} # package_name: TrainingDataList
+
 # 定数
 X = 0
 Y = 1
@@ -66,9 +69,17 @@ class Edge():
 
 class FeaturedImage():
     """特徴情報と画像ndarray"""
-    def __init__(self, path: str):
-        self.image = cv2.imread(path)
-        self.image = cv2.resize(self.image, PROCESSING_SIZE, interpolation=cv2.INTER_CUBIC)
+    def __init__(self, path_or_image):
+        if isinstance(path_or_image, str):
+            self.image = cv2.imread(path_or_image)
+        elif isinstance(path_or_image, np.ndarray):
+            self.image = path_or_image
+        
+        h, w, _ = self.image.shape
+        if h > w:
+            self.image = cv2.resize(self.image, PROCESSING_SIZE, interpolation=cv2.INTER_CUBIC)
+        else:
+            self.image = cv2.resize(self.image, tuple(reversed(PROCESSING_SIZE)), interpolation=cv2.INTER_CUBIC)
         self.keypoints, self.descriptors = AKAZE.detectAndCompute(self.image, None)
         self.keypoints_mat = self._convert_keypoint_to_mat(self.keypoints)
         self.edges = set()
