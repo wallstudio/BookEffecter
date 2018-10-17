@@ -10,6 +10,7 @@ import uuid
 import sys
 import traceback
 from datetime import datetime
+from django.views.generic import TemplateView
 
 PACKAGES_DIR = r'C:\Users\huser\Desktop\yukamaki'
 
@@ -84,3 +85,6 @@ def api(request):
     retval = {'id': request_hash, 'index': idx, 'socre': score[idx], 'cross': package[idx].get_cross()}
     succes_log(request_hash, str(retval))
     return JsonResponse(retval)
+
+class AppView(TemplateView):
+    template_name = 'narrator/app.html'
