@@ -1,3 +1,76 @@
+html, body, header, footer, 
+div, h1, h2, h3, h4, h5, h6, p,
+span, ul, li, ol, a, img{
+    margin: 0;
+    padding: 0;
+    font-size: 100%;
+    font-family: 游ゴシック体, 'Yu Gothic', YuGothic, 'ヒラギノ角ゴシック Pro', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, Osaka, 'ＭＳ Ｐゴシック', 'MS PGothic', sans-serif;
+}
 html{
     background-color: snow;
+    font-size: 20px;
+    width: 100%;
+}
+body, #main-contents{
+    width: 100%;
+}
+
+/* ヘッダ/フッタ */
+header, footer{
+    background-color: #111111;
+    color: white;
+}
+header{
+    display: flex;
+    height: 40px;
+    font-size: 20px;
+}
+.holizotal{
+    margin: 0 10px;
+}
+#nav-title{
+    font-size: 25px;
+}
+#nav-support{
+    margin-left: auto;
+    height: 100%;
+}
+#nav-support > a{
+    color: white;
+    text-decoration-line: none;
+}
+#nav-support > h2{
+    margin-top: 5px;
+}
+footer{
+    height: 20px;
+    font-size: 14px;
+}
+.footer-c{
+    width: 360px;
+    display: flex;
+    margin: 0 auto;
+}
+
+/* メインコンテンツ */
+.center{
+    width: 360px;
+    margin: 0 auto;
+}
+#package-list-selection > select, #run-button{
+    width: 100%;
+    height: 40px;
+    margin: 10px 0;
+    font-size: 25px;
+}
+#app{
+    width: 100%; 
+    background-color: #333333;
+}
+video{
+    background-color: black;
+    display: block;
+}
+canvas{
+    display: none;
 }
