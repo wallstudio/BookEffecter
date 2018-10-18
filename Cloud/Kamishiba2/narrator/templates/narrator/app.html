@@ -24,8 +24,11 @@
             </select>
         </div>
         <div id="app">
-            <video class="center" width="360" height="480" autoplay></video>
-            <canvas width="360" height="480"></canvas>
+            <div class="center">
+                <video width="360" height="480" autoplay></video>
+                <img id="result-image" src="{% static 'narrator/loading.gif' %}">
+                <canvas width="360" height="480"></canvas>
+            </div>
         </div>
         <div id="camera-controll" class="center">
             <button id="run-button">START</button>

@@ -19,11 +19,13 @@ class PgdetRetval{
         }
     }
 
-    public past(id:HTMLSpanElement, index:HTMLSpanElement, score:HTMLSpanElement, cross:HTMLSpanElement){
+    public past(pack:string, id:HTMLSpanElement, index:HTMLSpanElement,
+        score:HTMLSpanElement, cross:HTMLSpanElement, image:HTMLImageElement){
         id.innerHTML = this.id;
         index.innerHTML = this.index.toString();
         score.innerHTML = this.score.toString();
         cross.innerHTML = this.cross.toString();
+        image.src = `/static/narrator/packages/${pack}/${("000" + this.index).slice(-3)}.jpg`;
     }
 }
 
@@ -36,6 +38,7 @@ class CallPgdet{
     private indexLabel: HTMLSpanElement;
     private scoreLabel: HTMLSpanElement;
     private crossLabel: HTMLSpanElement;
+    private image: HTMLImageElement;
     private frameCount = 0;
     private task:NodeJS.Timeout | null = null;
     private isPlay = false;
@@ -44,12 +47,13 @@ class CallPgdet{
         this.select = <HTMLSelectElement>$("#package-list-selection > select")[0]
         this.button = <HTMLButtonElement>$("#run-button")[0];
         this.button.addEventListener("click", this.runOrStop.bind(this));
-        this.video = <HTMLVideoElement>$("#app>video")[0];
-        this.canvas = <HTMLCanvasElement>$("#app>canvas")[0];
+        this.video = <HTMLVideoElement>$("#app>div>video")[0];
+        this.canvas = <HTMLCanvasElement>$("#app>div>canvas")[0];
         this.idLabel = <HTMLSpanElement>$("#call-id")[0];
         this.indexLabel = <HTMLSpanElement>$("#page-idx")[0];
         this.scoreLabel = <HTMLSpanElement>$("#distance")[0];
         this.crossLabel = <HTMLSpanElement>$("#cross")[0];
+        this.image = <HTMLImageElement>$("#app>div>img")[0];
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
 
         // ここでBindせずに this.frameCallBack を渡してしまうとthisがイベントの発火元になってしまう
@@ -98,7 +102,7 @@ class CallPgdet{
         const pack = this.select.options[this.select.selectedIndex].value;
         if(pack == "unselected") 
             return;
-            
+
         formData.append("package", pack);
         formData.append("image", imageFile)
 
@@ -111,7 +115,7 @@ class CallPgdet{
         }).done((data, status, xhr) => {
             if(xhr.status == 200){
                 const retval = new PgdetRetval(data);
-                retval.past(this.idLabel, this.indexLabel, this.scoreLabel, this.crossLabel);
+                retval.past(pack, this.idLabel, this.indexLabel, this.scoreLabel, this.crossLabel, this.image);
                 //console.log(`Success! ${JSON.stringify(retval)}`);
             }else{
                 console.log(`Success??? Status code: ${xhr.statusCode}`);
