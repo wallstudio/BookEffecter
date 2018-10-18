@@ -1,26 +1,35 @@
+
 {% load static %}
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>かみしば2</title>
-        <link rel="stylesheet" type="text/css" href="{% static 'narrator/base.css' %}">
-    </head>
-    <body>
-        <img src="{% static 'narrator/packages/yukawallstudio.yukamaki/cover.jpg' %}">
-        <header>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>かみしば2</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'narrator/base.css' %}">
+</head>
+<body>
+    <script src="{% static 'narrator/ts2js/main.js' %}"></script>
 
-        </header>
-        <div id="package-list-selection">
-
-        </div>
-        <div id="app">
-
-        </div>
-        <div id="camera-controll">
-
-        </div>
-        <footer>
-            
-        </footer>
-    </body>
+    <header>
+        <div><h1 id="nav-title">かみしば2</h1></div>
+        <div><h2 id="nav-support">サポート</h2></div>
+    </header>
+    <div id="package-list-selection">
+        <select name="package">
+            <option value="unselected">---</option>
+        </select>
+    </div>
+    <div id="app">
+        <video width="360" height="480" autoplay></video>
+        <canvas width="360" height="480"></canvas>
+    </div>
+    <div id="camera-controll">
+        <button id="run-button">▶</button>
+    </div>
+    <footer>
+        
+    </footer>
+</body>
 </html>

@@ -71,18 +71,7 @@ def api(request):
         error_log(request_hash, message, traceback.format_exc())
         raise Http404(message)
 
-    # デバッグ用に表示
-    #featured_image.draw_keypoint(override=True)
-    #featured_image.draw_edges(override=True)
-    #package[idx].draw_keypoint(override=True)
-    #package[idx].draw_edges(override=True)
-    #debug_image = featured_image.draw_matches(package[idx], matches)
-    #title = 'deb idx:{0} score:{1} cross:{2}'.format(idx, score[idx], package[idx].get_cross())
-    #cv2.imshow(title, debug_image)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
-
-    retval = {'id': request_hash, 'index': idx, 'socre': score[idx], 'cross': package[idx].get_cross()}
+    retval = {'id': request_hash, 'index': idx, 'score': score[idx], 'cross': package[idx].get_cross()}
     succes_log(request_hash, str(retval))
     return JsonResponse(retval)
 

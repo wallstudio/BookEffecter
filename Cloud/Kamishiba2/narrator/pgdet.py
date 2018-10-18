@@ -101,6 +101,7 @@ class FeaturedImage():
         self.edges = set()
 
     def create_delauny_edges(self, filter_matches:[cv2.DMatch]=None):
+        self.edges.clear()
         try:
             if filter_matches != None:
                 filter_index = sorted([m.queryIdx for m in filter_matches])
@@ -120,6 +121,7 @@ class FeaturedImage():
             raise FailedDelaunyError('デロニー処理内のエラー\n' + traceback.format_exc())
 
     def recontruct_edges(self, base_featued_image, matches:[cv2.DMatch]):
+        self.edges.clear()
         for base_edge in base_featued_image.edges:
             index0 = [m.trainIdx for m in matches if m.queryIdx == base_edge.index[0]][0]
             index1 = [m.trainIdx for m in matches if m.queryIdx == base_edge.index[1]][0]
