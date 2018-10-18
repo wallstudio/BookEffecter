@@ -55,7 +55,6 @@ def api(request):
             pgdet.PACKAGES[package_name] = pgdet.TrainingDataList(package_dir)
         package = pgdet.PACKAGES[package_name]
     except:
-        request_hash = get_hash()
         message = 'データベースがありません/読み込めません "{0}" '.format(package_name) + request_hash
         error_log(request_hash, message, traceback.format_exc())
         raise Http404(message)
@@ -66,12 +65,31 @@ def api(request):
         featured_image.create_delauny_edges(matches)
         package[idx].recontruct_edges(featured_image, matches)
     except:
-        request_hash = get_hash()
         message = '検索結果がありません/検索ができません ' + request_hash
         error_log(request_hash, message, traceback.format_exc())
         raise Http404(message)
 
     retval = {'id': request_hash, 'index': idx, 'score': score[idx], 'cross': package[idx].get_cross()}
+    succes_log(request_hash, str(retval))
+    return JsonResponse(retval)
+
+def package_list(request):
+    request_hash = get_hash()
+    try:
+        package_index_list = []
+        packages_dir = os.path.join(os.path.dirname(__file__), 'static', 'narrator', 'packages')
+        dirs_or_files = os.listdir(packages_dir)
+        for package_name in dirs_or_files:
+            if os.path.isdir(os.path.join(packages_dir, package_name)):
+                with open(os.path.join(packages_dir, package_name, 'title'), encoding='utf-8') as f:
+                    title = f.readline().strip()
+                    package_index_list.append({'package_id': package_name, 'package_title': title})
+    except Exception as ex:
+        message = 'サーバーの内部エラー ' + request_hash
+        error_log(request_hash, message, traceback.format_exc())
+        return HttpResponseBadRequest(message)
+
+    retval = {'id': request_hash, 'packages': package_index_list} 
     succes_log(request_hash, str(retval))
     return JsonResponse(retval)
 

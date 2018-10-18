@@ -45,6 +45,7 @@ class CallPgdet{
 
     constructor(){
         this.select = <HTMLSelectElement>$("#package-list-selection > select")[0]
+        this.loadSelect()
         this.button = <HTMLButtonElement>$("#run-button")[0];
         this.button.addEventListener("click", this.runOrStop.bind(this));
         this.video = <HTMLVideoElement>$("#app>div>video")[0];
@@ -62,6 +63,32 @@ class CallPgdet{
             this.frameCallBack.bind(handle),
             console.log
         );
+    }
+
+    public loadSelect(){
+        $.ajax({
+            url: "/narrator/package-list",
+            method: "get",
+        }).done((data:any, status, xhr) => {
+            if(xhr.status == 200){
+                if("packages" in data){
+                    const packages:Array<any> = data.packages;
+
+                    for (const packData of packages) {
+                        if("package_id" in packData && "package_title" in packData){
+                            const option = <HTMLOptionElement>document.createElement("option");
+                            option.value = packData.package_id;
+                            option.innerHTML = packData.package_title;
+                            this.select.appendChild<HTMLOptionElement>(option)
+                        }
+                    }
+                }
+            }else{
+                console.log(`Success??? Status code: ${xhr.statusCode}`);
+            }
+        }).fail((xhr, status) => {
+            console.log(`Failed! Status code: ${xhr.statusCode}`);
+        })
     }
 
     public runOrStop(){
