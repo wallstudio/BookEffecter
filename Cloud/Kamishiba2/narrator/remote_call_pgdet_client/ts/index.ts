@@ -18,19 +18,38 @@ class PgdetRetval{
             throw `Server internal error! ${jsonObj.toString()}`;
         }
     }
+
+    public past(id:HTMLSpanElement, index:HTMLSpanElement, score:HTMLSpanElement, cross:HTMLSpanElement){
+        id.innerHTML = this.id;
+        index.innerHTML = this.index.toString();
+        score.innerHTML = this.score.toString();
+        cross.innerHTML = this.cross.toString();
+    }
 }
 
 class CallPgdet{
-
-    public num:number;
+    private select: HTMLSelectElement;
+    private button: HTMLButtonElement;
     private video: HTMLVideoElement;
     private canvas: HTMLCanvasElement;
+    private idLabel: HTMLSpanElement;
+    private indexLabel: HTMLSpanElement;
+    private scoreLabel: HTMLSpanElement;
+    private crossLabel: HTMLSpanElement;
     private frameCount = 0;
+    private task:NodeJS.Timeout | null = null;
+    private isPlay = false;
 
     constructor(){
-        this.num = 1500;
+        this.select = <HTMLSelectElement>$("#package-list-selection > select")[0]
+        this.button = <HTMLButtonElement>$("#run-button")[0];
+        this.button.addEventListener("click", this.runOrStop.bind(this));
         this.video = <HTMLVideoElement>$("#app>video")[0];
         this.canvas = <HTMLCanvasElement>$("#app>canvas")[0];
+        this.idLabel = <HTMLSpanElement>$("#call-id")[0];
+        this.indexLabel = <HTMLSpanElement>$("#page-idx")[0];
+        this.scoreLabel = <HTMLSpanElement>$("#distance")[0];
+        this.crossLabel = <HTMLSpanElement>$("#cross")[0];
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
 
         // ここでBindせずに this.frameCallBack を渡してしまうとthisがイベントの発火元になってしまう
@@ -41,14 +60,22 @@ class CallPgdet{
         );
     }
 
+    public runOrStop(){
+        this.isPlay = !this.isPlay;
+        this.button.innerHTML = this.isPlay ? "STOP" : "START";
+    }
+
     private frameCallBack(stream: MediaStream){
         this.video.srcObject = stream;
         this.video.play();
 
-        setInterval(()=>{
+        this.task = setInterval(()=>{
             console.log(this.frameCount);
-            if(this.frameCount++ > 4){
-                this.callPgdet(this.video, this.canvas)
+            // カメラが慣れるまでスキップ
+            if(this.frameCount == 5)
+                console.log("Camera maybe became stabled.");
+            if(this.frameCount++ >= 5 && this.isPlay){
+                this.callPgdet(this.video, this.canvas);
             }
         }, 500);
     }
@@ -68,21 +95,24 @@ class CallPgdet{
         const imageFile = <File>blob;
 
         const formData = new FormData();
-        formData.append("package", "yukawallstudio.yukamaki");
+        const pack = this.select.options[this.select.selectedIndex].value;
+        if(pack == "unselected") 
+            return;
+            
+        formData.append("package", pack);
         formData.append("image", imageFile)
 
         $.ajax({
-            //async: true,
             url: "/narrator/api",
             method: 'post',
-            //dataType: 'multipart/form-data',
             data: formData,
             processData: false,
             contentType: false,
         }).done((data, status, xhr) => {
             if(xhr.status == 200){
                 const retval = new PgdetRetval(data);
-                console.log(`Success! ${JSON.stringify(retval)}`);
+                retval.past(this.idLabel, this.indexLabel, this.scoreLabel, this.crossLabel);
+                //console.log(`Success! ${JSON.stringify(retval)}`);
             }else{
                 console.log(`Success??? Status code: ${xhr.statusCode}`);
             }
@@ -93,7 +123,6 @@ class CallPgdet{
 }
 
 window.addEventListener("load",()=>{
-    let t = new CallPgdet();
-    console.log(t.num);
+    let callPgdet = new CallPgdet();
     console.log("Loaded index.ts");
 });
