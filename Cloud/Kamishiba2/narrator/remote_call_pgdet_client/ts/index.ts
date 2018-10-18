@@ -7,25 +7,61 @@ class PgdetRetval{
     public index: number;
     public score: number;
     public cross: number;
+    public timing: number[];
+
+    private static prevPackage: string = "";
+    private static prevIndex: number = -1;
 
     public constructor(jsonObj: any){
-        if("id" in jsonObj && "index" in jsonObj && "score" in jsonObj && "cross" in jsonObj){
+        if("id" in jsonObj && "index" in jsonObj && "score" in jsonObj && "cross" in jsonObj && "timing" in jsonObj){
             this.id = jsonObj.id;
             this.index = jsonObj.index;
             this.score = jsonObj.score;
             this.cross = jsonObj.cross;
+            this.timing = jsonObj.timing;
         }else{
             throw `Server internal error! ${jsonObj.toString()}`;
         }
     }
 
     public past(pack:string, id:HTMLSpanElement, index:HTMLSpanElement,
-        score:HTMLSpanElement, cross:HTMLSpanElement, image:HTMLImageElement){
+        score:HTMLSpanElement, cross:HTMLSpanElement, image:HTMLImageElement, audio:HTMLAudioElement){
         id.innerHTML = this.id;
         index.innerHTML = this.index.toString();
         score.innerHTML = this.score.toString();
         cross.innerHTML = this.cross.toString();
-        image.src = `/static/narrator/packages/${pack}/${("000" + this.index).slice(-3)}.jpg`;
+        
+        const imageUrl = `/static/narrator/packages/${pack}/${("000" + this.index).slice(-3)}.jpg`;
+        if(image.src != imageUrl)
+            image.src = imageUrl;
+
+        const start = this.timing[this.index * 2];
+        const end = this.timing[this.index * 2 + 1];
+
+        if(this.cross < 5 && PgdetRetval.prevPackage != pack){
+            audio.pause();
+            audio.src = `/static/narrator/packages/${pack}/0.mp3`;
+            audio.currentTime = start;
+            audio.play();
+            console.log(`Play new package audio! ${PgdetRetval}->${pack}:${this.index} [${start}:${end}]`);
+        }else if(this.cross < 5 && PgdetRetval.prevIndex != this.index){
+            audio.pause()
+            audio.currentTime = start;
+            audio.play();
+            console.log(`Play new Page audio! ${PgdetRetval.prevIndex}->${this.index} [${start}:${end}]`);
+        }else{
+            if(!audio.paused && audio.currentTime > end){
+                audio.pause();
+                console.log(`Stop audio! ${this.index}`);
+            }
+        }
+
+        if(this.cross >= 5){
+            // 404を表示する
+        }else{    
+            PgdetRetval.prevPackage = pack;
+            PgdetRetval.prevIndex = this.index;
+        }
     }
 }
 
@@ -34,6 +70,7 @@ class CallPgdet{
     private button: HTMLButtonElement;
     private video: HTMLVideoElement;
     private canvas: HTMLCanvasElement;
+    private audio: HTMLAudioElement;
     private idLabel: HTMLSpanElement;
     private indexLabel: HTMLSpanElement;
     private scoreLabel: HTMLSpanElement;
@@ -50,6 +87,7 @@ class CallPgdet{
         this.button.addEventListener("click", this.runOrStop.bind(this));
         this.video = <HTMLVideoElement>$("#app>div>video")[0];
         this.canvas = <HTMLCanvasElement>$("#app>div>canvas")[0];
+        this.audio = <HTMLAudioElement>$("#app>div>audio")[0];
         this.idLabel = <HTMLSpanElement>$("#call-id")[0];
         this.indexLabel = <HTMLSpanElement>$("#page-idx")[0];
         this.scoreLabel = <HTMLSpanElement>$("#distance")[0];
@@ -142,7 +180,7 @@ class CallPgdet{
         }).done((data, status, xhr) => {
             if(xhr.status == 200){
                 const retval = new PgdetRetval(data);
-                retval.past(pack, this.idLabel, this.indexLabel, this.scoreLabel, this.crossLabel, this.image);
+                retval.past(pack, this.idLabel, this.indexLabel, this.scoreLabel, this.crossLabel, this.image, this.audio);
                 //console.log(`Success! ${JSON.stringify(retval)}`);
             }else{
                 console.log(`Success??? Status code: ${xhr.statusCode}`);

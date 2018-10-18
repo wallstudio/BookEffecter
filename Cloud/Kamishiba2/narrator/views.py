@@ -11,6 +11,7 @@ import sys
 import traceback
 from datetime import datetime
 from django.views.generic import TemplateView
+import json
 
 PACKAGES_DIR = r'C:\Users\huser\Desktop\yukamaki'
 
@@ -69,7 +70,16 @@ def api(request):
         error_log(request_hash, message, traceback.format_exc())
         raise Http404(message)
 
-    retval = {'id': request_hash, 'index': idx, 'score': score[idx], 'cross': package[idx].get_cross()}
+    try:
+        packages_dir = os.path.join(os.path.dirname(__file__), 'static', 'narrator', 'packages')
+        with open(os.path.join(packages_dir, package_name, 'timing.json')) as f:
+            timing = json.loads(f.read())
+    except Exception as ex:
+        message = 'サーバーの内部エラー ' + request_hash
+        error_log(request_hash, message, traceback.format_exc())
+        return HttpResponseBadRequest(message)
+
+    retval = {'id': request_hash, 'index': idx, 'score': score[idx], 'cross': package[idx].get_cross(), 'timing': timing}
     succes_log(request_hash, str(retval))
     return JsonResponse(retval)
 
