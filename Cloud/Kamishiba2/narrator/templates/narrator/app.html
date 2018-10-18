@@ -4,7 +4,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=360">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>かみしば2</title>
     <link rel="stylesheet" type="text/css" href="{% static 'narrator/base.css' %}">
@@ -24,10 +25,10 @@
         </div>
         <div id="app">
             <div class="center">
-                <video width="360" height="480" autoplay></video>
+                <video width="360" height="360" autoplay></video>
                 <img id="result-image" src="{% static 'narrator/loading.gif' %}">
                 <canvas width="360" height="480"></canvas>
-                <audio src="{% static 'narrator/bgm.mp3' %}" autoplay preload loop></audio>
+                <audio src="{% static 'narrator/bgm.mp3' %}" autoplay preload></audio>
             </div>
         </div>
         <div id="camera-controll" class="center">

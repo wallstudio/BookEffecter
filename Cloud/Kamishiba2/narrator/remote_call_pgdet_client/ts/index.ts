@@ -31,10 +31,15 @@ class PgdetRetval{
         score.innerHTML = this.score.toString();
         cross.innerHTML = this.cross.toString();
         
-        const imageUrl = `/static/narrator/packages/${pack}/${("000" + this.index).slice(-3)}.jpg`;
+        let imageUrl:string;
+        if(this.cross >= 5){
+            imageUrl = image.src = `/static/narrator/loading.gif`;
+        }else{    
+            imageUrl = `/static/narrator/packages/${pack}/${("000" + this.index).slice(-3)}.jpg`;
+        }
         if(image.src != imageUrl)
             image.src = imageUrl;
-
+        
         const start = this.timing[this.index * 2];
         const end = this.timing[this.index * 2 + 1];
 
@@ -132,6 +137,10 @@ class CallPgdet{
     public runOrStop(){
         this.isPlay = !this.isPlay;
         this.button.innerHTML = this.isPlay ? "STOP" : "START";
+
+        if(!this.isPlay && !this.audio.paused){
+            this.audio.pause();
+        }
     }
 
     private frameCallBack(stream: MediaStream){

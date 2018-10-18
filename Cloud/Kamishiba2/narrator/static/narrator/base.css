@@ -45,6 +45,8 @@ header{
 footer{
     height: 20px;
     font-size: 14px;
+    position: fixed;
+    bottom: 0px;
 }
 .footer-c{
     width: 360px;
@@ -71,7 +73,7 @@ footer{
     position: relative;
 }
 video{
-    background-color: black;
+    background-color: #333333;
     display: block;
     z-index: 100;
 }
@@ -81,10 +83,14 @@ video{
     z-index: 200;
     position: absolute;
     left: 200px;
-    top: 270px;
+    top: 150px;
     opacity: 0.8;
     object-fit: cover;
 }
 canvas{
     display: none;
+}
+
+#run-button{
+    margin-bottom: 25px;
 }
