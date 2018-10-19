@@ -35,12 +35,16 @@ header{
     margin-left: auto;
     height: 100%;
 }
-#nav-support > a{
+.nav-link{
     color: white;
     text-decoration-line: none;
 }
+.left-nav{
+    display: flex;
+}
 #nav-support h2{
     margin-top: 5px;
+    margin-right: 8px;
 }
 footer{
     height: 20px;
@@ -75,7 +79,6 @@ footer{
 video{
     background-color: #333333;
     display: block;
-    z-index: 100;
 }
 #result-image{
     width: 150px;
@@ -87,10 +90,88 @@ video{
     opacity: 0.8;
     object-fit: cover;
 }
+.virtual-button{
+    z-index: 80;
+    width: 180px;
+    height: 360px;
+    position: absolute;
+    top: 0;
+}
+#virtual-button-left{
+    background-color: aqua;
+    opacity: 0;
+    left: 0;
+}
+#virtual-button-right{
+    background-color: magenta;
+    opacity: 0;
+    right: 0;
+}
 canvas{
+    display: none;
+    z-index: 50;
+}
+#hasi-image{
     display: none;
 }
 
 #run-button{
     margin-bottom: 25px;
 }
+
+/* ライセンス */
+#consealer{
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    opacity: 0.8;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+#info{
+    width: 320px;
+    height: 400px;
+    margin: 10px;
+    padding: 10px;
+    overflow-y: scroll;
+    background-color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    font-size: 13px;
+    border-radius: 5px;
+}
+#info h2{
+    font-size: 18px;
+    margin: 10px 5px;
+}
+#info-cancel{
+    padding: 15px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #777777;
+    color: white;
+    z-index: 1500;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.license{
+    font-size: 7px;
+    white-space: pre-wrap ;
+}
+#popup-wrap{
+    display: none;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome and Opera */
+  }

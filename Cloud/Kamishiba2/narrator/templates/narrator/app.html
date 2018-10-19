@@ -10,12 +10,16 @@
     <title>かみしば2</title>
     <link rel="stylesheet" type="text/css" href="{% static 'narrator/base.css' %}">
 </head>
-<body>
+<body class="noselect">
     <script src="{% static 'narrator/ts2js/main.js' %}"></script>
+    <script src="{% static 'narrator/tet.js' %}"></script>
 
     <header>
-        <div class="holizotal"><h1 id="nav-title">かみしば 2</h1></div>
-        <div class="holizotal" id="nav-support"><a href="/narrator/support"><h2>[？]</h2></a></div>
+        <div class="holizotal"><h1 id="nav-title"><a class="nav-link" href="app">かみしば 2</a></h1></div>
+        <div class="holizotal" id="nav-support"><div class="left-nav">
+            <h2 id="launch-minigame"><img src="{% static 'narrator/block_game_icon.png' %}"></h2>
+            <h2 id="info-button">[？]</h2>
+        </div></div>
     </header>
     <div id="main-contents">
         <div id="package-list-selection" class="center">
@@ -28,7 +32,12 @@
                 <video width="360" height="360" autoplay></video>
                 <img id="result-image" src="{% static 'narrator/loading.gif' %}">
                 <canvas width="360" height="480"></canvas>
-                <audio src="{% static 'narrator/bgm.mp3' %}" autoplay preload></audio>
+                <img id="hasi-image" src="{% static 'narrator/hashi.png' %}">
+                <div id="virtual-button-left" class="virtual-button"></div>
+                <div id="virtual-button-right" class="virtual-button"></div>
+                <audio id="narration-speacker" src="{% static 'narrator/bgm.mp3' %}" preload></audio>
+                <audio id="clearsound" src="{% static 'narrator/clear.mp3' %}" ></audio>
+                <audio id="gameover-sound" src="{% static 'narrator/game_over.mp3' %}" ></audio>
             </div>
         </div>
         <div id="camera-controll" class="center">
@@ -43,5 +52,55 @@
             <div class="holizotal">CROS: <span id="cross"></span></div>
         </div>
     </footer>
+    <div id="popup-wrap">
+        <div id="consealer"></div>
+        <div id="info">
+            <p>スマートフォンのカメラが同人誌を認識、隣にナレーターが居るようにページに合わせたスムーズな読み上げを実現します。</p>
+            <h2>使い方</h2>
+            <p>
+                まずは、カメラの使用を許可してください。上部のドロップダウンリストからお手持ちのタイトルを選択して、STARTボタンを押してください。あとはカメラが認識したページを読み上げます。
+            </p>
+            <h2>ライセンス表記</h2>
+            <ul>
+                <li>
+                    <h3>Django</h3>
+                    <pre  class="license">Copyright (c) Django Software Foundation and individual contributors. 
+All rights reserved. 
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+
+3. Neither the name of Django nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+                    </pre>
+                </li>
+                <li>
+                    <h3>canvas-tetris</h3>
+                    <pre class="license">This version of tetris is MIT licensed:
+
+Copyright (C) 2012 Dionysis "dionyziz" Zindros dionyziz@gmail.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+                    </pre>
+                </li>
+                <li>
+                    <h3>CeVIO Creattive Studio</h3>
+                    <pre class="license">http://cevio.jp/commercial/</pre>
+                </li>
+                <li>
+                    <h3>VOICEROID+ EX 民安ともえ（弦巻マキ）</h3>
+                    <pre class="license">https://www.ah-soft.com/voiceroid/license/</pre>
+                </li>
+            </ul>
+        </div>
+        <div id="info-cancel">閉じる</div>
+    </div>
 </body>
 </html>

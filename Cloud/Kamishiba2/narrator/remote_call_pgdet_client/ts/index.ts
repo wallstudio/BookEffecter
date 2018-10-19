@@ -92,7 +92,7 @@ class CallPgdet{
         this.button.addEventListener("click", this.runOrStop.bind(this));
         this.video = <HTMLVideoElement>$("#app>div>video")[0];
         this.canvas = <HTMLCanvasElement>$("#app>div>canvas")[0];
-        this.audio = <HTMLAudioElement>$("#app>div>audio")[0];
+        this.audio = <HTMLAudioElement>$("#narration-speacker")[0];
         this.idLabel = <HTMLSpanElement>$("#call-id")[0];
         this.indexLabel = <HTMLSpanElement>$("#page-idx")[0];
         this.scoreLabel = <HTMLSpanElement>$("#distance")[0];
@@ -202,5 +202,16 @@ class CallPgdet{
 
 window.addEventListener("load",()=>{
     let callPgdet = new CallPgdet();
+
+    let openInfoButton = <HTMLElement>$("#info-button")[0];
+    let closeInfoButton = <HTMLElement>$("#info-cancel")[0];
+    let popup = $("#popup-wrap");
+    openInfoButton.addEventListener("click", ()=>{
+        popup.css("display", "block");
+    });
+    closeInfoButton.addEventListener("click", ()=>{
+        popup.css("display", "none");
+    })
+
     console.log("Loaded index.ts");
 });
