@@ -142,3 +142,4 @@ tests/report/
 
 ts2js/
 packages/
+local_secret.py
