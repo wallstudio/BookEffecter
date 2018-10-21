@@ -119,6 +119,12 @@ class CallPgdet{
         this.crossLabel = <HTMLSpanElement>$("#cross")[0];
         this.image = <HTMLImageElement>$("#app>div>img")[0];
 
+        // Audioのユーザコール
+        if(checkIsIOS()){
+            this.audio.load();
+            this.audio.play();
+        }
+
         // カメラの初期化
         let videoConfig:any = {};
  
@@ -254,8 +260,10 @@ window.addEventListener("load",()=>{
     try{
         document.addEventListener("click", ()=>{
             try{
-                if(callPgdet == null)
+                if(callPgdet == null){
+                    
                     callPgdet = new CallPgdet();
+                }
             }catch(e){
                 alert(e);
             }
