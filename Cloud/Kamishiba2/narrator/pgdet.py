@@ -166,7 +166,7 @@ class TrainingDataList(list):
     def __init__(self, dir_path: str):
         super().__init__()
         files = os.listdir(dir_path)
-        for file in files:
+        for file in sorted(files):
             _, extention = os.path.splitext(file)
             if extention in ['.jpg', '.jpeg', '.png'] and not 'min' in file:
                 self.append(FeaturedImage(os.path.join(dir_path, file)))
