@@ -12,8 +12,7 @@ import traceback
 from datetime import datetime
 from django.views.generic import TemplateView
 import json
-
-PACKAGES_DIR = r'C:\Users\huser\Desktop\yukamaki'
+from Kamishiba2 import local_secret
 
 def succes_log(*messages):
     with open('succes.log', mode='a', encoding='utf-8') as log:
@@ -52,7 +51,7 @@ def api(request):
 
     try:
         if not package_name in pgdet.PACKAGES:
-            package_dir = os.path.join(PACKAGES_DIR, package_name)
+            package_dir = os.path.join(local_secret.PACKAGE_DIR, package_name)
             pgdet.PACKAGES[package_name] = pgdet.TrainingDataList(package_dir)
         package = pgdet.PACKAGES[package_name]
     except:
