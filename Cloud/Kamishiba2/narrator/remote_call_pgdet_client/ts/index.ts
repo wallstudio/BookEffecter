@@ -98,14 +98,37 @@ class CallPgdet{
         this.scoreLabel = <HTMLSpanElement>$("#distance")[0];
         this.crossLabel = <HTMLSpanElement>$("#cross")[0];
         this.image = <HTMLImageElement>$("#app>div>img")[0];
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
+   
+        let videoConfig:any = {};
+ 
+        try{
 
-        // ここでBindせずに this.frameCallBack を渡してしまうとthisがイベントの発火元になってしまう
-        let handle:CallPgdet = this;
-        navigator.getUserMedia({video: {width: 360, height: 480, frameRate: 2}, audio: false}, 
-            this.frameCallBack.bind(handle),
-            console.log
-        );
+            const isIos = /iP(hone|(o|a)d)/.test(navigator.userAgent)
+            if(isIos){
+                alert("設定：iOS");
+                videoConfig = {
+                    facingMode : { exact : "environment" }
+                };
+            }else{
+                alert("設定：Android")
+                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
+                videoConfig = {
+                    width: 360, 
+                    height: 480, 
+                    frameRate: 2
+                };
+            }
+
+            // ここでBindせずに this.frameCallBack を渡してしまうとthisがイベントの発火元になってしまう
+            let handle:CallPgdet = this;
+            navigator.getUserMedia(
+                <MediaStreamConstraints>{video: videoConfig, audio: false}, 
+                this.frameCallBack.bind(handle),
+                (err) => alert(err)
+            );
+        }catch (err){
+            alert(err);
+        }
     }
 
     public loadSelect(){
