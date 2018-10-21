@@ -285,18 +285,32 @@ function Tet(){
 }
 
 window.addEventListener("load",()=>{
-  const launcher = document.getElementById("launch-minigame");
-  launcher.addEventListener("click", ()=>{
-      const tet = new Tet();
-      
-      const video = document.getElementsByTagName("video")[0];
-      video.remove();
-      const canvas = document.getElementsByTagName("canvas")[0];
-      canvas.style.display = "block";
-      canvas.height = 360;
-      const image = document.getElementById("result-image");
-      image.remove();
+    const launcher = document.getElementById("launch-minigame");
+    launcher.addEventListener("click", ()=>{
 
+        if(! /iP(hone|(o|a)d)/.test(navigator.userAgent)){
+            const clearSrc = document.getElementById("clearsound-data");
+            const gameoverSrc = document.getElementById("gameover-sound-data");
+            const clearAudio = document.createElement("audio");
+            const gameoverAudio = document.createElement("audio");
+            clearAudio.src = clearSrc.getAttribute("data");
+            gameoverAudio.src = gameoverSrc.getAttribute("data");
+            clearAudio.id += "clearsound";
+            gameoverAudio.id += "gameover-sound";
+            clearAudio.load();
+            gameoverAudio.load();
+            clearSrc.appendChild(clearAudio);
+            gameoverSrc.appendChild(gameoverAudio);
+        }
 
-  });
+        const tet = new Tet();
+        
+        const video = document.getElementsByTagName("video")[0];
+        video.remove();
+        const canvas = document.getElementsByTagName("canvas")[0];
+        canvas.style.display = "block";
+        canvas.height = 360;
+        const image = document.getElementById("result-image");
+        image.remove();
+    });
 });

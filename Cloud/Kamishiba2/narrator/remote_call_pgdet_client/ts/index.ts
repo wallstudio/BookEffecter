@@ -43,8 +43,8 @@ class PgdetRetval{
         if(image.src != imageUrl)
             image.src = imageUrl;
         
-        const start = this.timing[this.index * 2];
-        const end = this.timing[this.index * 2 + 1];
+        let start = this.timing[this.index * 2];
+        let end = 1000000; // Infinity
 
         if(PgdetRetval.prevPackage != pack){
             // 本が変わった
@@ -52,7 +52,7 @@ class PgdetRetval{
             audio.src = `/static/narrator/packages/${pack}/0.mp3`;
             audio.load(); // iOSは自動でロードできない
             audio.currentTime = start;
-            console.log(`Play new package audio! ${PgdetRetval}->${pack}:${this.index} [${start}:${end}]`);
+            console.log(`Play new package audio! ${PgdetRetval.prevPackage}->${pack}:${this.index} [${start}:${end}]`);
             PgdetRetval.prevPackage = pack;
 
             // 音声を切り替えたら、次のフレームに委ねる（その間にロードされる）
@@ -65,6 +65,9 @@ class PgdetRetval{
 
                 if(this.cross >= 5){
                     // 404を表示する
+
+                    // 最後に認識したページの終了時刻を使う
+                    this.timing[PgdetRetval.prevIndex * 2 + 1];
                 }else{
                     // 検索成功
                     if(PgdetRetval.prevIndex != this.index){
@@ -76,6 +79,10 @@ class PgdetRetval{
                     }else{
                         // ページは変わっていない
                     }
+
+                    // 現在のページの終了時刻を使う
+                    this.timing[this.index * 2 + 1];
+                    
                     PgdetRetval.prevIndex = this.index;
                 }
 
@@ -123,6 +130,13 @@ class CallPgdet{
         if(checkIsIOS()){
             this.audio.load();
             this.audio.play();
+            let handle = this;
+
+            // 無音のmp3を再生し続けるのものあれだけど…まぁいいか
+            //
+            // setTimeout(()=>{
+            //     handle.audio.pause();
+            // },1000);
         }
 
         // カメラの初期化
@@ -130,12 +144,12 @@ class CallPgdet{
  
         try{
             if(checkIsIOS()){
-                alert("設定：iOS");
+                //alert("設定：iOS");
                 videoConfig = {
                     facingMode : { exact : "environment" }
                 };
             }else{
-                alert("設定：Android")
+                //alert("設定：Android")
                 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
                 videoConfig = {
                     width: 360, 
@@ -197,7 +211,7 @@ class CallPgdet{
 
         this.task = setInterval(()=>{
             try{
-                console.log(this.frameCount);
+                console.log(`Current frame: ${this.frameCount}`);
                 // カメラが慣れるまでスキップ
                 if(this.frameCount == 5)
                     console.log("Camera maybe became stabled.");
@@ -247,10 +261,10 @@ class CallPgdet{
                     alert(e);
                 }
             }else{
-                console.log(`Success??? Status code: ${xhr.statusCode}`);
+                console.log(`Success??? Status code: ${xhr.statusText} ${xhr.status}`);
             }
         }).fail((xhr, status) => {
-            console.log(`Failed! Status code: ${xhr.statusCode}`);
+            console.log(`Failed! Status code: ${xhr.statusText} ${xhr.status}`);
         })
     }
 }
@@ -261,7 +275,6 @@ window.addEventListener("load",()=>{
         document.addEventListener("click", ()=>{
             try{
                 if(callPgdet == null){
-                    
                     callPgdet = new CallPgdet();
                 }
             }catch(e){
