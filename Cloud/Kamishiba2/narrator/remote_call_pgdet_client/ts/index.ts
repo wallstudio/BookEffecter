@@ -1,6 +1,9 @@
 import UUID from "uuid"
 import $ from "jquery"
 
+function checkIsIOS(): boolean{
+    return /iP(hone|(o|a)d)/.test(navigator.userAgent);
+}
 
 class PgdetRetval{
     public id:string;
@@ -43,30 +46,47 @@ class PgdetRetval{
         const start = this.timing[this.index * 2];
         const end = this.timing[this.index * 2 + 1];
 
-        if(this.cross < 5 && PgdetRetval.prevPackage != pack){
+        if(PgdetRetval.prevPackage != pack){
+            // 本が変わった
             audio.pause();
             audio.src = `/static/narrator/packages/${pack}/0.mp3`;
+            audio.load(); // iOSは自動でロードできない
             audio.currentTime = start;
-            audio.play();
             console.log(`Play new package audio! ${PgdetRetval}->${pack}:${this.index} [${start}:${end}]`);
-        }else if(this.cross < 5 && PgdetRetval.prevIndex != this.index){
-            audio.pause()
-            audio.currentTime = start;
-            audio.play();
-            console.log(`Play new Page audio! ${PgdetRetval.prevIndex}->${this.index} [${start}:${end}]`);
+            PgdetRetval.prevPackage = pack;
+
+            // 音声を切り替えたら、次のフレームに委ねる（その間にロードされる）
+
         }else{
-            if(!audio.paused && audio.currentTime > end){
-                audio.pause();
-                console.log(`Stop audio! ${this.index}`);
+
+            const HAVE_ENOUGH_DATA = 4
+            if(audio.readyState == HAVE_ENOUGH_DATA){
+                // ロードが終わっている
+
+                if(this.cross >= 5){
+                    // 404を表示する
+                }else{
+                    // 検索成功
+                    if(PgdetRetval.prevIndex != this.index){
+                        // ページが変わった
+                        audio.pause()
+                        audio.currentTime = start;
+                        audio.play();
+                        console.log(`Play new Page audio! ${PgdetRetval.prevIndex}->${this.index} [${start}:${end}]`);
+                    }else{
+                        // ページは変わっていない
+                    }
+                    PgdetRetval.prevIndex = this.index;
+                }
+
+                // 時間になったら再生を止める
+                if(!audio.paused && audio.currentTime > end){
+                    audio.pause();
+                    console.log(`Stop audio! ${this.index}`);
+                }
             }
         }
-
-        if(this.cross >= 5){
-            // 404を表示する
-        }else{    
-            PgdetRetval.prevPackage = pack;
-            PgdetRetval.prevIndex = this.index;
-        }
+        
     }
 }
 
@@ -98,13 +118,12 @@ class CallPgdet{
         this.scoreLabel = <HTMLSpanElement>$("#distance")[0];
         this.crossLabel = <HTMLSpanElement>$("#cross")[0];
         this.image = <HTMLImageElement>$("#app>div>img")[0];
-   
+
+        // カメラの初期化
         let videoConfig:any = {};
  
         try{
-
-            const isIos = /iP(hone|(o|a)d)/.test(navigator.userAgent)
-            if(isIos){
+            if(checkIsIOS()){
                 alert("設定：iOS");
                 videoConfig = {
                     facingMode : { exact : "environment" }
@@ -171,12 +190,16 @@ class CallPgdet{
         this.video.play();
 
         this.task = setInterval(()=>{
-            console.log(this.frameCount);
-            // カメラが慣れるまでスキップ
-            if(this.frameCount == 5)
-                console.log("Camera maybe became stabled.");
-            if(this.frameCount++ >= 5 && this.isPlay){
-                this.callPgdet(this.video, this.canvas);
+            try{
+                console.log(this.frameCount);
+                // カメラが慣れるまでスキップ
+                if(this.frameCount == 5)
+                    console.log("Camera maybe became stabled.");
+                if(this.frameCount++ >= 5 && this.isPlay){
+                    this.callPgdet(this.video, this.canvas);
+                }
+            }catch(e){
+                alert(e);
             }
         }, 500);
     }
@@ -211,9 +234,12 @@ class CallPgdet{
             contentType: false,
         }).done((data, status, xhr) => {
             if(xhr.status == 200){
+                try{
                 const retval = new PgdetRetval(data);
                 retval.past(pack, this.idLabel, this.indexLabel, this.scoreLabel, this.crossLabel, this.image, this.audio);
-                //console.log(`Success! ${JSON.stringify(retval)}`);
+                }catch(e){
+                    alert(e);
+                }
             }else{
                 console.log(`Success??? Status code: ${xhr.statusCode}`);
             }
@@ -223,18 +249,31 @@ class CallPgdet{
     }
 }
 
+export var callPgdet:CallPgdet | null = null;
 window.addEventListener("load",()=>{
-    let callPgdet = new CallPgdet();
+    try{
+        document.addEventListener("click", ()=>{
+            try{
+                if(callPgdet == null)
+                    callPgdet = new CallPgdet();
+            }catch(e){
+                alert(e);
+            }
+        });
 
-    let openInfoButton = <HTMLElement>$("#info-button")[0];
-    let closeInfoButton = <HTMLElement>$("#info-cancel")[0];
-    let popup = $("#popup-wrap");
-    openInfoButton.addEventListener("click", ()=>{
-        popup.css("display", "block");
-    });
-    closeInfoButton.addEventListener("click", ()=>{
-        popup.css("display", "none");
-    })
+        // Info
+        let openInfoButton = <HTMLElement>$("#info-button")[0];
+        let closeInfoButton = <HTMLElement>$("#info-cancel")[0];
+        let popup = $("#popup-wrap");
+        openInfoButton.addEventListener("click", ()=>{
+            popup.css("display", "block");
+        });
+        closeInfoButton.addEventListener("click", ()=>{
+            popup.css("display", "none");
+        })
+        console.log("Loaded index.ts");
 
-    console.log("Loaded index.ts");
+    }catch(e){
+        alert(e);
+    }
 });
